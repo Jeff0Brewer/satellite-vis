@@ -4,11 +4,11 @@ import styles from '../styles/Home.module.css'
 
 const Home = () => {
     const getData = () => {
-        fetch('/api/tle/2')
+        fetch('/api/tle/120')
             .then(res => res.json())
             .then(data => {
                 console.log(data)
-                const example = data[Object.keys(data)[0]]
+                const example = data.member[0]
                 console.log(getLatLngObj(example.tle, example.timestamp))
             })
             .catch(err => console.log(err))

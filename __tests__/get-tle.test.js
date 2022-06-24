@@ -2,49 +2,61 @@ import getTleData from '../pages/api/tle/get-tle.js'
 
 const defaultFetch = global.fetch
 
+test('getTleData returns total number of items', async () => {
+    const data = await getTleData(1)
+        .catch(err => console.log(err))
+
+    expect(data.totalItems).toBeGreaterThan(0)
+})
+
+test('getTleData returns page number', async () => {
+    const data = await getTleData(1)
+        .catch(err => console.log(err))
+
+    expect(data.page).toBeGreaterThan(0)
+})
+
 test('getTleData returns non-zero number of entries', async () => {
     const data = await getTleData(1)
         .catch(err => console.log(err))
 
-    const keys = Object.keys(data)
-    expect(keys.length).toBeGreaterThan(0)
+    expect(data.member.length).toBeGreaterThan(0)
 })
 
 test('getTleData returns valid names', async () => {
     const data = await getTleData(1)
         .catch(err => console.log(err))
 
-    for (const name in data) {
-        expect(name).toBeTruthy()
-    }
+    data.member.forEach(item => {
+        expect(item.name).toBeTruthy()
+    })
 })
 
 test('getTleData returns tles in valid format', async () => {
     const data = await getTleData(1)
         .catch(err => console.log(err))
 
-    for (const name in data) {
-        const l1 = data[name].tle[0]
+    data.member.forEach(item => {
+        const l1 = item.tle[0]
         expect(l1.charAt(0)).toBe('1')
         for(const spaceInd of [1, 8, 17, 32, 43, 52, 61, 63]) {
             expect(l1.charAt(spaceInd)).toBe(' ')
         }
 
-        const l2 = data[name].tle[1]
+        const l2 = item.tle[1]
         expect(l2.charAt(0)).toBe('2')
         for(const spaceInd of [1, 7, 16, 25, 33, 42, 51]) {
             expect(l2.charAt(spaceInd)).toBe(' ')
         }
-    }
+    })
 })
 
 test('getTleData returns valid timestamps', async () => {
     const data = await getTleData(1)
         .catch(err => console.log(err))
-
-    for (const name in data) {
-        expect(data[name].timestamp).toBeGreaterThan(0)
-    }
+    data.member.forEach(item => {
+        expect(item.timestamp).toBeGreaterThan(0)
+    })
 })
 
 beforeEach(() => {
