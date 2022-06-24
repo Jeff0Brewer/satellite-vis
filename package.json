@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest"
   },
   "dependencies": {
     "next": "12.1.6",
@@ -15,7 +16,12 @@
     "tle.js": "^4.7.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.3.0",
     "eslint": "8.18.0",
-    "eslint-config-next": "12.1.6"
+    "eslint-config-next": "12.1.6",
+    "jest": "^28.1.1",
+    "jest-environment-jsdom": "^28.1.1",
+    "jest-fetch-mock": "^3.0.3"
   }
 }
