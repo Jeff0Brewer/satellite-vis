@@ -3,7 +3,7 @@ import styles from '../styles/Home.module.css'
 
 const Home = () => {
     const getData = async () => {
-        const res = await fetch('/api/tle-data')
+        const res = await fetch('/api/tle/2')
         const data = await res.json()
         console.log(data)
     }
