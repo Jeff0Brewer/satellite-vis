@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { getLatLngObj } from 'tle.js'
-import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from './glu.js'
+import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/glu.js'
 import useWindowDim from '../hooks/window-dim.js'
 import styles from '../styles/Home.module.css'
 
