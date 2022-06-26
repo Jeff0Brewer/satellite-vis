@@ -33,4 +33,7 @@ const getTleData = async (page) => {
         .catch(err => console.log(err))
 }
 
-export default getTleData
+export { 
+    getTleData,
+    validateTle
+}

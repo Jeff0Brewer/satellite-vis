@@ -1,4 +1,4 @@
-import getTleData from './get-tle.js'
+import { getTleData } from './get-tle.js'
 
 export default async (req, res) => {
     const { page } = req.query
