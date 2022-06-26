@@ -10,10 +10,8 @@ const SatVis = props => {
 
     const glRef = useRef()
     const programRef = useRef({})
-    const locationRef = useRef({
-        buffer: {},
-        attrib: {}
-    })
+    const bufferRef = useRef({})
+    const locationRef = useRef({})
 
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
@@ -44,14 +42,18 @@ const SatVis = props => {
 
     const initShaderVars = (gl, programs) => {
         switchShader(gl, programs.point)
-        locationRef.current.attrib['point'] = {}
-        locationRef.current.attrib.point['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
-        gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uModelMatrix'), false, modelMatRef.current)
+
+        locationRef.current['point'] = {}
+        locationRef.current.point['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
+        
+        const uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
+        locationRef.current.point['uModelMatrix'] = uModelMatrix
+        gl.uniformMatrix4fv(uModelMatrix, false, modelMatRef.current)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
     }
 
     const initBuffers = (gl) => {
-        locationRef.current.buffer['point'] = initBuffer(gl, props.data, gl.STATIC_DRAW)
+        bufferRef.current['point'] = initBuffer(gl, props.data, gl.STATIC_DRAW)
     }
 
     const setupViewport = (gl, programs) => {
@@ -78,14 +80,16 @@ const SatVis = props => {
 
     const draw = time => {
         const gl = glRef.current
-        const { buffer, attrib } = locationRef.current
 
         gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 
-        if (buffer?.point) {
+        modelMatRef.current = mat4.fromRotation(mat4.create(), time/1000, [0, 1, 0])
+
+        if (bufferRef.current?.point) {
             switchShader(gl, programRef.current.point)
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer.point)
-            gl.vertexAttribPointer(attrib.point.aPosition, 3, gl.FLOAT, false, 3 * byteSize, 0)
+            gl.bindBuffer(gl.ARRAY_BUFFER, bufferRef.current.point)
+            gl.vertexAttribPointer(locationRef.current.point.aPosition, 3, gl.FLOAT, false, 3 * byteSize, 0)
+            gl.uniformMatrix4fv(locationRef.current.point.uModelMatrix, false, modelMatRef.current)
             gl.drawArrays(gl.POINTS, 0, props.data.length / 3)
         }
 
