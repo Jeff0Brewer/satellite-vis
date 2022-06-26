@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
-import useWindowDim from '../hooks/window-dim.js'
 import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/glu.js'
+import useWindowDim from '../hooks/window-dim.js'
 import styles from '../styles/SatVis.module.css'
 
 const SatVis = props => {
@@ -41,7 +41,6 @@ const SatVis = props => {
         switchShader(gl, pointRef.current.program)
 
         pointRef.current['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
-        
         const uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
         pointRef.current['uModelMatrix'] = uModelMatrix
         gl.uniformMatrix4fv(uModelMatrix, false, modelMatRef.current)
@@ -57,7 +56,7 @@ const SatVis = props => {
         gl.viewport(0, 0, w * dpr, h * dpr)
         const projMatrix = getProjMat((w * dpr)/(h * dpr))
     
-        if (pointRef.current?.buffer) {
+        if (pointRef.current?.program) {
             switchShader(gl, pointRef.current.program)
             gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
         }
