@@ -14,7 +14,7 @@ const Home = () => {
         getData()
     }, [])
     
-    const testData = (new Float32Array(1000*3)).map(e => 2*Math.random() - 1)
+    const testData = (new Float32Array(15000*3)).map(e => 2*Math.random() - 1)
 
     return (
         <main className={styles.home}>
