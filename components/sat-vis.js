@@ -6,12 +6,10 @@ import styles from '../styles/SatVis.module.css'
 
 const SatVis = props => {
     const { width, height } = useWindowDim()
-    const canvRef = useRef()
 
+    const canvRef = useRef()
     const glRef = useRef()
-    const programRef = useRef({})
-    const bufferRef = useRef({})
-    const locationRef = useRef({})
+    const pointRef = useRef({})
 
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
@@ -27,42 +25,40 @@ const SatVis = props => {
             100 //far
         )
     }
-    
     const byteSize = Float32Array.BYTES_PER_ELEMENT
-
+    
     const frameIdRef = useRef()
     const requestFrame = func => { frameIdRef.current = window.requestAnimationFrame(func) }
     const cancelFrame = () => { if(frameIdRef.current) window.cancelAnimationFrame(frameIdRef.current) }
 
-    const initPrograms = async (gl) => {
+    const initPrograms = async gl => {
         const pointVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/pointVert.glsl')
         const pointFrag = await loadShader(gl, gl.FRAGMENT_SHADER, './shaders/pointFrag.glsl')
-        programRef.current['point'] = createProgram(gl, pointVert, pointFrag)
+        pointRef.current['program'] = createProgram(gl, pointVert, pointFrag)
     }
 
-    const initShaderVars = (gl, programs) => {
-        switchShader(gl, programs.point)
+    const initShaderVars = gl => {
+        switchShader(gl, pointRef.current.program)
 
-        locationRef.current['point'] = {}
-        locationRef.current.point['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
+        pointRef.current['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
         
         const uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
-        locationRef.current.point['uModelMatrix'] = uModelMatrix
+        pointRef.current['uModelMatrix'] = uModelMatrix
         gl.uniformMatrix4fv(uModelMatrix, false, modelMatRef.current)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
     }
 
-    const initBuffers = (gl) => {
-        bufferRef.current['point'] = initBuffer(gl, props.data, gl.STATIC_DRAW)
+    const initBuffers = gl => {
+        pointRef.current['buffer'] = initBuffer(gl, props.data, gl.STATIC_DRAW)
     }
 
-    const setupViewport = (gl, programs) => {
+    const setupViewport = gl => {
         const {innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
         gl.viewport(0, 0, w * dpr, h * dpr)
         const projMatrix = getProjMat((w * dpr)/(h * dpr))
     
-        if(programs?.point) {
-            switchShader(gl, programs.point)
+        if (pointRef.current?.buffer) {
+            switchShader(gl, pointRef.current.program)
             gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
         }
     }
@@ -71,9 +67,9 @@ const SatVis = props => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
 
         await initPrograms(glRef.current)
-        initShaderVars(glRef.current, programRef.current)
+        initShaderVars(glRef.current)
         initBuffers(glRef.current)
-        setupViewport(glRef.current, programRef.current)
+        setupViewport(glRef.current)
 
         requestFrame(draw)
     }
@@ -85,11 +81,11 @@ const SatVis = props => {
 
         modelMatRef.current = mat4.fromRotation(mat4.create(), time/1000, [0, 1, 0])
 
-        if (bufferRef.current?.point) {
-            switchShader(gl, programRef.current.point)
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufferRef.current.point)
-            gl.vertexAttribPointer(locationRef.current.point.aPosition, 3, gl.FLOAT, false, 3 * byteSize, 0)
-            gl.uniformMatrix4fv(locationRef.current.point.uModelMatrix, false, modelMatRef.current)
+        if (pointRef.current?.buffer) {
+            switchShader(gl, pointRef.current.program)
+            gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
+            gl.vertexAttribPointer(pointRef.current.aPosition, 3, gl.FLOAT, false, 3 * byteSize, 0)
+            gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
             gl.drawArrays(gl.POINTS, 0, props.data.length / 3)
         }
 
@@ -102,7 +98,7 @@ const SatVis = props => {
     }, [])
 
     useEffect(() => {
-        setupViewport(glRef.current, programRef.current)
+        setupViewport(glRef.current)
     }, [width, height])
 
     return (
