@@ -1,4 +1,4 @@
-import getTleData from '../pages/api/tle/get-tle.js'
+import { getTleData, validateTle } from '../pages/api/tle/get-tle.js'
 
 const defaultFetch = global.fetch
 
@@ -57,6 +57,20 @@ test('getTleData returns valid timestamps', async () => {
     data.member.forEach(item => {
         expect(item.timestamp).toBeGreaterThan(0)
     })
+})
+
+test('validateTle returns true for valid input', () => {
+    const line1 = "1 25544C 98067A   22188.25277778 -.00045535  00000-0 -79974-3 0   608"
+    const line2 = "2 25544  51.6410 237.2145 0005099 341.7889 105.4438 15.49870784    15"
+
+    expect(validateTle(line1, line2)).toBe(true)
+})
+
+test('validateTle returns false for invalid input', () => {
+    const line1 = "<body></body>"
+    const line2 = "25543241234.2341234.124124.5323452354.341234235643   234 .324 324 .34"
+
+    expect(validateTle(line1, line2)).toBe(false)
 })
 
 beforeEach(() => {
