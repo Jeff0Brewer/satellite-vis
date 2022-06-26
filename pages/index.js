@@ -1,6 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { getLatLngObj } from 'tle.js'
-
 import SatVis from '../components/sat-vis.js'
 import styles from '../styles/Home.module.css'
 
