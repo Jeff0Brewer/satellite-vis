@@ -1,11 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { createCanvas } from 'canvas'
 import { mat4 } from 'gl-matrix'
 import useWindowDim from '../hooks/window-dim.js'
 import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/glu.js'
-
 import styles from '../styles/SatVis.module.css'
-
 
 const SatVis = props => {
     const { width, height } = useWindowDim()
@@ -20,7 +17,7 @@ const SatVis = props => {
 
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
-        [0, 0, 10], // camera position
+        [0, 0, 5], // camera position
         [0, 0, 0], // camera focus
         [0, 1, 0] // up vector
     )
@@ -49,7 +46,6 @@ const SatVis = props => {
         switchShader(gl, programs.point)
         locationRef.current.attrib['point'] = {}
         locationRef.current.attrib.point['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
-
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uModelMatrix'), false, modelMatRef.current)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
     }
@@ -70,8 +66,6 @@ const SatVis = props => {
     }
 
     const initGl = async () => {
-        if (glRef.current) return
-
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
 
         await initPrograms(glRef.current)
@@ -106,7 +100,6 @@ const SatVis = props => {
     useEffect(() => {
         setupViewport(glRef.current, programRef.current)
     }, [width, height])
-
 
     return (
         <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>
