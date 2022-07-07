@@ -78,7 +78,12 @@ const SatVis = props => {
 
         gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 
-        modelMatRef.current = mat4.fromRotation(mat4.create(), time/1000, [0, 1, 0])
+        const rX = mat4.fromXRotation(mat4.create(), time/2000)
+        const rY = mat4.fromYRotation(mat4.create(), time/1000)
+        let tmp0 = mat4.create()
+        let tmp1 = mat4.create()
+        mat4.multiply(tmp1, rX, tmp0)
+        mat4.multiply(modelMatRef.current, rY, tmp1)
 
         if (pointRef.current?.buffer) {
             switchShader(gl, pointRef.current.program)
