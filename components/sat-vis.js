@@ -103,6 +103,17 @@ const SatVis = props => {
         setupViewport(glRef.current)
     }, [width, height])
 
+    useEffect(() => {
+        if (!glRef.current || !pointRef.current.buffer) return
+
+        const gl = glRef.current
+        gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW)
+
+        cancelFrame()
+        requestFrame(draw)
+    }, [props.data])
+
     return (
         <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>
     )
