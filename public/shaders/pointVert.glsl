@@ -13,7 +13,7 @@ uniform mat4 uProjMatrix;
 
 void main() {
     float u = 3.986004418 * pow(10.0, 14.0);
-    float dt = uTime - aEpoch;
+    float dt = 1000.0 * uTime - aEpoch; //placeholder, incorrect epoch reference
     float a = aAxis;
     float e = aEccentricity;
     float w = aPeriapsis;
@@ -38,5 +38,5 @@ void main() {
     );
 
     gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
-    gl_PointSize = 500.0/gl_Position.w;
+    gl_PointSize = 80.0/gl_Position.w;
 }

@@ -82,7 +82,7 @@ const SatVis = props => {
         if (pointRef.current?.buffer) {
             switchShader(gl, pointRef.current.program)
             gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
-            gl.uniform1f(pointRef.current.uTime, time)
+            gl.uniform1f(pointRef.current.uTime, time/1000)
 
             gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
             for (let i = 0; i < pointAttrib.length; i++)
