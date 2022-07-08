@@ -23,7 +23,7 @@ void main() {
     float M = aAnomoly + dt*sqrt(u/pow(a, 3.0));
     M = mod(M, 2.0*3.1415926535);
     float E = M;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
         E = E - (E - e*sin(E) - M)/(1.0 - e*cos(E));
     }
     float v = 2.0*atan(sqrt(1.0 + e)*sin(E/2.0), sqrt(1.0 - e)*cos(E/2.0));
