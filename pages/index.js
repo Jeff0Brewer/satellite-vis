@@ -1,24 +1,35 @@
 import React, { useRef, useEffect, useState } from 'react'
 import SatVis from '../components/sat-vis.js'
+import { tleToKeplerian } from '../lib/tle-kepler.js'
 import styles from '../styles/Home.module.css'
 
 const Home = () => {
+    const [visData, setVisData] = useState(new Float32Array())
+
     const getData = () => {
-        fetch('/api/tle/120')
+        fetch('/api/tle/1')
             .then(res => res.json())
-            .then(data => console.log(data))
+            .then(data => { 
+                let out = []
+                data.member.forEach(el => {
+                    const k = tleToKeplerian(el.tle[0], el.tle[1])
+                    for (const key in k) {
+                        if (key !== 'year')
+                            out.push(k[key])
+                    }
+                })
+                setVisData(new Float32Array(out))
+            })
             .catch(err => console.log(err))
     }
 
     useEffect(() => {
         getData()
     }, [])
-    
-    const testData = (new Float32Array(1000*3)).map(e => 2*Math.random() - 1)
 
     return (
         <main className={styles.home}>
-            <SatVis data={testData}/>
+            <SatVis data={visData}/>
         </main>
     )
 }
