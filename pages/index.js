@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import SatVis from '../components/sat-vis.js'
+import { tleToKeplerian } from '../lib/tle-kepler.js'
 import styles from '../styles/Home.module.css'
 
 const Home = () => {
@@ -16,7 +17,15 @@ const Home = () => {
         getData()
     }, [])
     
-    const testData = (new Float32Array(15000*3)).map(e => 2*Math.random() - 1)
+    const testData = new Float32Array([
+        6795285.461957194, 
+        0.00045,
+        6.050752829374493,
+        4.061911749483411,
+        0.9013368949489277,
+        1.9406595205605268,
+        189.15741203
+    ])
 
     return (
         <main className={styles.home}>

@@ -10,6 +10,7 @@ const SatVis = props => {
     const canvRef = useRef()
     const glRef = useRef()
     const pointRef = useRef({})
+    const pointAttrib = ['aAxis', 'aEccentricity', 'aPeriapsis', 'aLngAcendingNode', 'aInclination', 'aAnomoly', 'aEpoch']
 
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
@@ -40,10 +41,10 @@ const SatVis = props => {
     const initShaderVars = gl => {
         switchShader(gl, pointRef.current.program)
 
-        pointRef.current['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
-        const uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
-        pointRef.current['uModelMatrix'] = uModelMatrix
-        gl.uniformMatrix4fv(uModelMatrix, false, modelMatRef.current)
+        for(let i = 0; i < pointAttrib.length; i++)
+            pointRef.current[pointAttrib[i]] = initAttribute(gl, pointAttrib[i], 1, 7, i, false, byteSize)
+        pointRef.current['uTime'] = gl.getUniformLocation(gl.program, 'uTime')
+        pointRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
     }
 
@@ -66,8 +67,8 @@ const SatVis = props => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
 
         await initPrograms(glRef.current)
-        initShaderVars(glRef.current)
         initBuffers(glRef.current)
+        initShaderVars(glRef.current)
         setupViewport(glRef.current)
 
         requestFrame(draw)
@@ -78,19 +79,16 @@ const SatVis = props => {
 
         gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 
-        const rX = mat4.fromXRotation(mat4.create(), time/2000)
-        const rY = mat4.fromYRotation(mat4.create(), time/1000)
-        let tmp0 = mat4.create()
-        let tmp1 = mat4.create()
-        mat4.multiply(tmp1, rX, tmp0)
-        mat4.multiply(modelMatRef.current, rY, tmp1)
-
         if (pointRef.current?.buffer) {
             switchShader(gl, pointRef.current.program)
-            gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
-            gl.vertexAttribPointer(pointRef.current.aPosition, 3, gl.FLOAT, false, 3 * byteSize, 0)
             gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
-            gl.drawArrays(gl.POINTS, 0, props.data.length / 3)
+            gl.uniform1f(pointRef.current.uTime, time)
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
+            for (let i = 0; i < pointAttrib.length; i++)
+                gl.vertexAttribPointer(pointRef.current[pointAttrib[i]], 1, gl.FLOAT, false, 7 * byteSize , i * byteSize)
+
+            gl.drawArrays(gl.POINTS, 0, props.data.length / 7)
         }
 
         requestFrame(draw)
