@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react'
-import SatVis from '../components/sat-vis.js'
-import { tleToKeplerian } from '../lib/tle-kepler.js'
 import styles from '../styles/Home.module.css'
+import SatVis from '../components/sat-vis.js'
+import { Clock } from '../components/clock.js'
+import { tleToKeplerian } from '../lib/tle-kepler.js'
 
 const Home = () => {
     const [visData, setVisData] = useState(new Float32Array())
+    const [visEpoch, setVisEpoch] = useState()
 
     const getData = () => {
         fetch('/api/tle/1')
@@ -29,7 +31,8 @@ const Home = () => {
 
     return (
         <main className={styles.home}>
-            <SatVis data={visData}/>
+            <Clock setEpoch={setVisEpoch} />
+            <SatVis data={visData} epoch={visEpoch} />
         </main>
     )
 }

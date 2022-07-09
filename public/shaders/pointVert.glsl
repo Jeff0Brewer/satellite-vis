@@ -13,7 +13,7 @@ uniform mat4 uProjMatrix;
 
 void main() {
     float u = 3.986004418 * pow(10.0, 14.0);
-    float dt = 1000.0 * uTime - aEpoch; //placeholder, incorrect epoch reference
+    float dt = (uTime - aEpoch)*86400.0;
     float a = aAxis;
     float e = aEccentricity;
     float w = aPeriapsis;
