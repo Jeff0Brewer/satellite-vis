@@ -29,14 +29,10 @@ const Home = () => {
         getData()
     }, [])
 
-    useEffect(() => {
-        console.log(visTime)
-    }, [visTime])
-
     return (
         <main className={styles.home}>
             <Clock setTime={setVisTime} />
-            <SatVis data={visData}/>
+            <SatVis data={visData} time={visTime} />
         </main>
     )
 }

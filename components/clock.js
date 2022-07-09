@@ -4,7 +4,7 @@ const Clock = props => {
     const frameIdRef = useRef()
     const epochRef = useRef()
 
-    const clockSpeed = 100
+    const clockSpeed = 1000
     const tickRate = 1000/60
     const msPerDay = 86400000
 

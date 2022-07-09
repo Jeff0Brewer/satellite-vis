@@ -27,10 +27,6 @@ const SatVis = props => {
         )
     }
     const byteSize = Float32Array.BYTES_PER_ELEMENT
-    
-    const frameIdRef = useRef()
-    const requestFrame = func => { frameIdRef.current = window.requestAnimationFrame(func) }
-    const cancelFrame = () => { if(frameIdRef.current) window.cancelAnimationFrame(frameIdRef.current) }
 
     const initPrograms = async gl => {
         const pointVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/pointVert.glsl')
@@ -65,38 +61,14 @@ const SatVis = props => {
 
     const initGl = async () => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
-
         await initPrograms(glRef.current)
         initBuffers(glRef.current)
         initShaderVars(glRef.current)
         setupViewport(glRef.current)
-
-        requestFrame(draw)
-    }
-
-    const draw = time => {
-        const gl = glRef.current
-
-        gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-
-        if (pointRef.current?.buffer) {
-            switchShader(gl, pointRef.current.program)
-            gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
-            gl.uniform1f(pointRef.current.uTime, time/1000)
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
-            for (let i = 0; i < pointAttrib.length; i++)
-                gl.vertexAttribPointer(pointRef.current[pointAttrib[i]], 1, gl.FLOAT, false, 7 * byteSize , i * byteSize)
-
-            gl.drawArrays(gl.POINTS, 0, props.data.length / 7)
-        }
-
-        requestFrame(draw)
     }
 
     useEffect(() => {
         initGl()
-        return cancelFrame
     }, [])
 
     useEffect(() => {
@@ -109,10 +81,24 @@ const SatVis = props => {
         const gl = glRef.current
         gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
         gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW)
-
-        cancelFrame()
-        requestFrame(draw)
     }, [props.data])
+
+    useEffect(() => {
+        const gl = glRef.current
+        gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
+
+        if (pointRef.current?.buffer) {
+            switchShader(gl, pointRef.current.program)
+            gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
+            gl.uniform1f(pointRef.current.uTime, props.time)
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
+            for (let i = 0; i < pointAttrib.length; i++)
+                gl.vertexAttribPointer(pointRef.current[pointAttrib[i]], 1, gl.FLOAT, false, 7 * byteSize , i * byteSize)
+
+            gl.drawArrays(gl.POINTS, 0, props.data.length / 7)
+        }
+    }, [props.time])
 
     return (
         <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>
