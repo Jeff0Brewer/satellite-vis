@@ -90,7 +90,7 @@ const SatVis = props => {
         if (pointRef.current?.buffer) {
             switchShader(gl, pointRef.current.program)
             gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
-            gl.uniform1f(pointRef.current.uTime, props.time)
+            gl.uniform1f(pointRef.current.uTime, props.epoch)
 
             gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
             for (let i = 0; i < pointAttrib.length; i++)
@@ -98,7 +98,7 @@ const SatVis = props => {
 
             gl.drawArrays(gl.POINTS, 0, props.data.length / 7)
         }
-    }, [props.time])
+    }, [props.epoch])
 
     return (
         <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>

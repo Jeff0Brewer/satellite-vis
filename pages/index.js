@@ -6,7 +6,7 @@ import styles from '../styles/Home.module.css'
 
 const Home = () => {
     const [visData, setVisData] = useState(new Float32Array())
-    const [visTime, setVisTime] = useState()
+    const [visEpoch, setVisEpoch] = useState()
 
     const getData = () => {
         fetch('/api/tle/1')
@@ -31,8 +31,8 @@ const Home = () => {
 
     return (
         <main className={styles.home}>
-            <Clock setTime={setVisTime} />
-            <SatVis data={visData} time={visTime} />
+            <Clock setEpoch={setVisEpoch} />
+            <SatVis data={visData} epoch={visEpoch} />
         </main>
     )
 }
