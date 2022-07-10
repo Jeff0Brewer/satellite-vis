@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import SatVis from '../components/sat-vis.js'
-import { Clock } from '../components/clock.js'
+import Clock from '../components/clock.js'
 import tleToKeplerian from '../lib/tle-kepler.js'
 
 const Home = () => {

@@ -44,7 +44,7 @@ const Clock = props => {
     )
 }
 
+export default Clock
 export {
-    Clock,
     getEpoch
 }
