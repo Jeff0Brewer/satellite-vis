@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import connectMongo from '../../lib/connect-mongo.js'
 import Keplerian from '../../models/keplerModel.js'
 import tleToKeplerian from '../../lib/tle-kepler.js'
@@ -25,11 +26,14 @@ const getPage = page => {
         .then(res => {
             let keps = []
             res.member.forEach(el => {
-                console.log(el.line1 + '\n' + el.line2)
-                if (!validateTle(el.line1, el.line2)) return
+                if (!validateTle(el.line1, el.line2)) { 
+                    console.log(`INVALID TLE: line1 - ${el.line1}, line2 - ${el.line2},`)
+                    return
+                }
                 const keplerian = tleToKeplerian(el.name, el.line1, el.line2)
                 keps.push(keplerian)
             })
+            console.log(`${keps.length} added from page ${page}`)
             return Keplerian.insertMany(keps)
         })
         .catch(err => console.log(err))
@@ -39,9 +43,18 @@ const populateKeplerian = async (req, res) => {
     const maxPage = await getMaxPage()
 
     await connectMongo()
+    const collections = await mongoose.connection.db.listCollections({ name: 'keplerians' }).toArray()
+    if (collections) {
+        await Keplerian.collection.drop()
+        console.log('collection reset')
+    }
 
-    await getPage(1)
+    console.log('inserting pages:')
+    for(let i = 1; i <= maxPage; i++) {
+        await getPage(i)
+    }
 
+    console.log('data updated')
     res.status(200).end()
 }
 
