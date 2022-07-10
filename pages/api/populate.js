@@ -26,10 +26,7 @@ const getPage = page => {
         .then(res => {
             let keps = []
             res.member.forEach(el => {
-                if (!validateTle(el.line1, el.line2)) { 
-                    console.log(`INVALID TLE: line1 - ${el.line1}, line2 - ${el.line2},`)
-                    return
-                }
+                if (!validateTle(el.line1, el.line2)) return
                 const keplerian = tleToKeplerian(el.name, el.line1, el.line2)
                 keps.push(keplerian)
             })
