@@ -1,14 +1,5 @@
 import { Schema, model, models } from 'mongoose'
-
-const keplerianAttribs = [
-    'aAxis', 
-    'aEccentricity', 
-    'aPeriapsis', 
-    'aLngAcendingNode', 
-    'aInclination', 
-    'aAnomoly', 
-    'aEpoch'
-]
+import keplerianAttribs from './keplerAttrib.js'
 
 const keplerianSchema = new Schema({
     name: { type: String, required: true },
@@ -23,9 +14,6 @@ const keplerianSchema = new Schema({
     }
 })
 
-const Keplerian = models.Keplerian || model('Keplerian', keplerianSchema)
+const Keplerian = models?.Keplerian || model('Keplerian', keplerianSchema)
 
-export { 
-    Keplerian,
-    keplerianAttribs
-}
+export default Keplerian
