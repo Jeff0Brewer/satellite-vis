@@ -9,34 +9,26 @@ const getEpoch = date => {
 
 const Clock = props => {
     const epochRef = useRef()
-    const clockSpeed = 1000
-    const tickRate = 1000/60
-
     const frameIdRef = useRef()
-    const requestFrame = func => { frameIdRef.current = window.requestAnimationFrame(func) }
-    const cancelFrame = () => { window.cancelAnimationFrame(frameIdRef.current) }
+    const clockSpeed = 1000
 
     let lastT = 0
     const update = time => {
         const elapsed = time - lastT
-        if (elapsed < tickRate) {
-            requestFrame(update)
-            return
-        }
         lastT = time
 
         epochRef.current += elapsed/MS_PER_DAY * clockSpeed
         props.setEpoch(epochRef.current)
 
-        requestFrame(update)
+        frameIdRef.current = window.requestAnimationFrame(update)
     }
 
     useEffect(() => {
         epochRef.current = getEpoch(new Date())
         props.setEpoch(epochRef.current)
 
-        requestFrame(update)
-        return cancelFrame
+        frameIdRef.current = window.requestAnimationFrame(update)
+        return () => window.cancelAnimationFrame(frameIdRef.current)
     }, [])
 
     return (
