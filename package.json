@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest",
-    "populate": "node util/populate-db.js"
+    "test": "jest"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.9",
