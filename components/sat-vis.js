@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
 import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/glu.js'
+import keplerianAttribs from '../models/keplerAttrib.js'
 import useWindowDim from '../hooks/window-dim.js'
 import styles from '../styles/SatVis.module.css'
 
@@ -10,17 +11,16 @@ const SatVis = props => {
     const canvRef = useRef()
     const glRef = useRef()
     const pointRef = useRef({})
-    const pointAttrib = ['aAxis', 'aEccentricity', 'aPeriapsis', 'aLngAcendingNode', 'aInclination', 'aAnomoly', 'aEpoch']
 
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
-        [0, 0, 3], // camera position
+        [0, 4, 0], // camera position
         [0, 0, 0], // camera focus
-        [0, 1, 0] // up vector
+        [0, 0, 1] // up vector
     )
     const getProjMat = (aspect) => {
         return mat4.perspective(mat4.create(),
-            90, //fov
+            70, //fov
             aspect,
             .1, //near
             100 //far
@@ -37,8 +37,8 @@ const SatVis = props => {
     const initShaderVars = gl => {
         switchShader(gl, pointRef.current.program)
 
-        for(let i = 0; i < pointAttrib.length; i++)
-            pointRef.current[pointAttrib[i]] = initAttribute(gl, pointAttrib[i], 1, 7, i, false, byteSize)
+        for(let i = 0; i < keplerianAttribs.length; i++)
+            pointRef.current[keplerianAttribs[i]] = initAttribute(gl, keplerianAttribs[i], 1, 7, i, false, byteSize)
         pointRef.current['uTime'] = gl.getUniformLocation(gl.program, 'uTime')
         pointRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
@@ -93,8 +93,8 @@ const SatVis = props => {
             gl.uniform1f(pointRef.current.uTime, props.epoch)
 
             gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
-            for (let i = 0; i < pointAttrib.length; i++)
-                gl.vertexAttribPointer(pointRef.current[pointAttrib[i]], 1, gl.FLOAT, false, 7 * byteSize , i * byteSize)
+            for (let i = 0; i < keplerianAttribs.length; i++)
+                gl.vertexAttribPointer(pointRef.current[keplerianAttribs[i]], 1, gl.FLOAT, false, 7 * byteSize , i * byteSize)
 
             gl.drawArrays(gl.POINTS, 0, props.data.length / 7)
         }
