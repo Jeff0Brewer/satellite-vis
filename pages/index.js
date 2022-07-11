@@ -9,14 +9,13 @@ const Home = () => {
     const [visEpoch, setVisEpoch] = useState()
 
     const getData = () => {
-        fetch('/api/tle/1')
+        fetch('/api/get-keplerian')
             .then(res => res.json())
             .then(data => { 
                 let out = []
-                data.member.forEach(el => {
-                    const k = tleToKeplerian(el.name, el.tle[0], el.tle[1])
-                    out = [...out, ...k.attribs]
-                })
+                for(let i = 0; i < data.length; i++) {
+                    out.push(...data[i].attribs)
+                }
                 setVisData(new Float32Array(out))
             })
             .catch(err => console.log(err))
