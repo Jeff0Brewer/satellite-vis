@@ -38,5 +38,5 @@ void main() {
     );
 
     gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
-    gl_PointSize = 5.0/gl_Position.w;
+    gl_PointSize = 10.0/gl_Position.w;
 }

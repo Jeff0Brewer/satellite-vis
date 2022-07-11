@@ -10,7 +10,7 @@ const getEpoch = date => {
 const Clock = props => {
     const epochRef = useRef()
     const frameIdRef = useRef()
-    const clockSpeed = 1000
+    const clockSpeed = 500
 
     let lastT = 0
     const update = time => {

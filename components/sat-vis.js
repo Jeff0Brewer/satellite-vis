@@ -14,13 +14,13 @@ const SatVis = props => {
 
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
-        [0, 0, 3], // camera position
+        [0, 4, 0], // camera position
         [0, 0, 0], // camera focus
-        [0, 1, 0] // up vector
+        [0, 0, 1] // up vector
     )
     const getProjMat = (aspect) => {
         return mat4.perspective(mat4.create(),
-            90, //fov
+            70, //fov
             aspect,
             .1, //near
             100 //far
