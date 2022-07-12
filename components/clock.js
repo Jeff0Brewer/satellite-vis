@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import styles from '../styles/Clock.module.css'
 
 const MS_PER_DAY = 86400000
 
@@ -8,31 +9,43 @@ const getEpoch = date => {
 }
 
 const Clock = props => {
+    const [speed, setSpeed] = useState(500)
     const epochRef = useRef()
     const frameIdRef = useRef()
-    const clockSpeed = 500
 
-    let lastT = 0
-    const update = time => {
-        const elapsed = time - lastT
-        lastT = time
-
-        epochRef.current += elapsed/MS_PER_DAY * clockSpeed
-        props.setEpoch(epochRef.current)
-
-        frameIdRef.current = window.requestAnimationFrame(update)
-    }
+    const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
+    const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
 
     useEffect(() => {
         epochRef.current = getEpoch(new Date())
         props.setEpoch(epochRef.current)
-
-        frameIdRef.current = window.requestAnimationFrame(update)
-        return () => window.cancelAnimationFrame(frameIdRef.current)
     }, [])
 
+    useEffect(() => {
+        let lastT = 0
+        const update = time => {
+            const elapsed = time - lastT
+            lastT = time
+
+            epochRef.current += elapsed/MS_PER_DAY * speed
+            props.setEpoch(epochRef.current)
+
+            requestFrame(update)
+        }
+        requestFrame(update)
+
+        return cancelFrame
+    }, [speed])
+
+    const speedInputChange = e => {
+        const val = parseFloat(e.target.value)
+        if (val) {
+            setSpeed(val)
+        }
+    }
+
     return (
-        <></>
+        <input className={styles.speed} type='text' defaultValue={speed} onChange={speedInputChange} />
     )
 }
 
