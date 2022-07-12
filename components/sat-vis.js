@@ -71,12 +71,12 @@ const SatVis = props => {
     useEffect(() => {
         initGl()
 
-        const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY)
+        const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .002)
         canvRef.current.addEventListener('mousedown', () => canvRef.current.addEventListener('mousemove', dragHandler))
         canvRef.current.addEventListener('mouseup', () => canvRef.current.removeEventListener('mousemove', dragHandler))
         canvRef.current.addEventListener('wheel', e => { 
             e.preventDefault()
-            modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY)
+            modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY, .0003)
         })
     }, [])
 
