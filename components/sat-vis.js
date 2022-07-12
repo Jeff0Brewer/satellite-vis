@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
 import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/glu.js'
+import { mouseToRotation } from '../lib/mouse-control.js'
 import keplerianAttribs from '../models/keplerAttrib.js'
 import useWindowDim from '../hooks/window-dim.js'
 import styles from '../styles/SatVis.module.css'
@@ -38,7 +39,7 @@ const SatVis = props => {
         switchShader(gl, pointRef.current.program)
 
         for(let i = 0; i < keplerianAttribs.length; i++)
-            pointRef.current[keplerianAttribs[i]] = initAttribute(gl, keplerianAttribs[i], 1, 7, i, false, byteSize)
+            pointRef.current[keplerianAttribs[i]] = initAttribute(gl, keplerianAttribs[i], 1, keplerianAttribs.length, i, false, byteSize)
         pointRef.current['uTime'] = gl.getUniformLocation(gl.program, 'uTime')
         pointRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
@@ -69,6 +70,16 @@ const SatVis = props => {
 
     useEffect(() => {
         initGl()
+
+        const dragHandler = e => {
+            modelMatRef.current = mat4.multiply(
+                mat4.create(), 
+                mouseToRotation(e.movementX, e.movementY),
+                modelMatRef.current
+            )
+        }
+        canvRef.current.addEventListener('mousedown', () => { canvRef.current.addEventListener('mousemove', dragHandler) })
+        canvRef.current.addEventListener('mouseup', () => { canvRef.current.removeEventListener('mousemove', dragHandler) })
     }, [])
 
     useEffect(() => {
@@ -94,9 +105,9 @@ const SatVis = props => {
 
             gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
             for (let i = 0; i < keplerianAttribs.length; i++)
-                gl.vertexAttribPointer(pointRef.current[keplerianAttribs[i]], 1, gl.FLOAT, false, 7 * byteSize , i * byteSize)
+                gl.vertexAttribPointer(pointRef.current[keplerianAttribs[i]], 1, gl.FLOAT, false, keplerianAttribs.length * byteSize , i * byteSize)
 
-            gl.drawArrays(gl.POINTS, 0, props.data.length / 7)
+            gl.drawArrays(gl.POINTS, 0, props.data.length / keplerianAttribs.length)
         }
     }, [props.epoch])
 
