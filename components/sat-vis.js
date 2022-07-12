@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
 import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/glu.js'
-import { mouseToRotation } from '../lib/mouse-control.js'
+import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import keplerianAttribs from '../models/keplerAttrib.js'
 import useWindowDim from '../hooks/window-dim.js'
 import styles from '../styles/SatVis.module.css'
@@ -71,15 +71,13 @@ const SatVis = props => {
     useEffect(() => {
         initGl()
 
-        const dragHandler = e => {
-            modelMatRef.current = mat4.multiply(
-                mat4.create(), 
-                mouseToRotation(e.movementX, e.movementY),
-                modelMatRef.current
-            )
-        }
-        canvRef.current.addEventListener('mousedown', () => { canvRef.current.addEventListener('mousemove', dragHandler) })
-        canvRef.current.addEventListener('mouseup', () => { canvRef.current.removeEventListener('mousemove', dragHandler) })
+        const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY)
+        canvRef.current.addEventListener('mousedown', () => canvRef.current.addEventListener('mousemove', dragHandler))
+        canvRef.current.addEventListener('mouseup', () => canvRef.current.removeEventListener('mousemove', dragHandler))
+        canvRef.current.addEventListener('wheel', e => { 
+            e.preventDefault()
+            modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY)
+        })
     }, [])
 
     useEffect(() => {
