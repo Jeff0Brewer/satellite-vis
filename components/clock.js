@@ -9,7 +9,7 @@ const getEpoch = date => {
 }
 
 const Clock = props => {
-    const [speed, setSpeed] = useState(500)
+    const [speed, setSpeed] = useState(30)
     const epochRef = useRef()
     const frameIdRef = useRef()
 

@@ -15,7 +15,7 @@ const SatVis = props => {
 
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
-        [0, 4, 0], // camera position
+        [0, 2, 0], // camera position
         [0, 0, 0], // camera focus
         [0, 0, 1] // up vector
     )
