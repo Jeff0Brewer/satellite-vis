@@ -40,9 +40,13 @@ const SatVis = props => {
 
         for(let i = 0; i < keplerianAttribs.length; i++)
             pointRef.current[keplerianAttribs[i]] = initAttribute(gl, keplerianAttribs[i], 1, keplerianAttribs.length, i, false, byteSize)
-        pointRef.current['uTime'] = gl.getUniformLocation(gl.program, 'uTime')
-        pointRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
+
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
+
+        pointRef.current['uYear'] = gl.getUniformLocation(gl.program, 'uYear')
+        pointRef.current['uDay'] = gl.getUniformLocation(gl.program, 'uDay')
+        pointRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
+        pointRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
     }
 
     const initBuffers = gl => {
@@ -95,11 +99,14 @@ const SatVis = props => {
     useEffect(() => {
         const gl = glRef.current
         gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
+        console.log(props.epoch)
 
         if (pointRef.current?.buffer) {
             switchShader(gl, pointRef.current.program)
             gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
-            gl.uniform1f(pointRef.current.uTime, props.epoch)
+            gl.uniform1f(pointRef.current.uYear, props.epoch.year)
+            gl.uniform1f(pointRef.current.uDay, props.epoch.day)
+            gl.uniform1f(pointRef.current.uSecond, props.epoch.second)
 
             gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
             for (let i = 0; i < keplerianAttribs.length; i++)

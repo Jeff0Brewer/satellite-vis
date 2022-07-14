@@ -1,27 +1,34 @@
-attribute float aEpoch;
 attribute float aAxis;
 attribute float aEccentricity;
 attribute float aPeriapsis;
 attribute float aInclination;
 attribute float aLngAcendingNode;
 attribute float aAnomoly;
+attribute float aYear;
+attribute float aDay;
+attribute float aSecond;
 
-uniform float uTime;
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
+uniform float uYear;
+uniform float uDay;
+uniform float uSecond;
 
 void main() {
-    float u = 3.986004418 * pow(10.0, 14.0);
-    float dt = (uTime - aEpoch)*86400.0;
     float a = aAxis;
     float e = aEccentricity;
     float w = aPeriapsis;
     float i = aInclination;
     float o = aLngAcendingNode;
     
-    float M = aAnomoly + dt*sqrt(u/pow(a, 3.0));
+    float M = aAnomoly;
+    float ua3 = sqrt((3.986004418 * pow(10.0, 14.0))/pow(a, 3.0));
+    M += ua3*365.0*86400.0*(uYear - aYear);
+    M += ua3*86400.0*(uDay - aDay);
+    M += ua3*(uSecond - aSecond);
     M = mod(M, 2.0*3.1415926535);
+
     float E = M;
     for (int i = 0; i < 10; i++) {
         E = E - (E - e*sin(E) - M)/(1.0 - e*cos(E));
