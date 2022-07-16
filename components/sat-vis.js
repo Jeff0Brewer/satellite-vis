@@ -105,9 +105,7 @@ const SatVis = props => {
 
     useEffect(() => {
         epochRef.current = props.startEpoch
-    }, [props.startEpoch])
-
-    useEffect(() => {
+        if (!epochRef.current) return
         let epoch = epochRef.current
         let lastT = 0
         const tick = currT => {
@@ -119,16 +117,14 @@ const SatVis = props => {
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             if (pointRef.current?.buffer) {
                 switchShader(gl, pointRef.current.program)
-                gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
                 gl.uniform1f(pointRef.current.uYear, epoch.year)
                 gl.uniform1f(pointRef.current.uDay, epoch.day)
                 gl.uniform1f(pointRef.current.uSecond, epoch.second)
+                gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
                 gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
-                for (let i = 0; i < keplerianAttribs.length; i++)
-                    gl.vertexAttribPointer(pointRef.current[keplerianAttribs[i]], 1, gl.FLOAT, false, keplerianAttribs.length * byteSize , i * byteSize)
+                keplerianAttribs.forEach((attrib, i) => gl.vertexAttribPointer(pointRef.current[attrib], 1, gl.FLOAT, false, keplerianAttribs.length * byteSize, i * byteSize))
                 gl.drawArrays(gl.POINTS, 0, props.data.length / keplerianAttribs.length)
             }
-
             requestFrame(tick)
         }
         requestFrame(tick)
@@ -136,9 +132,10 @@ const SatVis = props => {
         let startT = Date.now()
         return () => {
             cancelFrame()
-            epochRef.current = incrementEpoch(epochRef.current, (Date.now() - startT)*props.clockSpeed)
+            const totalElapsed = (Date.now() - startT)*props.clockSpeed
+            epochRef.current = incrementEpoch(epochRef.current, totalElapsed)
         }
-    }, [props.clockSpeed, props.data])
+    }, [props.startEpoch, props.clockSpeed, props.data])
 
     return (
         <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>

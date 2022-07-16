@@ -24,12 +24,13 @@ void main() {
     
     float M = aAnomoly;
     float ua3 = sqrt((3.986004418 * pow(10.0, 14.0))/pow(a, 3.0));
+    float pi2 = 3.1415926535*2.0;
     M += ua3*365.0*86400.0*(uYear - aYear);
-    M = mod(M, 2.0*3.1415926535);
+    M = mod(M, pi2);
     M += ua3*86400.0*(uDay - aDay);
-    M = mod(M, 2.0*3.1415926535);
+    M = mod(M, pi2);
     M += ua3*(uSecond - aSecond);
-    M = mod(M, 2.0*3.1415926535);
+    M = mod(M, pi2);
 
     float E = M;
     for (int i = 0; i < 10; i++) {

@@ -3,7 +3,7 @@ import { getEpoch } from '../lib/epoch.js'
 import styles from '../styles/Clock.module.css'
 
 const ClockUi = props => {
-    const defaultSpeed = 1
+    const defaultSpeed = 50
 
     useEffect(() => {
         props.setStartEpoch(getEpoch(new Date()))
