@@ -102,9 +102,12 @@ const SatVis = props => {
         gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
         gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW)
     }, [props.data])
-
+    
     useEffect(() => {
         epochRef.current = props.startEpoch
+    }, [props.startEpoch])
+
+    useEffect(() => {
         if (!epochRef.current) return
         let epoch = epochRef.current
         let lastT = 0
@@ -127,13 +130,12 @@ const SatVis = props => {
             }
             requestFrame(tick)
         }
+        let startT = Date.now()
         requestFrame(tick)
 
-        let startT = Date.now()
         return () => {
             cancelFrame()
-            const totalElapsed = (Date.now() - startT)*props.clockSpeed
-            epochRef.current = incrementEpoch(epochRef.current, totalElapsed)
+            epochRef.current = epoch
         }
     }, [props.startEpoch, props.clockSpeed, props.data])
 
