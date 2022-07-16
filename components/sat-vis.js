@@ -35,7 +35,6 @@ const SatVis = props => {
     const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
     const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
 
-
     const initPrograms = async gl => {
         const pointVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/pointVert.glsl')
         const pointFrag = await loadShader(gl, gl.FRAGMENT_SHADER, './shaders/pointFrag.glsl')
@@ -44,12 +43,8 @@ const SatVis = props => {
 
     const initShaderVars = gl => {
         switchShader(gl, pointRef.current.program)
-
-        for(let i = 0; i < keplerianAttribs.length; i++)
-            pointRef.current[keplerianAttribs[i]] = initAttribute(gl, keplerianAttribs[i], 1, keplerianAttribs.length, i, false, byteSize)
-
+        keplerianAttribs.forEach((a, i) => pointRef.current[a] = initAttribute(gl, a, 1, keplerianAttribs.length, i, false, byteSize))
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
-
         pointRef.current['uYear'] = gl.getUniformLocation(gl.program, 'uYear')
         pointRef.current['uDay'] = gl.getUniformLocation(gl.program, 'uDay')
         pointRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
@@ -97,7 +92,6 @@ const SatVis = props => {
 
     useEffect(() => {
         if (!glRef.current || !pointRef.current.buffer) return
-
         const gl = glRef.current
         gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
         gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW)
