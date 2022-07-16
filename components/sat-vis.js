@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
 import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/glu.js'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
+import { incrementEpoch } from '../lib/epoch.js'
 import keplerianAttribs from '../models/keplerAttrib.js'
 import useWindowDim from '../hooks/window-dim.js'
 import styles from '../styles/SatVis.module.css'
@@ -12,6 +13,7 @@ const SatVis = props => {
     const canvRef = useRef()
     const glRef = useRef()
     const pointRef = useRef({})
+    const epochRef = useRef()
 
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
@@ -28,6 +30,11 @@ const SatVis = props => {
         )
     }
     const byteSize = Float32Array.BYTES_PER_ELEMENT
+
+    const frameIdRef = useRef()
+    const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
+    const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
+
 
     const initPrograms = async gl => {
         const pointVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/pointVert.glsl')
@@ -97,24 +104,41 @@ const SatVis = props => {
     }, [props.data])
 
     useEffect(() => {
-        const gl = glRef.current
-        gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-        console.log(props.epoch)
+        epochRef.current = props.startEpoch
+    }, [props.startEpoch])
 
-        if (pointRef.current?.buffer) {
-            switchShader(gl, pointRef.current.program)
-            gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
-            gl.uniform1f(pointRef.current.uYear, props.epoch.year)
-            gl.uniform1f(pointRef.current.uDay, props.epoch.day)
-            gl.uniform1f(pointRef.current.uSecond, props.epoch.second)
+    useEffect(() => {
+        let epoch = epochRef.current
+        let lastT = 0
+        const tick = currT => {
+            const elapsed = currT - lastT
+            lastT = currT
+            epoch = incrementEpoch(epoch, elapsed*props.clockSpeed)
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
-            for (let i = 0; i < keplerianAttribs.length; i++)
-                gl.vertexAttribPointer(pointRef.current[keplerianAttribs[i]], 1, gl.FLOAT, false, keplerianAttribs.length * byteSize , i * byteSize)
+            const gl = glRef.current
+            gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
+            if (pointRef.current?.buffer) {
+                switchShader(gl, pointRef.current.program)
+                gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
+                gl.uniform1f(pointRef.current.uYear, epoch.year)
+                gl.uniform1f(pointRef.current.uDay, epoch.day)
+                gl.uniform1f(pointRef.current.uSecond, epoch.second)
+                gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
+                for (let i = 0; i < keplerianAttribs.length; i++)
+                    gl.vertexAttribPointer(pointRef.current[keplerianAttribs[i]], 1, gl.FLOAT, false, keplerianAttribs.length * byteSize , i * byteSize)
+                gl.drawArrays(gl.POINTS, 0, props.data.length / keplerianAttribs.length)
+            }
 
-            gl.drawArrays(gl.POINTS, 0, props.data.length / keplerianAttribs.length)
+            requestFrame(tick)
         }
-    }, [props.epoch])
+        requestFrame(tick)
+
+        let startT = Date.now()
+        return () => {
+            cancelFrame()
+            epochRef.current = incrementEpoch(epochRef.current, (Date.now() - startT)*props.clockSpeed)
+        }
+    }, [props.clockSpeed, props.data])
 
     return (
         <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>

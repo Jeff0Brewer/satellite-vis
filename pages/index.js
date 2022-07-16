@@ -1,11 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import SatVis from '../components/sat-vis.js'
-import Clock from '../components/clock.js'
+import ClockUi from '../components/clock.js'
+import { getEpoch } from '../lib/epoch.js'
 
 const Home = () => {
     const [satData, setSatData] = useState(new Float32Array())
-    const [epoch, setEpoch] = useState()
+    const [startEpoch, setStartEpoch] = useState(getEpoch(new Date()))
+    const [clockSpeed, setClockSpeed] = useState()
 
     const getData = () => {
         fetch('/api/get-keplerian')
@@ -24,18 +26,10 @@ const Home = () => {
         getData()
     }, [])
 
-    useEffect(() => {
-        console.log(epoch)
-    }, [epoch])
-
-    const setEpochWrap = val => {
-        setEpoch(val)
-    }
-
     return (
         <main className={styles.home}>
-            <Clock setEpoch={setEpochWrap} />
-            <SatVis data={satData} epoch={epoch} />
+            <ClockUi setStartEpoch={setStartEpoch} setClockSpeed={setClockSpeed} />
+            <SatVis startEpoch={startEpoch} clockSpeed={clockSpeed} data={satData} />
         </main>
     )
 }
