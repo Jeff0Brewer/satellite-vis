@@ -1,21 +1,20 @@
 import React, { useRef, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 import SatVis from '../components/sat-vis.js'
-import Clock from '../components/clock.js'
+import ClockUi from '../components/clock.js'
 
 const Home = () => {
-    const [visData, setVisData] = useState(new Float32Array())
-    const [visEpoch, setVisEpoch] = useState()
+    const [satData, setSatData] = useState(new Float32Array())
+    const [startEpoch, setStartEpoch] = useState()
+    const [clockSpeed, setClockSpeed] = useState()
 
     const getData = () => {
         fetch('/api/get-keplerian')
             .then(res => res.json())
             .then(data => { 
                 let out = []
-                for(let i = 0; i < data.length; i++) {
-                    out.push(...data[i].attribs)
-                }
-                setVisData(new Float32Array(out))
+                data.forEach(el => out.push(...el.attribs))
+                setSatData(new Float32Array(out))
             })
             .catch(err => console.log(err))
     }
@@ -26,8 +25,8 @@ const Home = () => {
 
     return (
         <main className={styles.home}>
-            <Clock setEpoch={setVisEpoch} />
-            <SatVis data={visData} epoch={visEpoch} />
+            <ClockUi setStartEpoch={setStartEpoch} setClockSpeed={setClockSpeed} />
+            <SatVis startEpoch={startEpoch} clockSpeed={clockSpeed} data={satData} />
         </main>
     )
 }

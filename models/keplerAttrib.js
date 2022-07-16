@@ -5,7 +5,9 @@ const keplerianAttribs = [
     'aLngAcendingNode', 
     'aInclination', 
     'aAnomoly', 
-    'aEpoch'
+    'aYear',
+    'aDay',
+    'aSecond'
 ]
 
 export default keplerianAttribs

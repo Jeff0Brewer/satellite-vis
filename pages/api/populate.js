@@ -6,9 +6,9 @@ import { tleToKeplerian, validateTle, getTlePageCount } from '../../lib/tle-help
 const getPage = page => {
     return fetch(`http://tle.ivanstanojevic.me/api/tle/?page-size=100&page=${page}`)
         .then(res => res.json())
-        .then(res => {
+        .then(data => {
             let keps = []
-            res.member.forEach(el => {
+            data.member.forEach(el => {
                 if (!validateTle(el.line1, el.line2)) return
                 const keplerian = tleToKeplerian(el.name, el.line1, el.line2)
                 keps.push(keplerian)

@@ -23,8 +23,7 @@ test('tleToKeplerian returns complete keplerian element set', () => {
     const k = tleToKeplerian('name', line1, line2)
 
     expect(k).toHaveProperty('name')
-    expect(k).toHaveProperty('epochYear')
-    expect(k?.attribs.length).toBe(7)
+    expect(k?.attribs.length).toBe(keplerianAttribs.length)
 })
 
 test('tleToKeplerian returns correct axis attribute', () => {
@@ -63,10 +62,22 @@ test('tleToKeplerian returns correct inclination attribute', () => {
     expect(attrib).toBeCloseTo(0.027197, 5)
 })
 
-test('tleToKeplerian returns correct epoch attribute', () => {
+test('tleToKeplerian returns correct year attribute', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aEpoch')]
-    expect(attrib).toBeCloseTo(187.911, 2)
+    const attrib = k?.attribs[keplerianAttribs.indexOf('aYear')]
+    expect(attrib).toBeCloseTo(22, 2)
+})
+
+test('tleToKeplerian returns correct day attribute', () => {
+    const k = tleToKeplerian('name', line1, line2)
+    const attrib = k?.attribs[keplerianAttribs.indexOf('aDay')]
+    expect(attrib).toBeCloseTo(187, 2)
+})
+
+test('tleToKeplerian returns correct second attribute', () => {
+    const k = tleToKeplerian('name', line1, line2)
+    const attrib = k?.attribs[keplerianAttribs.indexOf('aSecond')]
+    expect(attrib).toBeCloseTo(.91168981*86400, 1)
 })
 
 test('validateTle returns true for valid input', () => {

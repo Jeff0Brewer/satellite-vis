@@ -3,7 +3,6 @@ import keplerianAttribs from './keplerAttrib.js'
 
 const keplerianSchema = new Schema({
     name: { type: String, required: true },
-    epochYear: { type: Number, required: true },
     attribs: {
         type: [Number],
         required: true,
