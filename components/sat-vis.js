@@ -12,6 +12,7 @@ const SatVis = props => {
 
     const canvRef = useRef()
     const glRef = useRef()
+    const frameIdRef = useRef()
     const epochRef = useRef()
     const satelliteRef = useRef({})
 
@@ -21,7 +22,7 @@ const SatVis = props => {
         [0, 0, 0], // camera focus
         [0, 0, 1] // up vector
     )
-    const getProjMat = (aspect) => {
+    const getProjMat = aspect => {
         return mat4.perspective(mat4.create(),
             70, //fov
             aspect,
@@ -30,10 +31,6 @@ const SatVis = props => {
         )
     }
     const byteSize = Float32Array.BYTES_PER_ELEMENT
-
-    const frameIdRef = useRef()
-    const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
-    const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
 
     const initPrograms = async gl => {
         const satelliteVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/satellite-vert.glsl')
@@ -76,7 +73,6 @@ const SatVis = props => {
 
     useEffect(() => {
         initGl()
-
         const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .002)
         canvRef.current.addEventListener('mousedown', () => canvRef.current.addEventListener('mousemove', dragHandler))
         canvRef.current.addEventListener('mouseup', () => canvRef.current.removeEventListener('mousemove', dragHandler))
@@ -105,6 +101,7 @@ const SatVis = props => {
         if (!epochRef.current) return
         let epoch = epochRef.current
         const gl = glRef.current
+
         let lastT = 0
         const tick = currT => {
             const elapsed = currT - lastT
@@ -122,13 +119,12 @@ const SatVis = props => {
                 keplerianAttribs.forEach((attrib, i) => gl.vertexAttribPointer(satelliteRef.current[attrib], 1, gl.FLOAT, false, keplerianAttribs.length * byteSize, i * byteSize))
                 gl.drawArrays(gl.POINTS, 0, props.data.length / keplerianAttribs.length)
             }
-            requestFrame(tick)
+            frameIdRef.current = window.requestAnimationFrame(tick)
         }
-        let startT = Date.now()
-        requestFrame(tick)
+        frameIdRef.current = window.requestAnimationFrame(tick)
 
         return () => {
-            cancelFrame()
+            window.cancelAnimationFrame(frameIdRef.current)
             epochRef.current = epoch
         }
     }, [props.startEpoch, props.clockSpeed, props.data])
