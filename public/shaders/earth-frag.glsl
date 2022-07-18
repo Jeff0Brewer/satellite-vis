@@ -1,3 +1,9 @@
+precision highp float;
+
+varying vec3 vNormal;
+
+uniform samplerCube uEarthMap;
+
 void main() {
-    gl_FragColor = vec4(0.3, 0.3, 1.0, 1.0);
+    gl_FragColor = textureCube(uEarthMap, normalize(vNormal));
 }

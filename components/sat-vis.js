@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
-import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/gl-help.js'
+import { loadShader, createProgram, switchShader, initAttribute, initBuffer, createCubemap } from '../lib/gl-help.js'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { incrementEpoch } from '../lib/epoch.js'
 import getIcosphere from '../lib/icosphere.js'
@@ -57,6 +57,16 @@ const SatVis = props => {
         earthRef.current['uDay'] = gl.getUniformLocation(gl.program, 'uDay')
         earthRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
         earthRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
+        gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
+        createCubemap(gl, 512, [
+            './earth-cubemap/posx.jpg', './earth-cubemap/negx.jpg',
+            './earth-cubemap/posy.jpg', './earth-cubemap/negy.jpg',
+            './earth-cubemap/posz.jpg', './earth-cubemap/negz.jpg'
+        ], [
+            gl.TEXTURE_CUBE_MAP_POSITIVE_X, gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+            gl.TEXTURE_CUBE_MAP_POSITIVE_Y, gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+            gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
+        ])
     }
 
     const initBuffers = gl => {
@@ -83,7 +93,7 @@ const SatVis = props => {
         const {innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
         gl.viewport(0, 0, w * dpr, h * dpr)
         const projMatrix = getProjMat((w * dpr)/(h * dpr))
-    
+
         if (satelliteRef.current?.program) {
             switchShader(gl, satelliteRef.current.program)
             gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
