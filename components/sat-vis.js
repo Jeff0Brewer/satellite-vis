@@ -17,9 +17,9 @@ const SatVis = props => {
     const earthRef = useRef({})
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
-        [0, 2, 0], // camera position
+        [0, 0, 2], // camera position
         [0, 0, 0], // camera focus
-        [0, 0, 1] // up vector
+        [0, 1, 0] // up vector
     )
     const getProjMat = aspect => {
         return mat4.perspective(mat4.create(),
@@ -58,7 +58,7 @@ const SatVis = props => {
         earthRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
         earthRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
         gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
-        createCubemap(gl, 512, [
+        createCubemap(gl, 1024, [
             './earth-cubemap/posx.jpg', './earth-cubemap/negx.jpg',
             './earth-cubemap/posy.jpg', './earth-cubemap/negy.jpg',
             './earth-cubemap/posz.jpg', './earth-cubemap/negz.jpg'
@@ -74,7 +74,7 @@ const SatVis = props => {
         satelliteRef.current['numVertex'] = props.data.length / keplerianAttribs.length
 
         let icoBuffer = []
-        const { vertices, triangles } = getIcosphere(4)
+        const { vertices, triangles } = getIcosphere(3)
         vertices = vertices.map(
             vertex => vertex.map(
                 val => val*.63
@@ -107,6 +107,7 @@ const SatVis = props => {
     const initGl = async () => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
         glRef.current.enable(glRef.current.DEPTH_TEST)
+        glRef.current.enable(glRef.current.CULL_FACE)
         await initPrograms(glRef.current)
         initBuffers(glRef.current)
         initShaderVars(glRef.current)

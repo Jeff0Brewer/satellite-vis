@@ -10,16 +10,16 @@ test('mouseRotate returns same matrix on 360 rotation', () => {
 })
 
 test('mouseRotate rotates about Z on X movement', () => {
-    const mat = mouseRotate(mat4.create(), Math.PI, 0, 1)
-    const comp = mat4.fromZRotation(mat4.create(), Math.PI)
+    const mat = mouseRotate(mat4.create(), Math.PI/2, 0, 1)
+    const comp = mat4.fromYRotation(mat4.create(), Math.PI/2)
     comp.forEach((n, i) => {
         expect(mat[i]).toBeCloseTo(n)
     })
 })
 
 test('mouseRotate rotates about X on Y movement', () => {
-    const mat = mouseRotate(mat4.create(), 0, Math.PI, 1)
-    const comp = mat4.fromXRotation(mat4.create(), -Math.PI)
+    const mat = mouseRotate(mat4.create(), 0, Math.PI/2, 1)
+    const comp = mat4.fromXRotation(mat4.create(), Math.PI/2)
     comp.forEach((n, i) => {
         expect(mat[i]).toBeCloseTo(n)
     })
