@@ -3,7 +3,7 @@ attribute float aEccentricity;
 attribute float aPeriapsis;
 attribute float aInclination;
 attribute float aLngAcendingNode;
-attribute float aAnomoly;
+attribute float aAnomaly;
 attribute float aYear;
 attribute float aDay;
 attribute float aSecond;
@@ -22,7 +22,7 @@ void main() {
     float i = aInclination;
     float o = aLngAcendingNode;
     
-    float M = aAnomoly;
+    float M = aAnomaly;
     float ua3 = sqrt((3.986004418 * pow(10.0, 14.0))/pow(a, 3.0));
     float pi2 = 3.1415926535*2.0;
     M = mod(M + ua3*365.0*86400.0*(uYear - aYear), pi2);
