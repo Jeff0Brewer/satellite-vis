@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
 import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/glu.js'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
@@ -12,8 +12,8 @@ const SatVis = props => {
 
     const canvRef = useRef()
     const glRef = useRef()
-    const pointRef = useRef({})
     const epochRef = useRef()
+    const satelliteRef = useRef({})
 
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
@@ -36,23 +36,23 @@ const SatVis = props => {
     const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
 
     const initPrograms = async gl => {
-        const pointVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/pointVert.glsl')
-        const pointFrag = await loadShader(gl, gl.FRAGMENT_SHADER, './shaders/pointFrag.glsl')
-        pointRef.current['program'] = createProgram(gl, pointVert, pointFrag)
+        const satelliteVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/satellite-vert.glsl')
+        const satelliteFrag = await loadShader(gl, gl.FRAGMENT_SHADER, './shaders/satellite-frag.glsl')
+        satelliteRef.current['program'] = createProgram(gl, satelliteVert, satelliteFrag)
     }
 
     const initShaderVars = gl => {
-        switchShader(gl, pointRef.current.program)
-        keplerianAttribs.forEach((a, i) => pointRef.current[a] = initAttribute(gl, a, 1, keplerianAttribs.length, i, false, byteSize))
+        switchShader(gl, satelliteRef.current.program)
+        keplerianAttribs.forEach((a, i) => satelliteRef.current[a] = initAttribute(gl, a, 1, keplerianAttribs.length, i, false, byteSize))
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
-        pointRef.current['uYear'] = gl.getUniformLocation(gl.program, 'uYear')
-        pointRef.current['uDay'] = gl.getUniformLocation(gl.program, 'uDay')
-        pointRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
-        pointRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
+        satelliteRef.current['uYear'] = gl.getUniformLocation(gl.program, 'uYear')
+        satelliteRef.current['uDay'] = gl.getUniformLocation(gl.program, 'uDay')
+        satelliteRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
+        satelliteRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
     }
 
     const initBuffers = gl => {
-        pointRef.current['buffer'] = initBuffer(gl, props.data, gl.STATIC_DRAW)
+        satelliteRef.current['buffer'] = initBuffer(gl, props.data, gl.STATIC_DRAW)
     }
 
     const setupViewport = gl => {
@@ -60,8 +60,8 @@ const SatVis = props => {
         gl.viewport(0, 0, w * dpr, h * dpr)
         const projMatrix = getProjMat((w * dpr)/(h * dpr))
     
-        if (pointRef.current?.program) {
-            switchShader(gl, pointRef.current.program)
+        if (satelliteRef.current?.program) {
+            switchShader(gl, satelliteRef.current.program)
             gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
         }
     }
@@ -91,9 +91,9 @@ const SatVis = props => {
     }, [width, height])
 
     useEffect(() => {
-        if (!glRef.current || !pointRef.current.buffer) return
+        if (!glRef.current || !satelliteRef.current.buffer) return
         const gl = glRef.current
-        gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
+        gl.bindBuffer(gl.ARRAY_BUFFER, satelliteRef.current.buffer)
         gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW)
     }, [props.data])
     
@@ -104,22 +104,22 @@ const SatVis = props => {
     useEffect(() => {
         if (!epochRef.current) return
         let epoch = epochRef.current
+        const gl = glRef.current
         let lastT = 0
         const tick = currT => {
             const elapsed = currT - lastT
             lastT = currT
             epoch = incrementEpoch(epoch, elapsed*props.clockSpeed)
 
-            const gl = glRef.current
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-            if (pointRef.current?.buffer) {
-                switchShader(gl, pointRef.current.program)
-                gl.uniform1f(pointRef.current.uYear, epoch.year)
-                gl.uniform1f(pointRef.current.uDay, epoch.day)
-                gl.uniform1f(pointRef.current.uSecond, epoch.second)
-                gl.uniformMatrix4fv(pointRef.current.uModelMatrix, false, modelMatRef.current)
-                gl.bindBuffer(gl.ARRAY_BUFFER, pointRef.current.buffer)
-                keplerianAttribs.forEach((attrib, i) => gl.vertexAttribPointer(pointRef.current[attrib], 1, gl.FLOAT, false, keplerianAttribs.length * byteSize, i * byteSize))
+            if (satelliteRef.current?.buffer) {
+                switchShader(gl, satelliteRef.current.program)
+                gl.uniform1f(satelliteRef.current.uYear, epoch.year)
+                gl.uniform1f(satelliteRef.current.uDay, epoch.day)
+                gl.uniform1f(satelliteRef.current.uSecond, epoch.second)
+                gl.uniformMatrix4fv(satelliteRef.current.uModelMatrix, false, modelMatRef.current)
+                gl.bindBuffer(gl.ARRAY_BUFFER, satelliteRef.current.buffer)
+                keplerianAttribs.forEach((attrib, i) => gl.vertexAttribPointer(satelliteRef.current[attrib], 1, gl.FLOAT, false, keplerianAttribs.length * byteSize, i * byteSize))
                 gl.drawArrays(gl.POINTS, 0, props.data.length / keplerianAttribs.length)
             }
             requestFrame(tick)
