@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
-import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/glu.js'
+import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/gl-help.js'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { incrementEpoch } from '../lib/epoch.js'
 import getIcosphere from '../lib/icosphere.js'
