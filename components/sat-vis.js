@@ -3,19 +3,18 @@ import { mat4 } from 'gl-matrix'
 import { loadShader, createProgram, switchShader, initAttribute, initBuffer } from '../lib/glu.js'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { incrementEpoch } from '../lib/epoch.js'
+import getIcosphere from '../lib/icosphere.js'
 import keplerianAttribs from '../models/keplerAttrib.js'
 import useWindowDim from '../hooks/window-dim.js'
 import styles from '../styles/SatVis.module.css'
 
 const SatVis = props => {
-    const { width, height } = useWindowDim()
-
     const canvRef = useRef()
     const glRef = useRef()
     const frameIdRef = useRef()
     const epochRef = useRef()
     const satelliteRef = useRef({})
-
+    const earthRef = useRef({})
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
         [0, 2, 0], // camera position
@@ -36,6 +35,10 @@ const SatVis = props => {
         const satelliteVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/satellite-vert.glsl')
         const satelliteFrag = await loadShader(gl, gl.FRAGMENT_SHADER, './shaders/satellite-frag.glsl')
         satelliteRef.current['program'] = createProgram(gl, satelliteVert, satelliteFrag)
+
+        const earthVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/earth-vert.glsl')
+        const earthFrag = await loadShader(gl, gl.FRAGMENT_SHADER, './shaders/earth-frag.glsl')
+        earthRef.current['program'] = createProgram(gl, earthVert, earthFrag)
     }
 
     const initShaderVars = gl => {
@@ -46,10 +49,34 @@ const SatVis = props => {
         satelliteRef.current['uDay'] = gl.getUniformLocation(gl.program, 'uDay')
         satelliteRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
         satelliteRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
+
+        switchShader(gl, earthRef.current.program)
+        earthRef.current['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
+        gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
+        earthRef.current['uYear'] = gl.getUniformLocation(gl.program, 'uYear')
+        earthRef.current['uDay'] = gl.getUniformLocation(gl.program, 'uDay')
+        earthRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
+        earthRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
     }
 
     const initBuffers = gl => {
         satelliteRef.current['buffer'] = initBuffer(gl, props.data, gl.STATIC_DRAW)
+        satelliteRef.current['numVertex'] = props.data.length / keplerianAttribs.length
+
+        let icoBuffer = []
+        const { vertices, triangles } = getIcosphere(4)
+        vertices = vertices.map(
+            vertex => vertex.map(
+                val => val*.63
+            )
+        )
+        triangles.forEach(triangle => {
+            triangle.forEach(vertex => {
+                icoBuffer.push(...vertices[vertex])
+            })
+        })
+        earthRef.current['buffer'] = initBuffer(gl, new Float32Array(icoBuffer), gl.STATIC_DRAW)
+        earthRef.current['numVertex'] = icoBuffer.length / 3
     }
 
     const setupViewport = gl => {
@@ -61,10 +88,15 @@ const SatVis = props => {
             switchShader(gl, satelliteRef.current.program)
             gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
         }
+        if (earthRef.current?.program) {
+            switchShader(gl, earthRef.current.program)
+            gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
+        }
     }
 
     const initGl = async () => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
+        glRef.current.enable(glRef.current.DEPTH_TEST)
         await initPrograms(glRef.current)
         initBuffers(glRef.current)
         initShaderVars(glRef.current)
@@ -83,14 +115,11 @@ const SatVis = props => {
     }, [])
 
     useEffect(() => {
-        setupViewport(glRef.current)
-    }, [width, height])
-
-    useEffect(() => {
         if (!glRef.current || !satelliteRef.current.buffer) return
         const gl = glRef.current
         gl.bindBuffer(gl.ARRAY_BUFFER, satelliteRef.current.buffer)
         gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW)
+        satelliteRef.current.numVertex = props.data.length / keplerianAttribs.length
     }, [props.data])
     
     useEffect(() => {
@@ -117,7 +146,18 @@ const SatVis = props => {
                 gl.uniformMatrix4fv(satelliteRef.current.uModelMatrix, false, modelMatRef.current)
                 gl.bindBuffer(gl.ARRAY_BUFFER, satelliteRef.current.buffer)
                 keplerianAttribs.forEach((attrib, i) => gl.vertexAttribPointer(satelliteRef.current[attrib], 1, gl.FLOAT, false, keplerianAttribs.length * byteSize, i * byteSize))
-                gl.drawArrays(gl.POINTS, 0, props.data.length / keplerianAttribs.length)
+                gl.drawArrays(gl.POINTS, 0, satelliteRef.current.numVertex)
+            }
+
+            if (earthRef.current?.buffer) {
+                switchShader(gl, earthRef.current.program)
+                gl.uniform1f(earthRef.current.uYear, epoch.year)
+                gl.uniform1f(earthRef.current.uDay, epoch.day)
+                gl.uniform1f(earthRef.current.uSecond, epoch.second)
+                gl.uniformMatrix4fv(earthRef.current.uModelMatrix, false, modelMatRef.current)
+                gl.bindBuffer(gl.ARRAY_BUFFER, earthRef.current.buffer)
+                gl.vertexAttribPointer(earthRef.current.aPosition, 3, gl.FLOAT, false, 3 * byteSize, 0)
+                gl.drawArrays(gl.TRIANGLES, 0, earthRef.current.numVertex)
             }
             frameIdRef.current = window.requestAnimationFrame(tick)
         }
@@ -128,6 +168,11 @@ const SatVis = props => {
             epochRef.current = epoch
         }
     }, [props.startEpoch, props.clockSpeed, props.data])
+
+    const { width, height } = useWindowDim()
+    useEffect(() => {
+        setupViewport(glRef.current)
+    }, [width, height])
 
     return (
         <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>
