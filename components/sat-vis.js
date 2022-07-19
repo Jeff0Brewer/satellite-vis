@@ -163,11 +163,13 @@ const SatVis = props => {
             }
 
             if (earthRef.current?.buffer) {
+                const earthModelMat = mat4.multiply(
+                    mat4.create(),
+                    modelMatRef.current,
+                    mat4.fromYRotation(mat4.create(), -currT/86400000*props.clockSpeed*Math.PI*2)
+                )
                 switchShader(gl, earthRef.current.program)
-                gl.uniform1f(earthRef.current.uYear, epoch.year)
-                gl.uniform1f(earthRef.current.uDay, epoch.day)
-                gl.uniform1f(earthRef.current.uSecond, epoch.second)
-                gl.uniformMatrix4fv(earthRef.current.uModelMatrix, false, modelMatRef.current)
+                gl.uniformMatrix4fv(earthRef.current.uModelMatrix, false, earthModelMat)
                 gl.bindBuffer(gl.ARRAY_BUFFER, earthRef.current.buffer)
                 gl.vertexAttribPointer(earthRef.current.aPosition, 3, gl.FLOAT, false, 3 * byteSize, 0)
                 gl.drawArrays(gl.TRIANGLES, 0, earthRef.current.numVertex)
