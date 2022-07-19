@@ -61,9 +61,9 @@ const SatVis = props => {
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
         gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
         createCubemap(gl, 1024, [
-            './earth-cubemap/posx.jpg', './earth-cubemap/negx.jpg',
-            './earth-cubemap/posy.jpg', './earth-cubemap/negy.jpg',
-            './earth-cubemap/posz.jpg', './earth-cubemap/negz.jpg'
+            './earth-cubemap/posx.png', './earth-cubemap/negx.png',
+            './earth-cubemap/posy.png', './earth-cubemap/negy.png',
+            './earth-cubemap/posz.png', './earth-cubemap/negz.png'
         ], [
             gl.TEXTURE_CUBE_MAP_POSITIVE_X, gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
             gl.TEXTURE_CUBE_MAP_POSITIVE_Y, gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
