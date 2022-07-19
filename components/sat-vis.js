@@ -30,6 +30,7 @@ const SatVis = props => {
         )
     }
     const byteSize = Float32Array.BYTES_PER_ELEMENT
+    const visScale = .0000001
 
     const initPrograms = async gl => {
         const satelliteVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/satellite-vert.glsl')
@@ -44,19 +45,20 @@ const SatVis = props => {
     const initShaderVars = gl => {
         switchShader(gl, satelliteRef.current.program)
         keplerianAttribs.forEach((a, i) => satelliteRef.current[a] = initAttribute(gl, a, 1, keplerianAttribs.length, i, false, byteSize))
-        gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
         satelliteRef.current['uYear'] = gl.getUniformLocation(gl.program, 'uYear')
         satelliteRef.current['uDay'] = gl.getUniformLocation(gl.program, 'uDay')
         satelliteRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
         satelliteRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
+        gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
+        gl.uniform1f(gl.getUniformLocation(gl.program, 'uScale'), visScale)
 
         switchShader(gl, earthRef.current.program)
         earthRef.current['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
-        gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
         earthRef.current['uYear'] = gl.getUniformLocation(gl.program, 'uYear')
         earthRef.current['uDay'] = gl.getUniformLocation(gl.program, 'uDay')
         earthRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
         earthRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
+        gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
         gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
         createCubemap(gl, 1024, [
             './earth-cubemap/posx.jpg', './earth-cubemap/negx.jpg',
@@ -77,7 +79,7 @@ const SatVis = props => {
         const { vertices, triangles } = getIcosphere(3)
         vertices = vertices.map(
             vertex => vertex.map(
-                val => val*.63
+                val => val*6371000*visScale
             )
         )
         triangles.forEach(triangle => {
