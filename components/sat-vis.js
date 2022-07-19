@@ -147,8 +147,9 @@ const SatVis = props => {
         let lastT = 0
         const tick = currT => {
             const elapsed = currT - lastT
+            if (lastT != 0) 
+                epoch = incrementEpoch(epoch, elapsed*props.clockSpeed)
             lastT = currT
-            epoch = incrementEpoch(epoch, elapsed*props.clockSpeed)
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             if (satelliteRef.current?.buffer) {
@@ -163,10 +164,10 @@ const SatVis = props => {
             }
 
             if (earthRef.current?.buffer) {
-                const earthModelMat = mat4.multiply(
-                    mat4.create(),
+                const dt = (epoch.year - 22)*365*86400 + (epoch.day*86400 - 0) + epoch.second
+                const earthModelMat = mat4.multiply(mat4.create(),
                     modelMatRef.current,
-                    mat4.fromZRotation(mat4.create(), currT/86400000*props.clockSpeed*Math.PI*2)
+                    mat4.fromZRotation(mat4.create(), dt/86400 * Math.PI * 2)
                 )
                 switchShader(gl, earthRef.current.program)
                 gl.uniformMatrix4fv(earthRef.current.uModelMatrix, false, earthModelMat)
