@@ -166,7 +166,7 @@ const SatVis = props => {
                 const earthModelMat = mat4.multiply(
                     mat4.create(),
                     modelMatRef.current,
-                    mat4.fromYRotation(mat4.create(), -currT/86400000*props.clockSpeed*Math.PI*2)
+                    mat4.fromZRotation(mat4.create(), currT/86400000*props.clockSpeed*Math.PI*2)
                 )
                 switchShader(gl, earthRef.current.program)
                 gl.uniformMatrix4fv(earthRef.current.uModelMatrix, false, earthModelMat)
