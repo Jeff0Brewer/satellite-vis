@@ -41,8 +41,8 @@ void main() {
     float Oy = r * sin(v);
     vec3 pos = uScale * vec3(
         Ox*(cos(w)*cos(o) - sin(w)*cos(i)*sin(o)) - Oy*(sin(w)*cos(o) + cos(w)*cos(i)*sin(o)),
-        Ox*(sin(w)*sin(i)) + Oy*(cos(w)*sin(i)),
-        Ox*(cos(w)*sin(o) + sin(w)*cos(i)*cos(o)) + Oy*(cos(w)*cos(i)*cos(o) - sin(w)*sin(o))
+        Ox*(cos(w)*sin(o) + sin(w)*cos(i)*cos(o)) + Oy*(cos(w)*cos(i)*cos(o) - sin(w)*sin(o)),
+        Ox*(sin(w)*sin(i)) + Oy*(cos(w)*sin(i))
     );
 
     gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * vec4(pos, 1.0);
