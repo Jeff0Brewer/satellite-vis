@@ -164,7 +164,7 @@ const SatVis = props => {
             }
 
             if (earthRef.current?.buffer) {
-                const dt = (epoch.year - 22)*365*86400 + (epoch.day*86400 - 0) + epoch.second
+                const dt = ((epoch.year - 22)*365*86400) % 86400 + ((epoch.day*86400 - 0)) + (epoch.second - 0)
                 const earthModelMat = mat4.multiply(mat4.create(),
                     modelMatRef.current,
                     mat4.fromZRotation(mat4.create(), dt/86400 * Math.PI * 2)
