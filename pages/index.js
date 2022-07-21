@@ -5,10 +5,11 @@ import ClockUi from '../components/clock.js'
 
 const Home = () => {
     const [satData, setSatData] = useState(new Float32Array())
+    const [tleReference, setTleReference] = useState()
     const [startEpoch, setStartEpoch] = useState()
     const [clockSpeed, setClockSpeed] = useState()
 
-    const getData = () => {
+    const getSatData = () => {
         fetch('/api/get-keplerian')
             .then(res => res.json())
             .then(data => { 
@@ -19,14 +20,23 @@ const Home = () => {
             .catch(err => console.log(err))
     }
 
+    const getTleReference = () => {
+        fetch('/api/get-tle-ref')
+            .then(res => res.json())
+            .then(tle => {
+                setTleReference(tle)
+            })
+    }
+
     useEffect(() => {
-        getData()
+        getSatData()
+        getTleReference()
     }, [])
 
     return (
         <main className={styles.home}>
             <ClockUi setStartEpoch={setStartEpoch} setClockSpeed={setClockSpeed} />
-            <SatVis startEpoch={startEpoch} clockSpeed={clockSpeed} data={satData} />
+            <SatVis startEpoch={startEpoch} clockSpeed={clockSpeed} data={satData} tleReference={tleReference} />
         </main>
     )
 }
