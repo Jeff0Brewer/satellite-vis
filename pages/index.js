@@ -8,7 +8,7 @@ const Home = () => {
     const [startEpoch, setStartEpoch] = useState()
     const [clockSpeed, setClockSpeed] = useState()
 
-    const getData = () => {
+    const getSatData = () => {
         fetch('/api/get-keplerian')
             .then(res => res.json())
             .then(data => { 
@@ -20,7 +20,7 @@ const Home = () => {
     }
 
     useEffect(() => {
-        getData()
+        getSatData()
     }, [])
 
     return (

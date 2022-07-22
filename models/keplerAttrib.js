@@ -4,7 +4,7 @@ const keplerianAttribs = [
     'aPeriapsis', 
     'aLngAcendingNode', 
     'aInclination', 
-    'aAnomoly', 
+    'aAnomaly', 
     'aYear',
     'aDay',
     'aSecond'

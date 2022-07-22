@@ -56,9 +56,9 @@ test('tleToKeplerian returns correct inclination attribute', () => {
     expect(attrib).toBeCloseTo(0.901338, 5)
 })
 
-test('tleToKeplerian returns correct inclination attribute', () => {
+test('tleToKeplerian returns correct anomaly attribute', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aAnomoly')]
+    const attrib = k?.attribs[keplerianAttribs.indexOf('aAnomaly')]
     expect(attrib).toBeCloseTo(0.027197, 5)
 })
 
