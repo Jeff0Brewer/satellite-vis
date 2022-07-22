@@ -4,8 +4,6 @@ import { getLatLngObj } from 'tle.js'
 import { loadShader, createProgram, switchShader, initAttribute, initBuffer, createCubemap } from '../lib/gl-help.js'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { incrementEpoch } from '../lib/epoch.js'
-import { tleToKeplerian } from '../lib/tle-help.js'
-import { getKeplerianStartPos } from '../lib/kep-help.js'
 import getIcosphere from '../lib/icosphere.js'
 import keplerianAttribs from '../models/keplerAttrib.js'
 import useWindowDim from '../hooks/window-dim.js'
@@ -136,22 +134,6 @@ const SatVis = props => {
     }, [props.startEpoch])
 
     useEffect(() => {
-        if (!props.tleReference) return
-        const keplerian = tleToKeplerian(props.tleReference.name, props.tleReference.tle[0], props.tleReference.tle[1])
-        const elem = {}
-        keplerian.attribs.forEach((attrib, i) => elem[keplerianAttribs[i]] = attrib)
-        let { x, y } = getKeplerianStartPos(
-            elem.aAxis, elem.aEccentricity, elem.aPeriapsis, 
-            elem.aInclination, elem.aLngAcendingNode, elem.aAnomaly
-        )
-        const xyAngle = Math.acos(((x * -1) + (y * 0)) / (Math.sqrt(x*x + y*y)))
-        let { lng: longitude } = getLatLngObj(props.tleReference.tle, (((elem.aYear + 30)*365 + elem.aDay)*86400 + elem.aSecond)*1000)
-        longitude *= Math.PI / 180
-        earthRef.current['rotationOffset'] = xyAngle - longitude
-
-    }, [props.tleReference])
-
-    useEffect(() => {
         setupViewport(glRef.current)
     }, [width, height])
 
@@ -187,11 +169,11 @@ const SatVis = props => {
                 gl.drawArrays(gl.POINTS, 0, satelliteRef.current.numVertex)
             }
 
-            if (earthRef.current?.rotationOffset) {
-                const dt = ((epoch.year - 22)*365*86400) % 86400 + ((epoch.day*86400 - 0)) + (epoch.second - 0)
+            if (earthRef.current?.buffer) {
+                const dt = (epoch.year*365*86400) % 86400 + epoch.day*86400 + epoch.second
                 const earthModelMat = mat4.multiply(mat4.create(),
                     modelMatRef.current,
-                    mat4.fromZRotation(mat4.create(), dt/86400 * Math.PI * 2 + earthRef.current.rotationOffset)
+                    mat4.fromZRotation(mat4.create(), dt/86400 * Math.PI * 2)
                 )
                 switchShader(gl, earthRef.current.program)
                 gl.uniformMatrix4fv(earthRef.current.uModelMatrix, false, earthModelMat)

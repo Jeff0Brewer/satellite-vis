@@ -5,7 +5,6 @@ import ClockUi from '../components/clock.js'
 
 const Home = () => {
     const [satData, setSatData] = useState(new Float32Array())
-    const [tleReference, setTleReference] = useState()
     const [startEpoch, setStartEpoch] = useState()
     const [clockSpeed, setClockSpeed] = useState()
 
@@ -20,23 +19,14 @@ const Home = () => {
             .catch(err => console.log(err))
     }
 
-    const getTleReference = () => {
-        fetch('/api/get-tle-ref')
-            .then(res => res.json())
-            .then(tle => {
-                setTleReference(tle)
-            })
-    }
-
     useEffect(() => {
         getSatData()
-        getTleReference()
     }, [])
 
     return (
         <main className={styles.home}>
             <ClockUi setStartEpoch={setStartEpoch} setClockSpeed={setClockSpeed} />
-            <SatVis startEpoch={startEpoch} clockSpeed={clockSpeed} data={satData} tleReference={tleReference} />
+            <SatVis startEpoch={startEpoch} clockSpeed={clockSpeed} data={satData} />
         </main>
     )
 }
