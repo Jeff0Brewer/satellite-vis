@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react'
-import { getEpoch } from '../lib/epoch.js'
+import { epochFromDate } from '../lib/epoch.js'
 import styles from '../styles/Clock.module.css'
 
 const ClockUi = props => {
     const defaultSpeed = 50
 
     useEffect(() => {
-        props.setStartEpoch(getEpoch(new Date()))
+        props.setStartEpoch(epochFromDate(new Date()))
         props.setClockSpeed(defaultSpeed)
     }, [])
 

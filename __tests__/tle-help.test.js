@@ -1,5 +1,4 @@
 import { tleToKeplerian, degToRad, motionToAxis, validateTle, getTlePageCount } from '../lib/tle-help.js'
-import keplerianAttribs from '../models/keplerAttrib.js'
 
 const line1 = "1 25544U 98067A   22187.91168981  .00005281  00000+0  10097-3 0  9998"
 const line2 = "2 25544  51.6429 238.9000 0004438 341.2767   1.5583 15.49849532348232"
@@ -23,61 +22,60 @@ test('tleToKeplerian returns complete keplerian element set', () => {
     const k = tleToKeplerian('name', line1, line2)
 
     expect(k).toHaveProperty('name')
-    expect(k?.attribs.length).toBe(keplerianAttribs.length)
+    expect(k).toHaveProperty('axis')
+    expect(k).toHaveProperty('eccentricity')
+    expect(k).toHaveProperty('periapsis')
+    expect(k).toHaveProperty('lngAcendingNode')
+    expect(k).toHaveProperty('inclination')
+    expect(k).toHaveProperty('anomaly')
+    expect(k).toHaveProperty('year')
+    expect(k).toHaveProperty('day')
+    expect(k).toHaveProperty('second')
 })
 
-test('tleToKeplerian returns correct axis attribute', () => {
+test('tleToKeplerian returns correct axis', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aAxis')]
-    expect(attrib).toBeCloseTo(6795302.85, 2)
+    expect(k.axis).toBeCloseTo(6795302.85, 2)
 })
 
-test('tleToKeplerian returns correct eccentricity attribute', () => {
+test('tleToKeplerian returns correct eccentricity', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aEccentricity')]
-    expect(attrib).toBeCloseTo(0.0004438, 7)
+    expect(k.eccentricity).toBeCloseTo(0.0004438, 7)
 })
 
-test('tleToKeplerian returns correct periapsis attribute', () => {
+test('tleToKeplerian returns correct periapsis', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aPeriapsis')]
-    expect(attrib).toBeCloseTo(5.956402, 5)
+    expect(k.periapsis).toBeCloseTo(5.956402, 5)
 })
 
-test('tleToKeplerian returns correct longitude of acending node attribute', () => {
+test('tleToKeplerian returns correct longitude of acending node', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aLngAcendingNode')]
-    expect(attrib).toBeCloseTo(4.169591, 5)
+    expect(k.lngAcendingNode).toBeCloseTo(4.169591, 5)
 })
 
-test('tleToKeplerian returns correct inclination attribute', () => {
+test('tleToKeplerian returns correct inclination', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aInclination')]
-    expect(attrib).toBeCloseTo(0.901338, 5)
+    expect(k.inclination).toBeCloseTo(0.901338, 5)
 })
 
-test('tleToKeplerian returns correct anomaly attribute', () => {
+test('tleToKeplerian returns correct anomaly', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aAnomaly')]
-    expect(attrib).toBeCloseTo(0.027197, 5)
+    expect(k.anomaly).toBeCloseTo(0.027197, 5)
 })
 
-test('tleToKeplerian returns correct year attribute', () => {
+test('tleToKeplerian returns correct year', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aYear')]
-    expect(attrib).toBeCloseTo(22, 2)
+    expect(k.year).toBeCloseTo(22, 2)
 })
 
-test('tleToKeplerian returns correct day attribute', () => {
+test('tleToKeplerian returns correct day', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aDay')]
-    expect(attrib).toBeCloseTo(187, 2)
+    expect(k.day).toBeCloseTo(187, 2)
 })
 
-test('tleToKeplerian returns correct second attribute', () => {
+test('tleToKeplerian returns correct second', () => {
     const k = tleToKeplerian('name', line1, line2)
-    const attrib = k?.attribs[keplerianAttribs.indexOf('aSecond')]
-    expect(attrib).toBeCloseTo(.91168981*86400, 1)
+    expect(k.second).toBeCloseTo(.91168981*86400, 1)
 })
 
 test('validateTle returns true for valid input', () => {
