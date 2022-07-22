@@ -10,10 +10,10 @@ import styles from '../styles/SatVis.module.css'
 const SatVis = props => {
     const canvRef = useRef()
     const glRef = useRef()
-    const frameIdRef = useRef()
     const epochRef = useRef()
     const satelliteRef = useRef()
     const earthRef = useRef()
+
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
         [0, 2, 0], // camera position
@@ -28,15 +28,19 @@ const SatVis = props => {
             100 //far
         )
     }
+
+    const frameIdRef = useRef()
+    const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
+    const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
+
+    const { width, height } = useWindowDim()
     const byteSize = Float32Array.BYTES_PER_ELEMENT
     const visScale = .0000001
-    const { width, height } = useWindowDim()
 
     const setupViewport = gl => {
         const {innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
         gl.viewport(0, 0, w * dpr, h * dpr)
         const projMatrix = getProjMat((w * dpr)/(h * dpr))
-
         if (satelliteRef.current?.program)
             Satellites.updateProjMatrix(gl, satelliteRef.current.program, projMatrix)
         if (earthRef.current?.program)
@@ -54,10 +58,12 @@ const SatVis = props => {
         ])
         satelliteRef.current = satelliteVars
         earthRef.current = earthVars
+
         setupViewport(glRef.current)
     }
 
-    const setupMouse = () => {
+    useEffect(() => {
+        initGl()
         const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .002)
         canvRef.current.addEventListener('mousedown', () => canvRef.current.addEventListener('mousemove', dragHandler))
         canvRef.current.addEventListener('mouseup', () => canvRef.current.removeEventListener('mousemove', dragHandler))
@@ -65,11 +71,6 @@ const SatVis = props => {
             e.preventDefault()
             modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY, .0003)
         })
-    }
-
-    useEffect(() => {
-        initGl()
-        setupMouse()
     }, [])
 
     useEffect(() => {
@@ -87,7 +88,8 @@ const SatVis = props => {
     
     useEffect(() => {
         if (!epochRef.current) return
-        let epoch = epochRef.current
+
+        const epoch = epochRef.current
         const gl = glRef.current
 
         let lastT = 0
@@ -102,16 +104,16 @@ const SatVis = props => {
                 Satellites.draw(gl, epoch, modelMatRef.current, program, buffer, locations, numVertex)
             }
             if(earthRef.current?.program) {
-                const dt = (epoch.year*365*86400) % 86400 + epoch.day*86400 + epoch.second
+                const timeDelta = (epoch.year*365*86400) % 86400 + epoch.day*86400 + epoch.second
                 const { program, buffer, locations, numVertex } = earthRef.current
-                Earth.draw(gl, dt, modelMatRef.current, program, buffer, locations, numVertex)
+                Earth.draw(gl, timeDelta, modelMatRef.current, program, buffer, locations, numVertex)
             }
-            frameIdRef.current = window.requestAnimationFrame(tick)
+            requestFrame(tick)
         }
-        frameIdRef.current = window.requestAnimationFrame(tick)
+        requestFrame(tick)
 
         return () => {
-            window.cancelAnimationFrame(frameIdRef.current)
+            cancelFrame()
             epochRef.current = epoch
         }
     }, [props.startEpoch, props.clockSpeed, props.data])
