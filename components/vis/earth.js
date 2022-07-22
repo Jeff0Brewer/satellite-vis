@@ -10,8 +10,9 @@ const initEarthShader = async (gl, viewMatrix) => {
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
     Glu.switchShader(gl, program)
 
-    const aPosition = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
-    const uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
+    const locations = {}
+    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
+    locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
 
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
@@ -26,10 +27,7 @@ const initEarthShader = async (gl, viewMatrix) => {
     ])
     return {
         program: program,
-        locations: {
-            position: aPosition,
-            modelMatrix: uModelMatrix
-        }
+        locations: locations
     }
 }
 
@@ -77,7 +75,7 @@ const draw = (gl, epochDelta, modelMatrix, program, buffer, locations, numVertex
     const earthModelMat = mat4.multiply(mat4.create(), modelMatrix, earthRotation)
     
     Glu.switchShader(gl, program)
-    gl.uniformMatrix4fv(locations.modelMatrix, false, earthModelMat)
+    gl.uniformMatrix4fv(locations.uModelMatrix, false, earthModelMat)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
     gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * byteSize, 0)
     gl.drawArrays(gl.TRIANGLES, 0, numVertex)
