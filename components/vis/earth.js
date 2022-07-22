@@ -1,11 +1,12 @@
-import * as Glu from '../lib/gl-help.js'
-import getIcosphere from '../lib/icosphere.js'
+import { mat4 } from 'gl-matrix'
+import * as Glu from '../../lib/gl-help.js'
+import getIcosphere from '../../lib/icosphere.js'
 
 const byteSize = Float32Array.BYTES_PER_ELEMENT
 
 const initEarthShader = async (gl, viewMatrix) => {
     const vertPath = './shaders/earth-vert.glsl'
-    const fragPath = './shader/earth-frag.glsl'
+    const fragPath = './shaders/earth-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
     Glu.switchShader(gl, program)
 
@@ -14,7 +15,7 @@ const initEarthShader = async (gl, viewMatrix) => {
 
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
-    createCubemap(gl, 1024, [
+    Glu.createCubemap(gl, 1024, [
         './earth-cubemap/posx.png', './earth-cubemap/negx.png',
         './earth-cubemap/posy.png', './earth-cubemap/negy.png',
         './earth-cubemap/posz.png', './earth-cubemap/negz.png'
@@ -67,7 +68,7 @@ const setupGl = async (gl, scale, viewMatrix) => {
 }
 
 const updateProjMatrix = (gl, program, projMatrix) => {
-    Glu.switchShader(program)
+    Glu.switchShader(gl, program)
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
 }
 

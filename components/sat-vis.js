@@ -9,13 +9,15 @@ import keplerianAttribs from '../models/keplerAttrib.js'
 import useWindowDim from '../hooks/window-dim.js'
 import styles from '../styles/SatVis.module.css'
 
+import * as Earth from './vis/earth.js'
+
 const SatVis = props => {
     const canvRef = useRef()
     const glRef = useRef()
     const frameIdRef = useRef()
     const epochRef = useRef()
     const satelliteRef = useRef({})
-    const earthRef = useRef({})
+    const earthRef = useRef()
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
         [0, 2, 0], // camera position
@@ -38,10 +40,6 @@ const SatVis = props => {
         const satelliteVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/satellite-vert.glsl')
         const satelliteFrag = await loadShader(gl, gl.FRAGMENT_SHADER, './shaders/satellite-frag.glsl')
         satelliteRef.current['program'] = createProgram(gl, satelliteVert, satelliteFrag)
-
-        const earthVert = await loadShader(gl, gl.VERTEX_SHADER, './shaders/earth-vert.glsl')
-        const earthFrag = await loadShader(gl, gl.FRAGMENT_SHADER, './shaders/earth-frag.glsl')
-        earthRef.current['program'] = createProgram(gl, earthVert, earthFrag)
     }
 
     const initShaderVars = gl => {
@@ -53,41 +51,11 @@ const SatVis = props => {
         satelliteRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
         gl.uniform1f(gl.getUniformLocation(gl.program, 'uScale'), visScale)
-
-        switchShader(gl, earthRef.current.program)
-        earthRef.current['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
-        earthRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
-        gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
-        gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
-        createCubemap(gl, 1024, [
-            './earth-cubemap/posx.png', './earth-cubemap/negx.png',
-            './earth-cubemap/posy.png', './earth-cubemap/negy.png',
-            './earth-cubemap/posz.png', './earth-cubemap/negz.png'
-        ], [
-            gl.TEXTURE_CUBE_MAP_POSITIVE_X, gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-            gl.TEXTURE_CUBE_MAP_POSITIVE_Y, gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-            gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
-        ])
     }
 
     const initBuffers = gl => {
         satelliteRef.current['buffer'] = initBuffer(gl, props.data, gl.STATIC_DRAW)
         satelliteRef.current['numVertex'] = props.data.length / keplerianAttribs.length
-
-        let icoBuffer = []
-        const { vertices, triangles } = getIcosphere(3)
-        vertices = vertices.map(
-            vertex => vertex.map(
-                val => val*6371000*visScale
-            )
-        )
-        triangles.forEach(triangle => {
-            triangle.forEach(vertex => {
-                icoBuffer.push(...vertices[vertex])
-            })
-        })
-        earthRef.current['buffer'] = initBuffer(gl, new Float32Array(icoBuffer), gl.STATIC_DRAW)
-        earthRef.current['numVertex'] = icoBuffer.length / 3
     }
 
     const setupViewport = gl => {
@@ -99,10 +67,8 @@ const SatVis = props => {
             switchShader(gl, satelliteRef.current.program)
             gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
         }
-        if (earthRef.current?.program) {
-            switchShader(gl, earthRef.current.program)
-            gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
-        }
+        if (earthRef.current?.program)
+            Earth.updateProjMatrix(gl, earthRef.current.program, projMatrix)
     }
 
     const initGl = async () => {
@@ -112,6 +78,7 @@ const SatVis = props => {
         await initPrograms(glRef.current)
         initBuffers(glRef.current)
         initShaderVars(glRef.current)
+        earthRef.current = await Earth.setupGl(glRef.current, visScale, viewMatrix)
         setupViewport(glRef.current)
     }
 
@@ -134,9 +101,9 @@ const SatVis = props => {
         setupViewport(glRef.current)
     }, [width, height])
 
-    useEffect(() => {
-        if (!glRef.current || !satelliteRef.current.buffer) return
-        const gl = glRef.current
+    useEffect(() => { 
+        if (!glRef.current || !satelliteRef.current.buffer) return 
+        const gl = glRef.current 
         gl.bindBuffer(gl.ARRAY_BUFFER, satelliteRef.current.buffer)
         gl.bufferData(gl.ARRAY_BUFFER, props.data, gl.STATIC_DRAW)
         satelliteRef.current.numVertex = props.data.length / keplerianAttribs.length
@@ -166,17 +133,10 @@ const SatVis = props => {
                 gl.drawArrays(gl.POINTS, 0, satelliteRef.current.numVertex)
             }
 
-            if (earthRef.current?.buffer) {
+            if(earthRef.current?.program) {
                 const dt = (epoch.year*365*86400) % 86400 + epoch.day*86400 + epoch.second
-                const earthModelMat = mat4.multiply(mat4.create(),
-                    modelMatRef.current,
-                    mat4.fromZRotation(mat4.create(), dt/86400 * Math.PI * 2)
-                )
-                switchShader(gl, earthRef.current.program)
-                gl.uniformMatrix4fv(earthRef.current.uModelMatrix, false, earthModelMat)
-                gl.bindBuffer(gl.ARRAY_BUFFER, earthRef.current.buffer)
-                gl.vertexAttribPointer(earthRef.current.aPosition, 3, gl.FLOAT, false, 3 * byteSize, 0)
-                gl.drawArrays(gl.TRIANGLES, 0, earthRef.current.numVertex)
+                const { program, buffer, locations, numVertex } = earthRef.current
+                Earth.draw(gl, dt, modelMatRef.current, program, buffer, locations, numVertex)
             }
             frameIdRef.current = window.requestAnimationFrame(tick)
         }
