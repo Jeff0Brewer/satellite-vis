@@ -11,11 +11,7 @@ const Home = () => {
     const getSatData = () => {
         fetch('/api/get-keplerian')
             .then(res => res.json())
-            .then(data => { 
-                let out = []
-                data.forEach(el => out.push(...el.attribs))
-                setSatData(new Float32Array(out))
-            })
+            .then(data => setSatData(data))
             .catch(err => console.log(err))
     }
 

@@ -1,8 +1,31 @@
 import { mat4 } from 'gl-matrix'
-import keplerianAttribs from '../../models/keplerAttrib.js'
 import * as Glu from '../../lib/gl-help.js'
 
+const keplerianAttribs = [
+    'aAxis', 'aEccentricity', 'aPeriapsis', 
+    'aLngAcendingNode', 'aInclination', 'aAnomaly', 
+    'aYear', 'aDay', 'aSecond'
+]
+const keplerianProperties = [
+    'axis', 'eccentricity', 'periapsis',
+    'lngAcendingNode', 'inclination', 'anomaly',
+    'year', 'day', 'second'
+]
 const byteSize = Float32Array.BYTES_PER_ELEMENT
+
+const updateBuffer = (gl, buffer, data) => {
+    if (!buffer) return
+    let visData = []
+    data.forEach(keplerian => {
+        keplerianProperties.forEach(property => {
+            visData.push(keplerian[property])
+        })
+    })
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(visData), gl.STATIC_DRAW)
+    const numVertex = visData.length / keplerianAttribs.length
+    return numVertex
+}
 
 const setupGl = async (gl, data, scale, viewMatrix) => {
     const vertPath = './shaders/satellite-vert.glsl'
@@ -10,8 +33,8 @@ const setupGl = async (gl, data, scale, viewMatrix) => {
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
     Glu.switchShader(gl, program)
 
-    const buffer = Glu.initBuffer(gl, data, gl.STATIC_DRAW)
-    const numVertex = data.length / keplerianAttribs.length
+    const buffer = gl.createBuffer()
+    const numVertex = updateBuffer(gl, buffer, data)
 
     const locations = {}
     keplerianAttribs.forEach((att, i) => {
@@ -37,14 +60,6 @@ const updateProjMatrix = (gl, program, projMatrix) => {
     if (!program) return
     Glu.switchShader(gl, program)
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
-}
-
-const updateBuffer = (gl, buffer, data) => {
-    if (!buffer) return
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
-    const numVertex = data.length / keplerianAttribs.length
-    return numVertex
 }
 
 const draw = (gl, epoch, modelMatrix, glVars) => {
