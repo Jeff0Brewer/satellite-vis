@@ -41,7 +41,7 @@ const Visualization = props => {
         Earth.updateProjMatrix(gl, earthRef.current?.program, projMatrix)
     }
 
-    const initGl = async gl => {
+    const setupGl = async gl => {
         gl.enable(gl.DEPTH_TEST)
         gl.enable(gl.CULL_FACE)
 
@@ -58,7 +58,7 @@ const Visualization = props => {
 
     useEffect(() => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
-        initGl(glRef.current)
+        setupGl(glRef.current)
 
         const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .002)
         canvRef.current.addEventListener('mousedown', () => canvRef.current.addEventListener('mousemove', dragHandler))
@@ -85,7 +85,7 @@ const Visualization = props => {
     }, [props.data])
     
     useEffect(() => {
-        if (!epochRef.current) return
+        if (!props.startEpoch) return
         const epoch = epochRef.current
         const gl = glRef.current
 
