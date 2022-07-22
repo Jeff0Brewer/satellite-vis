@@ -1,6 +1,7 @@
 import { mat4 } from 'gl-matrix'
-import * as Glu from '../../lib/gl-help.js'
+import { epochFromDate, epochDiff } from '../../lib/epoch.js'
 import getIcosphere from '../../lib/icosphere.js'
+import * as Glu from '../../lib/gl-help.js'
 
 const byteSize = Float32Array.BYTES_PER_ELEMENT
 
@@ -42,11 +43,14 @@ const setupGl = async (gl, scale, viewMatrix) => {
         gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
     ])
 
+    const offsetEpoch = epochFromDate(new Date())
+
     return {
         program: program,
         buffer: buffer,
         locations: locations,
-        numVertex: numVertex
+        numVertex: numVertex,
+        offsetEpoch: offsetEpoch
     }
 }
 
@@ -56,10 +60,12 @@ const updateProjMatrix = (gl, program, projMatrix) => {
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
 }
 
-const draw = (gl, epochDelta, modelMatrix, glVars) => {
+const draw = (gl, epoch, modelMatrix, glVars) => {
     if (!glVars?.program) return
-    const { program, buffer, locations, numVertex } = glVars
-    const earthRotation = mat4.fromZRotation(mat4.create(), epochDelta/86400 * 2*Math.PI)
+    const { program, buffer, locations, numVertex, offsetEpoch } = glVars
+
+    const timeDelta = epochDiff(epoch, offsetEpoch)
+    const earthRotation = mat4.fromZRotation(mat4.create(), timeDelta/86400 * 2*Math.PI)
     const earthModelMat = mat4.multiply(mat4.create(), modelMatrix, earthRotation)
     
     Glu.switchShader(gl, program)

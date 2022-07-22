@@ -5,9 +5,9 @@ import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { incrementEpoch } from '../lib/epoch.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
-import styles from '../styles/SatVis.module.css'
+import styles from '../styles/Visualization.module.css'
 
-const SatVis = props => {
+const Visualization = props => {
     const { width, height } = useWindowDim()
     const canvRef = useRef()
     const glRef = useRef()
@@ -97,8 +97,7 @@ const SatVis = props => {
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Satellites.draw(gl, epoch, modelMatRef.current, satelliteRef.current)
-            const timeDelta = (epoch.year*365*86400) % 86400 + epoch.day*86400 + epoch.second
-            Earth.draw(gl, timeDelta, modelMatRef.current, earthRef.current)
+            Earth.draw(gl, epoch, modelMatRef.current, earthRef.current)
 
             requestFrame(tick)
         }
@@ -115,4 +114,4 @@ const SatVis = props => {
     )
 }
 
-export default SatVis
+export default Visualization

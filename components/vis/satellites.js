@@ -1,6 +1,6 @@
 import { mat4 } from 'gl-matrix'
-import * as Glu from '../../lib/gl-help.js'
 import keplerianAttribs from '../../models/keplerAttrib.js'
+import * as Glu from '../../lib/gl-help.js'
 
 const byteSize = Float32Array.BYTES_PER_ELEMENT
 

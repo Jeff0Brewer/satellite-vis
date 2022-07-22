@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
-import SatVis from '../components/sat-vis.js'
+import Visualization from '../components/visualization.js'
 import ClockUi from '../components/clock.js'
 
 const Home = () => {
@@ -26,7 +26,7 @@ const Home = () => {
     return (
         <main className={styles.home}>
             <ClockUi setStartEpoch={setStartEpoch} setClockSpeed={setClockSpeed} />
-            <SatVis startEpoch={startEpoch} clockSpeed={clockSpeed} data={satData} />
+            <Visualization startEpoch={startEpoch} clockSpeed={clockSpeed} data={satData} />
         </main>
     )
 }
