@@ -56,9 +56,6 @@ const SatVis = props => {
 
         switchShader(gl, earthRef.current.program)
         earthRef.current['aPosition'] = initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
-        earthRef.current['uYear'] = gl.getUniformLocation(gl.program, 'uYear')
-        earthRef.current['uDay'] = gl.getUniformLocation(gl.program, 'uDay')
-        earthRef.current['uSecond'] = gl.getUniformLocation(gl.program, 'uSecond')
         earthRef.current['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
         gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
