@@ -1,4 +1,4 @@
-import { epochFromDate, incrementEpoch } from '../lib/epoch.js'
+import { epochFromDate, incrementEpoch, epochDiff } from '../lib/epoch.js'
 
 const testDate = new Date(Date.UTC(2020, 0, 18, 1, 1, 1, 1))
 
@@ -46,3 +46,10 @@ test('incrementEpoch correctly increments years', () => {
     expect(epoch.year).toBe(startYear + 1)
 })
 
+test('epochDiff returns correct time difference', () => {
+    const dateA = new Date(Date.UTC(2020, 0, 0, 0, 0, 0, 0))
+    const dateB = new Date(Date.UTC(2020, 0, 5, 0, 0, 1, 1))
+    let a = epochFromDate(dateA)
+    let b = epochFromDate(dateB)
+    expect(epochDiff(a, b)).toBe(Math.abs(dateA - dateB)/1000)
+})
