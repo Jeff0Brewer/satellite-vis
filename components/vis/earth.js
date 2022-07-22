@@ -4,11 +4,27 @@ import getIcosphere from '../../lib/icosphere.js'
 
 const byteSize = Float32Array.BYTES_PER_ELEMENT
 
-const initEarthShader = async (gl, viewMatrix) => {
+const setupGl = async (gl, scale, viewMatrix) => {
     const vertPath = './shaders/earth-vert.glsl'
     const fragPath = './shaders/earth-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
     Glu.switchShader(gl, program)
+
+    const earthRadius = 6371000
+    const { vertices, triangles } = getIcosphere(3)
+    vertices = vertices.map(
+        vertex => vertex.map(
+            val => val*scale*earthRadius
+        )
+    )
+    let icoBuffer = []
+    triangles.forEach(triangle => {
+        triangle.forEach(vertex => {
+            icoBuffer.push(...vertices[vertex])
+        })
+    })
+    const buffer = Glu.initBuffer(gl, new Float32Array(icoBuffer), gl.STATIC_DRAW)
+    const numVertex = icoBuffer.length / 3
 
     const locations = {}
     locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
@@ -25,38 +41,7 @@ const initEarthShader = async (gl, viewMatrix) => {
         gl.TEXTURE_CUBE_MAP_POSITIVE_Y, gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
         gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
     ])
-    return {
-        program: program,
-        locations: locations
-    }
-}
 
-const initEarthBuffer = (gl, scale) => {
-    const earthRadius = 6371000
-    const { vertices, triangles } = getIcosphere(3)
-    vertices = vertices.map(
-        vertex => vertex.map(
-            val => val*scale*earthRadius
-        )
-    )
-    let icoBuffer = []
-    triangles.forEach(triangle => {
-        triangle.forEach(vertex => {
-            icoBuffer.push(...vertices[vertex])
-        })
-    })
-    const buffer = Glu.initBuffer(gl, new Float32Array(icoBuffer), gl.STATIC_DRAW)
-    const numVertex = icoBuffer.length / 3
-    return {
-        buffer: buffer,
-        numVertex: numVertex
-    }
-}
-
-const setupGl = async (gl, scale, viewMatrix) => {
-    const shaderInit = initEarthShader(gl, viewMatrix)
-    const { buffer, numVertex } = initEarthBuffer(gl, scale)
-    const { program, locations } = await shaderInit
     return {
         program: program,
         buffer: buffer,
@@ -66,11 +51,14 @@ const setupGl = async (gl, scale, viewMatrix) => {
 }
 
 const updateProjMatrix = (gl, program, projMatrix) => {
+    if (!program) return
     Glu.switchShader(gl, program)
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
 }
 
-const draw = (gl, epochDelta, modelMatrix, program, buffer, locations, numVertex) => {
+const draw = (gl, epochDelta, modelMatrix, glVars) => {
+    if (!glVars?.program) return
+    const { program, buffer, locations, numVertex } = glVars
     const earthRotation = mat4.fromZRotation(mat4.create(), epochDelta/86400 * 2*Math.PI)
     const earthModelMat = mat4.multiply(mat4.create(), modelMatrix, earthRotation)
     
