@@ -19,6 +19,7 @@
     "node-fetch": "^3.2.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "satellite.js": "^4.1.4",
     "tle.js": "^4.7.1"
   },
   "devDependencies": {
