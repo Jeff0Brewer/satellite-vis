@@ -1,5 +1,4 @@
 import { mat4 } from 'gl-matrix'
-import { epochFromDate, epochDiff } from '../../lib/epoch.js'
 import getIcosphere from '../../lib/icosphere.js'
 import * as Glu from '../../lib/gl-help.js'
 
@@ -43,7 +42,7 @@ const setupGl = async (gl, scale, viewMatrix) => {
         gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
     ])
 
-    const offsetEpoch = epochFromDate(new Date())
+    const offsetEpoch = new Date()
 
     return {
         program: program,
@@ -64,7 +63,7 @@ const draw = (gl, epoch, modelMatrix, glVars) => {
     if (!glVars?.program) return
     const { program, buffer, locations, numVertex, offsetEpoch } = glVars
 
-    const timeDelta = epochDiff(epoch, offsetEpoch)
+    const timeDelta = (epoch - offsetEpoch)/1000
     const earthRotation = mat4.fromZRotation(mat4.create(), timeDelta/86400 * 2*Math.PI)
     const earthModelMat = mat4.multiply(mat4.create(), modelMatrix, earthRotation)
     

@@ -79,24 +79,21 @@ const Visualization = props => {
     }, [width, height])
 
     useEffect(() => { 
-        const numVertex = Satellites.updateBuffer(glRef.current, satelliteRef.current?.buffer, props.data)
-        if (numVertex) 
-            satelliteRef.current.numVertex = numVertex
     }, [props.data])
     
     useEffect(() => {
         if (!props.startEpoch) return
-        const epoch = epochRef.current
+        let epoch = epochRef.current
         const gl = glRef.current
 
         let lastT = 0
         const tick = currT => {
             const elapsed = currT - lastT < 100 ? currT - lastT : 0
             lastT = currT
-            epoch = incrementEpoch(epoch, elapsed*props.clockSpeed)
+            epoch = new Date(epoch.getTime() + elapsed*props.clockSpeed)
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-            Satellites.draw(gl, epoch, modelMatRef.current, satelliteRef.current)
+            Satellites.draw(gl, props.data, epoch, modelMatRef.current, satelliteRef.current)
             Earth.draw(gl, epoch, modelMatRef.current, earthRef.current)
 
             requestFrame(tick)

@@ -17,6 +17,13 @@ test('validateTle returns false for invalid input', () => {
     expect(validateTle(line1, line2)).toBe(false)
 })
 
+test('validateTle returns false for invalid checksum', () => {
+    const line1 = "1 25544C 98067A   22188.25277778 -.00045535  00000-0 -79974-3 0   602"
+    const line2 = "2 25544  51.6410 237.2145 0005099 341.7889 105.4438 15.49870784    11"
+
+    expect(validateTle(line1, line2)).toBe(false)
+})
+
 test('getTlePageCount returns correct page number', async () => {
     const defaultFetch = global.fetch
     global.fetch = () => 
