@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
-import useWindowDim from '../hooks/window-dim.js'
+import useWindowDim from '../util/window-dim.js'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { incrementEpoch } from '../lib/epoch.js'
 import * as Satellites from './vis/satellites.js'

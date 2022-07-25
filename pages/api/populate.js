@@ -1,7 +1,18 @@
 import mongoose from 'mongoose'
-import connectMongo from '../../lib/connect-mongo.js'
+import connectMongo from '../../util/connect-mongo.js'
 import Keplerian from '../../models/keplerModel.js'
-import { tleToKeplerian, validateTle, getTlePageCount } from '../../lib/tle-help.js'
+import { tleToKeplerian, validateTle } from '../../lib/tle-help.js'
+
+const getTlePageCount = () => {
+    return fetch('http://tle.ivanstanojevic.me/api/tle/?page-size=100&page=1')
+        .then(res => res.json())
+        .then(res => { 
+            const lastUrl = res.view.last
+            const pageNumber = lastUrl.substring(lastUrl.lastIndexOf('=') + 1)
+            return parseInt(pageNumber)
+        })
+        .catch(err => console.log(err))
+}
 
 const getPage = page => {
     return fetch(`http://tle.ivanstanojevic.me/api/tle/?page-size=100&page=${page}`)
