@@ -9,7 +9,7 @@ const Home = () => {
     const [clockSpeed, setClockSpeed] = useState()
 
     const getSatData = () => {
-        fetch('/api/get-keplerian')
+        fetch('/api/get-tles')
             .then(res => res.json())
             .then(data => setSatData(data))
             .catch(err => console.log(err))

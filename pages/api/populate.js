@@ -1,7 +1,6 @@
 import mongoose from 'mongoose'
 import connectMongo from '../../util/connect-mongo.js'
-import Keplerian from '../../models/keplerModel.js'
-import { tleToKeplerian, validateTle } from '../../lib/tle-help.js'
+import Tle from '../../models/tleModel.js'
 
 const getTlePageCount = () => {
     return fetch('http://tle.ivanstanojevic.me/api/tle/?page-size=100&page=1')
@@ -18,35 +17,39 @@ const getPage = page => {
     return fetch(`http://tle.ivanstanojevic.me/api/tle/?page-size=100&page=${page}`)
         .then(res => res.json())
         .then(data => {
-            let keps = []
+            let tles = []
             data.member.forEach(el => {
-                if (!validateTle(el.line1, el.line2)) return
-                const keplerian = tleToKeplerian(el.name, el.line1, el.line2)
-                keps.push(keplerian)
+                tles.push({
+                    satelliteId: el?.satelliteId,
+                    name: el?.name,
+                    date: el?.date,
+                    line1: el?.line1,
+                    line2: el?.line2
+                })
             })
-            console.log(`${keps.length} added from page ${page}`)
-            return Keplerian.insertMany(keps)
+            return Tle.insertMany(tles, { ordered: false })
         })
         .catch(err => console.log(err))
 }
 
-const populateKeplerian = async (req, res) => {
+const populateTles = async (req, res) => {
     const maxPage = await getTlePageCount()
 
     await connectMongo()
-    const collections = await mongoose.connection.db.listCollections({ name: 'keplerians' }).toArray()
+    const collections = await mongoose.connection.db.listCollections({ name: 'tles' }).toArray()
     if (collections) {
-        await Keplerian.collection.drop()
+        await Tle.collection.drop()
         console.log('collection reset')
     }
 
     console.log('inserting pages:')
     for(let i = 1; i <= maxPage; i++) {
-        await getPage(i)
+        const data = await getPage(i)
+        console.log(`${data.length} from page ${i} added`)
     }
 
     console.log('data updated')
     res.status(200).end()
 }
 
-export default populateKeplerian
+export default populateTles
