@@ -22,14 +22,14 @@ test('epochFromDate returns correct day', () => {
 test('epochFromDate returns correct second', () => {
     const epoch = epochFromDate(testDate)
     const second = 60 * 60 + 60 + 1 + 1/1000
-    expect(epoch.second).toBe(second)
+    expect(epoch.second).toBeCloseTo(second)
 })
 
 test('incrementEpoch correctly increments seconds', () => {
     let epoch = epochFromDate(testDate)
     const startSecond = epoch.second
     epoch = incrementEpoch(epoch, 1000)
-    expect(epoch.second).toBe(startSecond + 1)
+    expect(epoch.second).toBeCloseTo(startSecond + 1)
 })
 
 test('incrementEpoch correctly increments days', () => {
@@ -51,5 +51,5 @@ test('epochDiff returns correct time difference', () => {
     const dateB = new Date(Date.UTC(2020, 0, 5, 0, 0, 1, 1))
     let a = epochFromDate(dateA)
     let b = epochFromDate(dateB)
-    expect(epochDiff(a, b)).toBe(Math.abs(dateA - dateB)/1000)
+    expect(epochDiff(a, b)).toBeCloseTo(Math.abs(dateA - dateB)/1000)
 })
