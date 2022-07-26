@@ -2,7 +2,7 @@ import { Schema, model, models } from 'mongoose'
 import { validateTleLine1, validateTleLine2 } from '../lib/tle.js'
 
 const tleSchema = new Schema({
-    satelliteId: { type: Number, required: true },
+    satelliteId: { type: Number, required: true, unique: true },
     name: { type: String, required: true },
     date: { type: Date, required: true },
     line1: { 
