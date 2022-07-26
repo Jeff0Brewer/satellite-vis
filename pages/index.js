@@ -14,15 +14,7 @@ const Home = () => {
             .then(res => res.json())
             .then(data => {
                 const satrecs = data.map(el => twoline2satrec(el.line1, el.line2))
-                let numErr = 0
-                satrecs.forEach((satrec, i) => {
-                    const { position, velocity } = sgp4(satrec, 10000)
-                    if (satrec.error && satrec.error != 6) {
-                        console.log(satrec.error)
-                        //console.log(satrec)
-                        //console.log(data[i])
-                    }
-                })
+                console.log(satrecs)
             })
             .catch(err => console.log(err))
     }
