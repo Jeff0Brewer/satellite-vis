@@ -1,30 +1,17 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import styles from '../styles/Home.module.css'
 import Visualization from '../components/visualization.js'
 import ClockUi from '../components/clock.js'
-import { sgp4, twoline2satrec } from 'satellite.js'
+import DataProvider from '../components/data-provider.js'
 
 const Home = () => {
     const [satData, setSatData] = useState(new Float32Array())
     const [startEpoch, setStartEpoch] = useState()
     const [clockSpeed, setClockSpeed] = useState()
 
-    const getData = () => {
-        fetch('/api/get-tles')
-            .then(res => res.json())
-            .then(data => {
-                const satrecs = data.map(el => twoline2satrec(el.line1, el.line2))
-                console.log(satrecs)
-            })
-            .catch(err => console.log(err))
-    }
-
-    useEffect(() => {
-        getData()
-    }, [])
-
     return (
         <main className={styles.home}>
+            <DataProvider setData={setSatData} />
             <ClockUi setStartEpoch={setStartEpoch} setClockSpeed={setClockSpeed} />
             <Visualization startEpoch={startEpoch} clockSpeed={clockSpeed} data={satData} />
         </main>

@@ -79,9 +79,7 @@ const Visualization = props => {
     }, [width, height])
 
     useEffect(() => { 
-        const numVertex = Satellites.updateBuffer(glRef.current, satelliteRef.current?.buffer, props.data)
-        if (numVertex) 
-            satelliteRef.current.numVertex = numVertex
+        console.log(props.data)
     }, [props.data])
     
     useEffect(() => {
