@@ -45,7 +45,7 @@ const populateTles = async (req, res) => {
     console.log('inserting pages:')
     for(let i = 1; i <= maxPage; i++) {
         const data = await getPage(i)
-        console.log(`${data.length} from page ${i} added`)
+        console.log(`${data?.length} from page ${i} added`)
     }
 
     console.log('data updated')
