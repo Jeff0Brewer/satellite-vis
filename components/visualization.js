@@ -93,7 +93,7 @@ const Visualization = props => {
             epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
             
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-            //Satellites.draw(gl, currEpoch, modelMatRef.current, satelliteRef.current)
+            //Satellites.draw(gl, epochRef.current, modelMatRef.current, satelliteRef.current)
             Earth.draw(gl, epochRef.current, modelMatRef.current, earthRef.current)
 
             requestFrame(tick)
