@@ -1,6 +1,6 @@
 import { sgp4, twoline2satrec } from 'satellite.js'
 import elementsFromPosVel from '../lib/keplerian.js'
-import { getEccentricity, getInclination, getArgumentPerigee, getRAAN, getMeanMotion } from '../lib/tle.js'
+import { getEccentricity, getInclination, getArgumentPerigee, getRAAN, getMeanMotion, getMeanAnomaly } from '../lib/tle.js'
 
 const tles = [
     [
@@ -94,3 +94,27 @@ describe('elementsFromPosVel returns correct semimajor axis at t=0', () => {
         }
     )
 })
+
+//describe('elementsFromPosVel returns correct anomaly axis at t=0', () => {
+//    test.each(tles)(
+//        'tle: \n %p \n %p',
+//        (line1, line2) => {
+//            const satrec = twoline2satrec(line1, line2)
+//            const { position, velocity } = sgp4(satrec, 0)
+//            const elements = elementsFromPosVel(position, velocity)
+//            expect(elements.anom).toBeCloseTo(getMeanAnomaly(line1, line2), 2)
+//        }
+//    )
+//})
+
+//describe('elementsFromPosVel returns correct argument of perigee at t=0', () => {
+//    test.each(tles)(
+//        'tle: \n %p \n %p',
+//        (line1, line2) => {
+//            const satrec = twoline2satrec(line1, line2)
+//            const { position, velocity } = sgp4(satrec, 0)
+//            const elements = elementsFromPosVel(position, velocity)
+//            expect(elements.argp).toBeCloseTo(getArgumentPerigee(line1, line2), 2)
+//        }
+//    )
+//})
