@@ -1,5 +1,6 @@
 import { sgp4, twoline2satrec } from 'satellite.js'
 import elementsFromPosVel from '../lib/keplerian.js'
+import { getEccentricity, getInclination, getArgumentPerigee } from '../lib/tle.js'
 
 const tles = [
     [
@@ -32,7 +33,7 @@ const tles = [
 describe('elementsFromPosVel returns full element set', () => {
     const properties = ['ecc', 'axis', 'incl', 'lan', 'argp', 'anom']
     test.each(tles)(
-        'from tle: %p %p',
+        'from tle: \n %p \n %p',
         (line1, line2) => {
             const satrec = twoline2satrec(line1, line2)
             const { position, velocity } = sgp4(satrec, 0)
@@ -46,36 +47,36 @@ describe('elementsFromPosVel returns full element set', () => {
 
 describe('elementsFromPosVel returns correct eccentricity at t=0', () => {
     test.each(tles)(
-        'from tle: %p %p',
+        'from tle: \n %p \n %p',
         (line1, line2) => {
             const satrec = twoline2satrec(line1, line2)
             const { position, velocity } = sgp4(satrec, 0)
             const elements = elementsFromPosVel(position, velocity)
-            expect(elements.ecc).toBeCloseTo(satrec.ecco, 2)
+            expect(elements.ecc).toBeCloseTo(getEccentricity(line1, line2), 2)
         }
     )
 })
 
 describe('elementsFromPosVel returns correct inclination at t=0', () => {
     test.each(tles)(
-        'from tle: %p %p',
+        'from tle: \n %p \n %p',
         (line1, line2) => {
             const satrec = twoline2satrec(line1, line2)
             const { position, velocity } = sgp4(satrec, 0)
             const elements = elementsFromPosVel(position, velocity)
-            expect(elements.incl).toBeCloseTo(satrec.inclo, 2)
+            expect(elements.incl).toBeCloseTo(getInclination(line1, line2), 2)
         }
     )
 })
 
-describe('elementsFromPosVel returns correct argument of periapsis at t=0', () => {
+describe('elementsFromPosVel returns correct argument of perigee at t=0', () => {
     test.each(tles)(
-        'from tle: %p %p',
+        'from tle: \n %p \n %p',
         (line1, line2) => {
             const satrec = twoline2satrec(line1, line2)
             const { position, velocity } = sgp4(satrec, 0)
             const elements = elementsFromPosVel(position, velocity)
-            expect(elements.argp).toBeCloseTo(satrec.argpo, 2)
+            expect(elements.argp).toBeCloseTo(getArgumentPerigee(line1, line2), 2)
         }
     )
 })
