@@ -1,19 +1,23 @@
-import React, { useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
-import useWindowDim from '../util/window-dim.js'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
-import { incrementEpoch } from '../lib/epoch.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
+import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
+    const defaultSpeed = 100
+    const [clockSpeed, setClockSpeed] = useState(defaultSpeed)
+    const epochRef = useRef(new Date())
+
     const { width, height } = useWindowDim()
     const canvRef = useRef()
     const glRef = useRef()
-    const epochRef = useRef()
+
     const satelliteRef = useRef()
     const earthRef = useRef()
+
     const modelMatRef = useRef(mat4.create())
     const viewMatrix = mat4.lookAt(mat4.create(), 
         [0, 2, 0], // camera position
@@ -28,9 +32,11 @@ const Visualization = props => {
             100 //far
         )
     }
+
     const frameIdRef = useRef()
     const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
     const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
+
     const byteSize = Float32Array.BYTES_PER_ELEMENT
     const visScale = .0000001
 
@@ -71,31 +77,28 @@ const Visualization = props => {
     }, [])
 
     useEffect(() => {
-        epochRef.current = props.startEpoch
-    }, [props.startEpoch])
-
-    useEffect(() => {
         setupViewport(glRef.current, width, height)
     }, [width, height])
 
     useEffect(() => { 
-        console.log(props.data)
+        //console.log(props.data)
     }, [props.data])
     
     useEffect(() => {
-        if (!props.startEpoch) return
-        const epoch = epochRef.current
         const gl = glRef.current
+        const epochMs = epochRef.current.getTime()
+        let currEpoch = epochRef.current
 
-        let lastT = 0
+        let time = 0
+        const lastT = 0
         const tick = currT => {
-            const elapsed = currT - lastT < 100 ? currT - lastT : 0
+            time += currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
-            epoch = incrementEpoch(epoch, elapsed*props.clockSpeed)
-
+            currEpoch = new Date(epochMs + time*clockSpeed)
+            
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-            Satellites.draw(gl, epoch, modelMatRef.current, satelliteRef.current)
-            Earth.draw(gl, epoch, modelMatRef.current, earthRef.current)
+            //Satellites.draw(gl, currEpoch, modelMatRef.current, satelliteRef.current)
+            Earth.draw(gl, currEpoch, modelMatRef.current, earthRef.current)
 
             requestFrame(tick)
         }
@@ -103,12 +106,21 @@ const Visualization = props => {
 
         return () => {
             cancelFrame()
-            epochRef.current = epoch
+            epochRef.current = currEpoch
         }
-    }, [props.startEpoch, props.clockSpeed, props.data])
+    }, [clockSpeed, props.data])
+
+    const speedInputChange = e => {
+        const val = parseFloat(e.target.value)
+        if (!isNaN(val))
+            setClockSpeed(val)
+    }
 
     return (
-        <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>
+        <section>
+            <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>
+            <input className={styles.speed} type='text' defaultValue={defaultSpeed} onChange={speedInputChange} />
+        </section>
     )
 }
 
