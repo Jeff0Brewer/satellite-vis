@@ -86,28 +86,20 @@ const Visualization = props => {
     
     useEffect(() => {
         const gl = glRef.current
-        const epochMs = epochRef.current.getTime()
-        let currEpoch = epochRef.current
-
-        let time = 0
         const lastT = 0
         const tick = currT => {
-            time += currT - lastT > 100 ? 0 : currT - lastT
+            const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
-            currEpoch = new Date(epochMs + time*clockSpeed)
+            epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
             
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             //Satellites.draw(gl, currEpoch, modelMatRef.current, satelliteRef.current)
-            Earth.draw(gl, currEpoch, modelMatRef.current, earthRef.current)
+            Earth.draw(gl, epochRef.current, modelMatRef.current, earthRef.current)
 
             requestFrame(tick)
         }
         requestFrame(tick)
-
-        return () => {
-            cancelFrame()
-            epochRef.current = currEpoch
-        }
+        return cancelFrame
     }, [clockSpeed, props.data])
 
     const speedInputChange = e => {
