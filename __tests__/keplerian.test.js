@@ -1,6 +1,6 @@
 import { sgp4, twoline2satrec } from 'satellite.js'
 import elementsFromPosVel from '../lib/keplerian.js'
-import { getEccentricity, getInclination, getArgumentPerigee } from '../lib/tle.js'
+import { getEccentricity, getInclination, getArgumentPerigee, getRAAN, getMeanMotion } from '../lib/tle.js'
 
 const tles = [
     [
@@ -31,9 +31,9 @@ const tles = [
 ]
 
 describe('elementsFromPosVel returns full element set', () => {
-    const properties = ['ecc', 'axis', 'incl', 'lan', 'argp', 'anom']
+    const properties = ['ecc', 'incl', 'lan', 'axis', 'argp', 'anom']
     test.each(tles)(
-        'from tle: \n %p \n %p',
+        'tle: \n %p \n %p',
         (line1, line2) => {
             const satrec = twoline2satrec(line1, line2)
             const { position, velocity } = sgp4(satrec, 0)
@@ -47,7 +47,7 @@ describe('elementsFromPosVel returns full element set', () => {
 
 describe('elementsFromPosVel returns correct eccentricity at t=0', () => {
     test.each(tles)(
-        'from tle: \n %p \n %p',
+        'tle: \n %p \n %p',
         (line1, line2) => {
             const satrec = twoline2satrec(line1, line2)
             const { position, velocity } = sgp4(satrec, 0)
@@ -59,7 +59,7 @@ describe('elementsFromPosVel returns correct eccentricity at t=0', () => {
 
 describe('elementsFromPosVel returns correct inclination at t=0', () => {
     test.each(tles)(
-        'from tle: \n %p \n %p',
+        'tle: \n %p \n %p',
         (line1, line2) => {
             const satrec = twoline2satrec(line1, line2)
             const { position, velocity } = sgp4(satrec, 0)
@@ -69,14 +69,28 @@ describe('elementsFromPosVel returns correct inclination at t=0', () => {
     )
 })
 
-describe('elementsFromPosVel returns correct argument of perigee at t=0', () => {
+describe('elementsFromPosVel returns correct longitude of acending node at t=0', () => {
     test.each(tles)(
-        'from tle: \n %p \n %p',
+        'tle: \n %p \n %p',
         (line1, line2) => {
             const satrec = twoline2satrec(line1, line2)
             const { position, velocity } = sgp4(satrec, 0)
             const elements = elementsFromPosVel(position, velocity)
-            expect(elements.argp).toBeCloseTo(getArgumentPerigee(line1, line2), 2)
+            expect(elements.lan).toBeCloseTo(getRAAN(line1, line2), 3)
+        }
+    )
+})
+
+describe('elementsFromPosVel returns correct semimajor axis at t=0', () => {
+    test.each(tles)(
+        'tle: \n %p \n %p',
+        (line1, line2) => {
+            const satrec = twoline2satrec(line1, line2)
+            const { position, velocity } = sgp4(satrec, 0)
+            const elements = elementsFromPosVel(position, velocity)
+            const meanMotion = getMeanMotion(line1, line2)
+            const axis = Math.pow(3.986004418 * Math.pow(10, 5), 1/3)/Math.pow(2*Math.PI*meanMotion/86400, 2/3)
+            expect(Math.abs(elements.axis - axis)).toBeLessThan(10)
         }
     )
 })

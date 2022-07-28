@@ -1,4 +1,34 @@
-import { validateTleChecksum, validateTleLine1, validateTleLine2 } from '../lib/tle.js'
+import { validateTleChecksum, validateTleLine1, validateTleLine2, getEccentricity, getInclination, getArgumentPerigee, getRAAN, getMeanMotion } from '../lib/tle.js'
+
+test('getEccentricity returns correct value', () => {
+    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
+    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
+    expect(getEccentricity(line1, line2)).toBe(.0003334)
+})
+
+test('getInclination returns correct value', () => {
+    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
+    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
+    expect(getInclination(line1, line2)).toBe(52.9947 * Math.PI / 180)
+})
+
+test('getArgumentPerigee returns correct value', () => {
+    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
+    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
+    expect(getArgumentPerigee(line1, line2)).toBe(26.4946 * Math.PI / 180)
+})
+
+test('getRAAN returns correct value', () => {
+    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
+    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
+    expect(getRAAN(line1, line2)).toBe(286.2236 * Math.PI / 180)
+})
+
+test('getMeanMotion returns correct value', () => {
+    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
+    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
+    expect(getMeanMotion(line1, line2)).toBe(15.43229799)
+})
 
 const checksumCases = [
     ['2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537', true],
@@ -13,7 +43,6 @@ const checksumCases = [
     ['1 22041U 92043EEEE22205.67171242 -.00000193  00000+0  00000+0 0219990', false],
     ['2 45424  87.8862 303.8414 0002571 107.6120  14.5639 13.11410332    17', false]
 ]
-
 describe('validateTleChecksum', () => {
     test.each(checksumCases)(
         'given %p returns %p',
@@ -37,7 +66,6 @@ const line1Cases = [
     ['<body></body>', false],
     ['', false]
 ]
-
 describe('validateTleLine1', () => {
     test.each(line1Cases)(
         'given %p returns %p',
@@ -59,7 +87,6 @@ const line2Cases = [
     ['</body>', false],
     ['', false]
 ]
-
 describe('validateTleLine2', () => {
     test.each(line2Cases)(
         'given %p returns %p',
