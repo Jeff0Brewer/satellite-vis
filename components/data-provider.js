@@ -6,11 +6,11 @@ const DataProvider = props => {
         fetch('/api/get-tles')
             .then(res => res.json())
             .then(data => {
-                console.log(data)
                 const satrecs = data
                     .map(el => twoline2satrec(el.line1, el.line2))
                     .filter(satrec => satrec.error === 0)
                 props.setData(satrecs)
+                console.log(satrecs)
             })
             .catch(err => console.log(err))
     }
