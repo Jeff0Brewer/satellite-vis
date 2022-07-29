@@ -123,3 +123,27 @@ describe('elementsFromPosVel returns correct overall angle at t=0', () => {
         }
     )
 })
+
+describe('elementsFromPosVel returns consistent values over .2 second period', () => {
+    const line1 = "1 28654U 05018A   22206.52159967  .00000103  00000+0  79610-4 0  9995"
+    const line2 = "2 28654  98.9477 276.9250 0013651 220.4005 139.6154 14.12757208885356"
+    const satrec = twoline2satrec(line1, line2)
+    const { position: pos0, velocity: vel0 } = sgp4(satrec, 0)
+    const elem0 = elementsFromPosVel(pos0, vel0)
+    const { position: pos1, velocity: vel1 } = sgp4(satrec, 200)
+    const elem1 = elementsFromPosVel(pos1, vel1)
+
+    test('eccentricity', () => {
+        expect(elem1.ecc).toBeCloseTo(elem0.ecc, 3)
+    })
+    test('inclination', () => {
+        expect(elem1.incl).toBeCloseTo(elem0.incl, 2)
+    })
+    test('longitude of ascending node', () => {
+        expect(elem1.lan).toBeCloseTo(elem0.lan, 2)
+    })
+    test('semimajor axis', () => {
+        expect(Math.abs(elem0.axis - elem1.axis)).toBeLessThan(10)
+    })
+})
+
