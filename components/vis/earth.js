@@ -3,19 +3,19 @@ import { epochFromDate, epochDiff } from '../../lib/epoch.js'
 import getIcosphere from '../../lib/icosphere.js'
 import * as Glu from '../../lib/gl-help.js'
 
-const byteSize = Float32Array.BYTES_PER_ELEMENT
+const floatSize = Float32Array.BYTES_PER_ELEMENT
 
-const setupGl = async (gl, scale, viewMatrix) => {
+const setupGl = async (gl, viewMatrix) => {
     const vertPath = './shaders/earth-vert.glsl'
     const fragPath = './shaders/earth-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
     Glu.switchShader(gl, program)
 
-    const earthRadius = 6371000
+    const earthRadius = 6371
     const { vertices, triangles } = getIcosphere(3)
     vertices = vertices.map(
         vertex => vertex.map(
-            val => val*scale*earthRadius
+            val => val*earthRadius
         )
     )
     let icoBuffer = []
@@ -28,7 +28,7 @@ const setupGl = async (gl, scale, viewMatrix) => {
     const numVertex = icoBuffer.length / 3
 
     const locations = {}
-    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, byteSize)
+    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, floatSize)
     locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
 
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
@@ -70,7 +70,7 @@ const draw = (gl, epoch, modelMatrix, glVars) => {
     Glu.switchShader(gl, program)
     gl.uniformMatrix4fv(locations.uModelMatrix, false, earthModelMat)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-    gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * byteSize, 0)
+    gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * floatSize, 0)
     gl.drawArrays(gl.TRIANGLES, 0, numVertex)
 }
 

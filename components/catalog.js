@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { twoline2satrec } from 'satellite.js'
 
-const DataProvider = props => {
+const Catalog = props => {
     const getSatRecs = () => {
         fetch('/api/get-tles')
             .then(res => res.json())
@@ -10,7 +10,6 @@ const DataProvider = props => {
                     .map(el => twoline2satrec(el.line1, el.line2))
                     .filter(satrec => satrec.error === 0)
                 props.setData(satrecs)
-                console.log(satrecs)
             })
             .catch(err => console.log(err))
     }
@@ -24,4 +23,4 @@ const DataProvider = props => {
     )
 }
 
-export default DataProvider
+export default Catalog

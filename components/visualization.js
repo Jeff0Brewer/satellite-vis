@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { propagate } from 'satellite.js'
 import { mat4 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import * as Satellites from './vis/satellites.js'
@@ -18,7 +19,13 @@ const Visualization = props => {
     const satelliteRef = useRef()
     const earthRef = useRef()
 
-    const modelMatRef = useRef(mat4.create())
+    const visScale = .0001
+    const modelMatRef = useRef(
+        mat4.scale(
+            mat4.create(), 
+            mat4.create(), 
+            [visScale, visScale, visScale])
+    )
     const viewMatrix = mat4.lookAt(mat4.create(), 
         [0, 2, 0], // camera position
         [0, 0, 0], // camera focus
@@ -37,8 +44,7 @@ const Visualization = props => {
     const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
     const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
 
-    const byteSize = Float32Array.BYTES_PER_ELEMENT
-    const visScale = .0000001
+    const floatSize = Float32Array.BYTES_PER_ELEMENT
 
     const setupViewport = (gl, width, height) => {
         gl.viewport(0, 0, width, height)
@@ -52,8 +58,8 @@ const Visualization = props => {
         gl.enable(gl.CULL_FACE)
 
         const [satelliteVars, earthVars] = await Promise.all([
-            Satellites.setupGl(gl, props.data, visScale, viewMatrix),
-            Earth.setupGl(gl, visScale, viewMatrix)
+            Satellites.setupGl(gl, props.data.length, visScale, viewMatrix),
+            Earth.setupGl(gl, viewMatrix)
         ])
         satelliteRef.current = satelliteVars
         earthRef.current = earthVars
@@ -81,7 +87,7 @@ const Visualization = props => {
     }, [width, height])
 
     useEffect(() => { 
-        //console.log(props.data)
+        satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
     }, [props.data])
     
     useEffect(() => {
@@ -91,9 +97,18 @@ const Visualization = props => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
             epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
-            
+            const posBuffer = new Float32Array(props.data.length*3)
+            props.data.forEach((satrec, i) => {
+                const { position } = propagate(satrec, epochRef.current)
+                if (!satrec.error) {
+                    posBuffer[i*3] = position.x
+                    posBuffer[i*3+1] = position.y
+                    posBuffer[i*3+2] = position.z
+                }
+            })
+
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-            //Satellites.draw(gl, epochRef.current, modelMatRef.current, satelliteRef.current)
+            Satellites.draw(gl, posBuffer, modelMatRef.current, satelliteRef.current)
             Earth.draw(gl, epochRef.current, modelMatRef.current, earthRef.current)
 
             requestFrame(tick)
