@@ -1,41 +1,46 @@
 import mongoose from 'mongoose'
-import connectMongo from '../../lib/connect-mongo.js'
-import Keplerian from '../../models/keplerModel.js'
-import { tleToKeplerian, validateTle, getTlePageCount } from '../../lib/tle-help.js'
+import connectMongo from '../../util/connect-mongo.js'
+import Tle from '../../models/tleModel.js'
+import { getCatalogNumber } from '../../lib/tle.js'
+import celesGroups from '../../util/celes-groups.js'
 
-const getPage = page => {
-    return fetch(`http://tle.ivanstanojevic.me/api/tle/?page-size=100&page=${page}`)
-        .then(res => res.json())
+const addGroup = group => {
+    return fetch(`https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=TLE`)
+        .then(res => res.text())
         .then(data => {
-            let keps = []
-            data.member.forEach(el => {
-                if (!validateTle(el.line1, el.line2)) return
-                const keplerian = tleToKeplerian(el.name, el.line1, el.line2)
-                keps.push(keplerian)
-            })
-            console.log(`${keps.length} added from page ${page}`)
-            return Keplerian.insertMany(keps)
+            data = data.split('\n').map(line => line.replace(/[\r]/g, '').trim())
+            let tles = []
+            for (let i = 0; i+2 < data.length; i += 3) {
+                const line1 = data[i+1]
+                const line2 = data[i+2]
+                tles.push({
+                    satelliteId: getCatalogNumber(line1, line2),
+                    name: data[i],
+                    line1: line1,
+                    line2: line2
+                })
+            }
+            return Tle.insertMany(tles, { ordered: false })
         })
-        .catch(err => console.log(err))
 }
 
-const populateKeplerian = async (req, res) => {
-    const maxPage = await getTlePageCount()
-
+const populateTles = async (req, res) => {
     await connectMongo()
-    const collections = await mongoose.connection.db.listCollections({ name: 'keplerians' }).toArray()
-    if (collections) {
-        await Keplerian.collection.drop()
+    const collections = await mongoose.connection.db.listCollections({ name: 'tles' }).toArray()
+    if (collections.length) {
+        await Tle.collection.drop()
         console.log('collection reset')
     }
 
-    console.log('inserting pages:')
-    for(let i = 1; i <= maxPage; i++) {
-        await getPage(i)
+    let numSatellite = 0
+    for (const group of celesGroups) {
+        const data = await addGroup(group)
+        console.log(`${data.length} added from '${group}'`)
+        numSatellite += data.length
     }
 
-    console.log('data updated')
+    console.log(`data updated, ${numSatellite} total entries`)
     res.status(200).end()
 }
 
-export default populateKeplerian
+export default populateTles

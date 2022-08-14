@@ -6,3 +6,8 @@
     width: 100vw;
     height: 100vh;
 }
+
+.speed {
+    position: relative;
+    z-index: 2;
+}
