@@ -8,7 +8,7 @@ const addGroup = group => {
     return fetch(`https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=TLE`)
         .then(res => res.text())
         .then(data => {
-            data = data.replace(/[\r]/g, '').split('\n').map(line => line.trim())
+            data = data.split('\n').map(line => line.replace(/[\r]/g, '').trim())
             let tles = []
             for (let i = 0; i+2 < data.length; i += 3) {
                 const line1 = data[i+1]

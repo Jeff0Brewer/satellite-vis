@@ -4,10 +4,11 @@ import * as Glu from '../../lib/gl-help.js'
 const floatSize = Float32Array.BYTES_PER_ELEMENT
 
 const updateBuffer = (gl, numVertex, ref) => {
-    if (!ref?.buffer) return
-    gl.bindBuffer(gl.ARRAY_BUFFER, ref.buffer)
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(numVertex*3), gl.DYNAMIC_DRAW)
-    ref.numVertex = numVertex
+    if (ref?.buffer) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, ref.buffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(numVertex*3), gl.DYNAMIC_DRAW)
+        ref.numVertex = numVertex
+    }
     return ref
 }
 
@@ -34,9 +35,9 @@ const setupGl = async (gl, numVertex, scale, viewMatrix) => {
     }
 }
 
-const updateProjMatrix = (gl, program, projMatrix) => {
-    if (program) {
-        Glu.switchShader(gl, program)
+const updateProjMatrix = (gl, projMatrix, ref) => {
+    if (ref?.program) {
+        Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
     }
 }
@@ -44,12 +45,11 @@ const updateProjMatrix = (gl, program, projMatrix) => {
 const draw = (gl, positions, modelMatrix, ref) => {
     if (!ref?.program) return
     const { program, buffer, locations, numVertex } = ref
-
     Glu.switchShader(gl, program)
-    gl.uniformMatrix4fv(locations.uModelMatrix, false, modelMatrix)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions)
     gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * floatSize, 0)
+    gl.uniformMatrix4fv(locations.uModelMatrix, false, modelMatrix)
     gl.drawArrays(gl.POINTS, 0, numVertex)
 
 }

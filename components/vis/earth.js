@@ -1,5 +1,4 @@
 import { mat4 } from 'gl-matrix'
-import { epochFromDate, epochDiff } from '../../lib/epoch.js'
 import getIcosphere from '../../lib/icosphere.js'
 import * as Glu from '../../lib/gl-help.js'
 
@@ -54,10 +53,11 @@ const setupGl = async (gl, viewMatrix) => {
     }
 }
 
-const updateProjMatrix = (gl, program, projMatrix) => {
-    if (!program) return
-    Glu.switchShader(gl, program)
-    gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
+const updateProjMatrix = (gl, projMatrix, ref) => {
+    if (ref?.program) {
+        Glu.switchShader(gl, ref.program)
+        gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
+    }
 }
 
 const draw = (gl, epoch, modelMatrix, glVars) => {

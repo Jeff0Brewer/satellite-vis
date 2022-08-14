@@ -49,8 +49,8 @@ const Visualization = props => {
     const setupViewport = (gl, width, height) => {
         gl.viewport(0, 0, width, height)
         const projMatrix = getProjMat(width/height)
-        Satellites.updateProjMatrix(gl, satelliteRef.current?.program, projMatrix)
-        Earth.updateProjMatrix(gl, earthRef.current?.program, projMatrix)
+        Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
+        Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
     }
 
     const setupGl = async gl => {
@@ -75,7 +75,6 @@ const Visualization = props => {
         const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .002)
         canvRef.current.addEventListener('mousedown', () => canvRef.current.addEventListener('mousemove', dragHandler))
         canvRef.current.addEventListener('mouseup', () => canvRef.current.removeEventListener('mousemove', dragHandler))
-
         canvRef.current.addEventListener('wheel', e => { 
             e.preventDefault()
             modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY, .0003)
