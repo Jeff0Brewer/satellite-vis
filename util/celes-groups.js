@@ -1,4 +1,4 @@
-const celestrakGroups = [
+export default [
     'last-30-days',
     'stations',
     'visual',

@@ -1,39 +1,9 @@
-import { validateTleChecksum, validateTleLine1, validateTleLine2, getEccentricity, getInclination, getArgumentPerigee, getRAAN, getMeanMotion, getMeanAnomaly } from '../lib/tle.js'
+import { validateTleChecksum, validateTleLine1, validateTleLine2, getCatalogNumber } from '../lib/tle.js'
 
-test('getEccentricity returns correct value', () => {
+test('getCatalogNumber returns correct value', () => {
     const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
     const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
-    expect(getEccentricity(line1, line2)).toBe(.0003334)
-})
-
-test('getInclination returns correct value', () => {
-    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
-    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
-    expect(getInclination(line1, line2)).toBe(52.9947 * Math.PI / 180)
-})
-
-test('getArgumentPerigee returns correct value', () => {
-    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
-    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
-    expect(getArgumentPerigee(line1, line2)).toBe(26.4946 * Math.PI / 180)
-})
-
-test('getRAAN returns correct value', () => {
-    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
-    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
-    expect(getRAAN(line1, line2)).toBe(286.2236 * Math.PI / 180)
-})
-
-test('getMeanMotion returns correct value', () => {
-    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
-    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
-    expect(getMeanMotion(line1, line2)).toBe(15.43229799)
-})
-
-test('getMeanAnomaly returns correct value', () => {
-    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
-    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
-    expect(getMeanAnomaly(line1, line2)).toBe(333.6228 * Math.PI / 180)
+    expect(getCatalogNumber(line1, line2)).toBe(44252)
 })
 
 const checksumCases = [
@@ -64,7 +34,7 @@ const line1Cases = [
     ['1 47966U 21023B   22205.81703648  .00006120  00000+0  40548-3 0  9990', true],
     ['1 49069U 21073D   22205.91992724  .00002496  00000+0  16081-3 0  9994', true],
     ['1 45455C 20020AH  22206.13486526  .00003377  00000-0  95404-2 0  2069', true],
-    ['1 82741U          22206.42536500  .00001434  00000+0  18136-2 0  9991', false],
+    ['1 82741U          22206.42536500  .00001434  00000+0  18136-2 0  9991', true],
     ['1 25544C 98067A   22218.25277778  .09090838  00000-0  15651-2 0   603', false],
     ['1 73247C 21115Y   21342.82A91063 -.00009798  00010-0 -23754-3 0  3424', false],
     ['1 22041U 92043EEEE22205.67171242 -.00000193  00000+0  00000+0 0219990', false],

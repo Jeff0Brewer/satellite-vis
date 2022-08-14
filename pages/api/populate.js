@@ -1,54 +1,45 @@
 import mongoose from 'mongoose'
 import connectMongo from '../../util/connect-mongo.js'
 import Tle from '../../models/tleModel.js'
+import { getCatalogNumber } from '../../lib/tle.js'
+import celesGroups from '../../util/celes-groups.js'
 
-const getTlePageCount = () => {
-    return fetch('http://tle.ivanstanojevic.me/api/tle/?page-size=100&page=1')
-        .then(res => res.json())
-        .then(res => { 
-            const lastUrl = res.view.last
-            const pageNumber = lastUrl.substring(lastUrl.lastIndexOf('=') + 1)
-            return parseInt(pageNumber)
-        })
-        .catch(err => console.log(err))
-}
-
-const getPage = page => {
-    return fetch(`http://tle.ivanstanojevic.me/api/tle/?page-size=100&page=${page}`)
-        .then(res => res.json())
+const addGroup = group => {
+    return fetch(`https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=TLE`)
+        .then(res => res.text())
         .then(data => {
+            data = data.replace(/[\r]/g, '').split('\n').map(line => line.trim())
             let tles = []
-            data.member.forEach(el => {
+            for (let i = 0; i+2 < data.length; i += 3) {
+                const line1 = data[i+1]
+                const line2 = data[i+2]
                 tles.push({
-                    satelliteId: el?.satelliteId,
-                    name: el?.name,
-                    date: el?.date,
-                    line1: el?.line1,
-                    line2: el?.line2
+                    satelliteId: getCatalogNumber(line1, line2),
+                    name: data[i],
+                    line1: line1,
+                    line2: line2
                 })
-            })
+            }
             return Tle.insertMany(tles, { ordered: false })
         })
-        .catch(err => console.log(err))
 }
 
 const populateTles = async (req, res) => {
-    const maxPage = await getTlePageCount()
-
     await connectMongo()
     const collections = await mongoose.connection.db.listCollections({ name: 'tles' }).toArray()
-    if (collections) {
+    if (collections.length) {
         await Tle.collection.drop()
         console.log('collection reset')
     }
 
-    console.log('inserting pages:')
-    for(let i = 1; i <= maxPage; i++) {
-        const data = await getPage(i)
-        console.log(`${data?.length} from page ${i} added`)
+    let numSatellite = 0
+    for (const group of celesGroups) {
+        const data = await addGroup(group)
+        console.log(`${data.length} added from '${group}'`)
+        numSatellite += data.length
     }
 
-    console.log('data updated')
+    console.log(`data updated, ${numSatellite} total entries`)
     res.status(200).end()
 }
 
