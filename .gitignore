@@ -1,5 +1,6 @@
 notes.md
-/public/earth-cubemap-large
+/wasm/*/target
+/wasm/*/Cargo.lock
 
 # dependencies
 /node_modules

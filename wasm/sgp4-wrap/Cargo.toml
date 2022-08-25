@@ -1,0 +1,12 @@
+[package]
+name = "sgp4_wrap"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+crate_type = ["cdylib"]
+
+[dependencies]
+sgp4 = "0.7"
+serde = { version = "1.0", features = ["derive"] }
+wasm-bindgen = { version = "=0.2.81", features = ["serde-serialize"] }
