@@ -8,5 +8,6 @@ crate_type = ["cdylib"]
 
 [dependencies]
 sgp4 = "0.7"
+eventual = "0.1.7"
 serde = { version = "1.0", features = ["derive"] }
 wasm-bindgen = { version = "=0.2.81", features = ["serde-serialize"] }
