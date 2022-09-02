@@ -106,8 +106,10 @@ const Visualization = props => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
             epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
+            const epochYear = epochRef.current.getUTCFullYear() % 1000
+            const epochDay = (epochRef.current - new Date(epochRef.current.getUTCFullYear(), 0))/86400000;
 
-            sgp4Ref.current.propagate(currT)
+            sgp4Ref.current.propagate(epochYear, epochDay)
             const posPointer = sgp4Ref.current.pos_buf_ptr()
             const posBuffer = new Float32Array(memory.buffer.slice(posPointer, posPointer + props.data.length*3*4))
 

@@ -1,6 +1,9 @@
 extern crate console_error_panic_hook;
-
 use wasm_bindgen::prelude::*;
+use substring::Substring;
+
+const MIN_PER_YEAR: f64 = 525600.0;
+const MIN_PER_DAY: f64 = 1440.0;
 
 #[wasm_bindgen]
 extern "C" {
@@ -11,7 +14,9 @@ extern "C" {
 #[wasm_bindgen]
 pub struct Sgp4Calc {
     pos_buf: Vec<f32>,
-    element_groups: Vec<sgp4::Elements>
+    element_groups: Vec<sgp4::Elements>,
+    epoch_years: Vec<i16>,
+    epoch_days: Vec<f64>
 }
 
 #[wasm_bindgen]
@@ -21,9 +26,13 @@ impl Sgp4Calc {
         console_error_panic_hook::set_once();
         let pos_buf = Vec::new();
         let element_groups = Vec::new();
+        let epoch_years = Vec::new();
+        let epoch_days = Vec::new();
         Sgp4Calc {
             pos_buf,
-            element_groups
+            element_groups,
+            epoch_years,
+            epoch_days
         }
     }
 
@@ -34,21 +43,29 @@ impl Sgp4Calc {
         for text in tles {
             let lines = text.split("\n");
             let tle: Vec<&str> = lines.collect();
+
             let elements: sgp4::Elements = sgp4::Elements::from_tle(
                 Some(tle[0].to_string()),
                 tle[1].as_bytes(),
                 tle[2].as_bytes()
             ).unwrap();
             self.element_groups.push(elements);
+
             for _ in 0..3 {
                 self.pos_buf.push(0.0);
             }
+
+            let year = tle[1].substring(18, 20).parse::<i16>().unwrap();
+            let day = tle[1].substring(20, 32).parse::<f64>().unwrap();
+            self.epoch_years.push(year);
+            self.epoch_days.push(day);
         }
     }
 
-    pub fn propagate(&mut self, t: f64) {
+    pub fn propagate(&mut self, year: f64, day: f64) {
         let mut i = 0;
         for elements in &self.element_groups {
+            let t = (year - self.epoch_years[i] as f64)*MIN_PER_YEAR + (day - self.epoch_days[i])*MIN_PER_DAY;
             let constants: sgp4::Constants = sgp4::Constants::from_elements(&elements).unwrap();
             if let Ok(prediction) = constants.propagate(t) {
                 self.pos_buf[i*3] = prediction.position[0] as f32;

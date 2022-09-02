@@ -10,3 +10,4 @@ crate_type = ["cdylib"]
 sgp4 = "0.7"
 wasm-bindgen = { version = "=0.2.81" }
 console_error_panic_hook = "0.1.6"
+substring = "1.4.5"
