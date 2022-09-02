@@ -109,6 +109,10 @@ const Visualization = props => {
             const posPointer = sgp4Ref.current.pos_buf_ptr()
             const posBuffer = new Float32Array(memory.buffer.slice(posPointer, posPointer + props.data.length*3*4))
 
+            const dataView = new DataView(memory.buffer)
+            const wasmYear = dataView.getInt16(sgp4Ref.current.curr_year_ptr(), true)
+            const wasmDay = dataView.getFloat64(sgp4Ref.current.curr_day_ptr(), true)
+
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Satellites.draw(gl, posBuffer, modelMatRef.current, satelliteRef.current)
             Earth.draw(gl, epochRef.current, modelMatRef.current, earthRef.current)

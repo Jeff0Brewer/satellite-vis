@@ -16,7 +16,9 @@ pub struct Sgp4Calc {
     pos_buf: Vec<f32>,
     element_groups: Vec<sgp4::Elements>,
     epoch_years: Vec<i16>,
-    epoch_days: Vec<f64>
+    epoch_days: Vec<f64>,
+    curr_year: i16,
+    curr_day: f64
 }
 
 #[wasm_bindgen]
@@ -24,15 +26,13 @@ impl Sgp4Calc {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Sgp4Calc {
         console_error_panic_hook::set_once();
-        let pos_buf = Vec::new();
-        let element_groups = Vec::new();
-        let epoch_years = Vec::new();
-        let epoch_days = Vec::new();
         Sgp4Calc {
-            pos_buf,
-            element_groups,
-            epoch_years,
-            epoch_days
+            pos_buf: Vec::new(),
+            element_groups: Vec::new(),
+            epoch_years: Vec::new(),
+            epoch_days: Vec::new(),
+            curr_year: 0,
+            curr_day: 0.0
         }
     }
 
@@ -62,10 +62,10 @@ impl Sgp4Calc {
         }
     }
 
-    pub fn propagate(&mut self, year: f64, day: f64) {
+    pub fn propagate(&mut self, year: i16, day: f64) {
         let mut i = 0;
         for elements in &self.element_groups {
-            let t = (year - self.epoch_years[i] as f64)*MIN_PER_YEAR + (day - self.epoch_days[i])*MIN_PER_DAY;
+            let t = ((year - self.epoch_years[i]) as f64)*MIN_PER_YEAR + (day - self.epoch_days[i])*MIN_PER_DAY;
             let constants: sgp4::Constants = sgp4::Constants::from_elements(&elements).unwrap();
             if let Ok(prediction) = constants.propagate(t) {
                 self.pos_buf[i*3] = prediction.position[0] as f32;
@@ -74,9 +74,19 @@ impl Sgp4Calc {
             }
             i = i + 1;
         }
+        self.curr_year = year;
+        self.curr_day = day;
     }
 
-    pub fn pos_buf_ptr(& self) -> *const f32 {
+    pub fn pos_buf_ptr(&self) -> *const f32 {
         self.pos_buf.as_ptr()
+    }
+
+    pub fn curr_year_ptr(&self) -> *const i16 {
+        &self.curr_year
+    }
+
+    pub fn curr_day_ptr(&self) -> *const f64 {
+        &self.curr_day
     }
 }
