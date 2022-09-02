@@ -1,17 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
-import { Sgp4Loop } from '../wasm/sgp4-wrap/pkg/sgp4_wrap.js'
-import { memory } from '../wasm/sgp4-wrap/pkg/sgp4_wrap_bg.wasm'
+import { Sgp4Calc } from '../wasm/sgp/pkg/sgp.js'
+import { memory } from '../wasm/sgp/pkg/sgp_bg.wasm'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
-    const sgp4Loop = Sgp4Loop.new()
-    const posPointer = sgp4Loop.pos_buf_ptr()
-    //console.log(new Float32Array(memory.buffer.slice(posPointer, posPointer + 4*3)))
+    const sgp4Ref = useRef(new Sgp4Calc())
 
     const defaultSpeed = 100
     const [clockSpeed, setClockSpeed] = useState(defaultSpeed)
@@ -20,7 +18,6 @@ const Visualization = props => {
     const { width, height } = useWindowDim()
     const canvRef = useRef()
     const glRef = useRef()
-    const [satData, setSatData] = useState()
 
     const satelliteRef = useRef()
     const earthRef = useRef()
@@ -96,26 +93,22 @@ const Visualization = props => {
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
 
         const tles = props.data.reduce((prev, tle) => `${prev}${tle.name}\n${tle.line1}\n${tle.line2}\n\n`, '').slice(0, -2)
-        setSatData(tles)
 
-        sgp4Loop.set_data(tles)
+        sgp4Ref.current.set_data(tles)
     }, [props.data])
 
     useEffect(() => {
-        if (!satData) return
         const gl = glRef.current
         const lastT = 0
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
             epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
-            const posBuffer = new Float32Array(props.data.length*3)
-            sgp4Loop.propagate(1)
-            const posPointer = sgp4Loop.pos_buf_ptr()
-            console.log(new Float32Array(memory.buffer.slice(posPointer, posPointer + 4*3)))
-            //wasm.propagate_tles(satData, 1).split("\n").forEach((val, i) => {
-                //    posBuffer[i] = parseFloat(val)
-                //})
+
+            sgp4Ref.current.propagate(currT/1000)
+            const posPointer = sgp4Ref.current.pos_buf_ptr()
+            const posBuffer = new Float32Array(memory.buffer.slice(posPointer, posPointer + props.data.length*3*4))
+
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Satellites.draw(gl, posBuffer, modelMatRef.current, satelliteRef.current)
             Earth.draw(gl, epochRef.current, modelMatRef.current, earthRef.current)
@@ -124,7 +117,7 @@ const Visualization = props => {
         }
         requestFrame(tick)
         return cancelFrame
-    }, [clockSpeed, satData])
+    }, [clockSpeed, props.data])
 
     const speedInputChange = e => {
         const val = parseFloat(e.target.value)

@@ -1,0 +1,11 @@
+[package]
+name = "sgp"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+crate_type = ["cdylib"]
+
+[dependencies]
+sgp4 = "0.7"
+wasm-bindgen = { version = "=0.2.81" }
