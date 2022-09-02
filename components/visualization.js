@@ -98,6 +98,8 @@ const Visualization = props => {
     }, [props.data])
 
     useEffect(() => {
+        if (!props.data) return
+
         const gl = glRef.current
         const lastT = 0
         const tick = currT => {
@@ -105,7 +107,7 @@ const Visualization = props => {
             lastT = currT
             epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
 
-            sgp4Ref.current.propagate(currT/1000)
+            sgp4Ref.current.propagate(currT)
             const posPointer = sgp4Ref.current.pos_buf_ptr()
             const posBuffer = new Float32Array(memory.buffer.slice(posPointer, posPointer + props.data.length*3*4))
 

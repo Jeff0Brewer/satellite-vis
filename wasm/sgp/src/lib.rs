@@ -1,4 +1,12 @@
+extern crate console_error_panic_hook;
+
 use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
 
 #[wasm_bindgen]
 pub struct Sgp4Calc {
@@ -10,6 +18,7 @@ pub struct Sgp4Calc {
 impl Sgp4Calc {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Sgp4Calc {
+        console_error_panic_hook::set_once();
         let pos_buf = Vec::new();
         let element_groups = Vec::new();
         Sgp4Calc {
@@ -41,15 +50,16 @@ impl Sgp4Calc {
         let mut i = 0;
         for elements in &self.element_groups {
             let constants: sgp4::Constants = sgp4::Constants::from_elements(&elements).unwrap();
-            let prediction: sgp4::Prediction = constants.propagate(t).unwrap();
-            self.pos_buf[i*3] = prediction.position[0] as f32;
-            self.pos_buf[i*3+1] = prediction.position[1] as f32;
-            self.pos_buf[i*3+2] = prediction.position[2] as f32;
+            if let Ok(prediction) = constants.propagate(t) {
+                self.pos_buf[i*3] = prediction.position[0] as f32;
+                self.pos_buf[i*3+1] = prediction.position[1] as f32;
+                self.pos_buf[i*3+2] = prediction.position[2] as f32;
+            }
             i = i + 1;
         }
     }
 
-    pub fn pos_buf_ptr(&self) -> *const f32 {
+    pub fn pos_buf_ptr(& self) -> *const f32 {
         self.pos_buf.as_ptr()
     }
 }

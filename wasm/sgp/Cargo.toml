@@ -9,3 +9,4 @@ crate_type = ["cdylib"]
 [dependencies]
 sgp4 = "0.7"
 wasm-bindgen = { version = "=0.2.81" }
+console_error_panic_hook = "0.1.6"
