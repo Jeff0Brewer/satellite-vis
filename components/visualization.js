@@ -91,15 +91,11 @@ const Visualization = props => {
     useEffect(() => { 
         if (!props.data.length) return
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
-
         const tles = props.data.reduce((prev, tle) => `${prev}${tle.name}\n${tle.line1}\n${tle.line2}\n\n`, '').slice(0, -2)
-
         sgp4Ref.current.set_data(tles)
     }, [props.data])
 
     useEffect(() => {
-        if (!props.data) return
-
         const gl = glRef.current
         const lastT = 0
         const tick = currT => {
@@ -107,7 +103,7 @@ const Visualization = props => {
             lastT = currT
             epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
             const epochYear = epochRef.current.getUTCFullYear() % 1000
-            const epochDay = (epochRef.current - new Date(epochRef.current.getUTCFullYear(), 0))/86400000;
+            const epochDay = (epochRef.current - new Date(epochRef.current.getUTCFullYear(), 0))/86400000
 
             sgp4Ref.current.propagate(epochYear, epochDay)
             const posPointer = sgp4Ref.current.pos_buf_ptr()
