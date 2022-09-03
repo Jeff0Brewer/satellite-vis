@@ -1,15 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
-import { Sgp4Calc } from '../wasm/sgp/pkg/sgp.js'
-import { memory } from '../wasm/sgp/pkg/sgp_bg.wasm'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
-    const sgp4Ref = useRef(new Sgp4Calc())
+    const sgp4WorkerRef = useRef()
+    const sgp4MemoryRef = useRef([0])
 
     const defaultSpeed = 100
     const [clockSpeed, setClockSpeed] = useState(defaultSpeed)
@@ -82,6 +81,8 @@ const Visualization = props => {
             e.preventDefault()
             modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY, .0003)
         })
+
+        sgp4WorkerRef.current = new Worker(new URL('../util/sgp4-worker.js', import.meta.url))
     }, [])
 
     useEffect(() => {
@@ -92,7 +93,15 @@ const Visualization = props => {
         if (!props.data.length) return
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
         const tles = props.data.reduce((prev, tle) => `${prev}${tle.name}\n${tle.line1}\n${tle.line2}\n\n`, '').slice(0, -2)
-        sgp4Ref.current.set_data(tles)
+        sgp4MemoryRef.current = new SharedArrayBuffer(props.data.length*3*4)
+        sgp4WorkerRef.current.postMessage({
+            data: tles,
+            dataLength: props.data.length,
+            buffer: sgp4MemoryRef.current,
+            clockSpeed: clockSpeed,
+            epochYear: 22,
+            epochDay: 250
+        })
     }, [props.data])
 
     useEffect(() => {
@@ -105,13 +114,11 @@ const Visualization = props => {
             const epochYear = epochRef.current.getUTCFullYear() % 1000
             const epochDay = (epochRef.current - new Date(epochRef.current.getUTCFullYear(), 0))/86400000
 
-            sgp4Ref.current.propagate(epochYear, epochDay)
-            const posPointer = sgp4Ref.current.pos_buf_ptr()
-            const posBuffer = new Float32Array(memory.buffer.slice(posPointer, posPointer + props.data.length*3*4))
+            const posBuffer = new Float32Array(sgp4MemoryRef.current)
 
-            const dataView = new DataView(memory.buffer)
-            const wasmYear = dataView.getInt16(sgp4Ref.current.curr_year_ptr(), true)
-            const wasmDay = dataView.getFloat64(sgp4Ref.current.curr_day_ptr(), true)
+            //const dataView = new DataView(memory.buffer)
+            //const wasmYear = dataView.getInt16(sgp4Ref.current.curr_year_ptr(), true)
+            //const wasmDay = dataView.getFloat64(sgp4Ref.current.curr_day_ptr(), true)
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Satellites.draw(gl, posBuffer, modelMatRef.current, satelliteRef.current)
@@ -125,8 +132,16 @@ const Visualization = props => {
 
     const speedInputChange = e => {
         const val = parseFloat(e.target.value)
-        if (!isNaN(val))
+        if (!isNaN(val)) {
             setClockSpeed(val)
+            sgp4WorkerRef.current.postMessage({
+                dataLength: props.data.length,
+                buffer: sgp4MemoryRef.current,
+                clockSpeed: val,
+                epochYear: 22,
+                epochDay: 250
+            })
+        }
     }
 
     return (

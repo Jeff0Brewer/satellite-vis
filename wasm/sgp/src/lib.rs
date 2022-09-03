@@ -36,7 +36,7 @@ impl Sgp4Calc {
         }
     }
 
-    pub fn set_data(&mut self, data: &str) {
+    pub fn set_data(&mut self, data: &str) -> usize {
         self.pos_buf = Vec::new();
         self.element_groups = Vec::new();
         let tles = data.split("\n\n");
@@ -60,6 +60,7 @@ impl Sgp4Calc {
             self.epoch_years.push(year);
             self.epoch_days.push(day);
         }
+        self.element_groups.len()
     }
 
     pub fn propagate(&mut self, year: i16, day: f64) {
