@@ -8,7 +8,7 @@ import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
     const sgp4WorkerRef = useRef()
-    const sgp4MemoryRef = useRef([0])
+    const sgp4MemoryRef = useRef()
 
     const defaultSpeed = 100
     const [clockSpeed, setClockSpeed] = useState(defaultSpeed)
@@ -83,6 +83,7 @@ const Visualization = props => {
         })
 
         sgp4WorkerRef.current = new Worker(new URL('../util/sgp4-worker.js', import.meta.url))
+        sgp4MemoryRef.current = new WebAssembly.Memory({ initial: 10, maximum: 30, shared: true })
     }, [])
 
     useEffect(() => {
@@ -93,11 +94,9 @@ const Visualization = props => {
         if (!props.data.length) return
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
         const tles = props.data.reduce((prev, tle) => `${prev}${tle.name}\n${tle.line1}\n${tle.line2}\n\n`, '').slice(0, -2)
-        sgp4MemoryRef.current = new SharedArrayBuffer(props.data.length*3*4)
         sgp4WorkerRef.current.postMessage({
             data: tles,
-            dataLength: props.data.length,
-            buffer: sgp4MemoryRef.current,
+            memory: sgp4MemoryRef.current.buffer,
             clockSpeed: clockSpeed,
             epochYear: 22,
             epochDay: 250
@@ -107,6 +106,7 @@ const Visualization = props => {
     useEffect(() => {
         const gl = glRef.current
         const lastT = 0
+
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
@@ -114,7 +114,8 @@ const Visualization = props => {
             const epochYear = epochRef.current.getUTCFullYear() % 1000
             const epochDay = (epochRef.current - new Date(epochRef.current.getUTCFullYear(), 0))/86400000
 
-            const posBuffer = new Float32Array(sgp4MemoryRef.current)
+            //const posBuffer = new Float32Array(sgp4MemoryRef.current)
+            const posBuffer = new Float32Array(sgp4MemoryRef.current.buffer.slice(0, props.data.length*3*4))
 
             //const dataView = new DataView(memory.buffer)
             //const wasmYear = dataView.getInt16(sgp4Ref.current.curr_year_ptr(), true)
@@ -135,11 +136,7 @@ const Visualization = props => {
         if (!isNaN(val)) {
             setClockSpeed(val)
             sgp4WorkerRef.current.postMessage({
-                dataLength: props.data.length,
-                buffer: sgp4MemoryRef.current,
-                clockSpeed: val,
-                epochYear: 22,
-                epochDay: 250
+                clockSpeed: val
             })
         }
     }
