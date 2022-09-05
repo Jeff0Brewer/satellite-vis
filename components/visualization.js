@@ -1,27 +1,26 @@
 import { useState, useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
+import { newEpoch, incrementEpoch } from '../lib/shared-epoch.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
-    const SGP4_THREADS = 2
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
+    const SGP4_THREADS = 2
 
+    const epochRef = useRef(newEpoch(new Date()))
     const defaultSpeed = 100
     const [clockSpeed, setClockSpeed] = useState(defaultSpeed)
-    const epochRef = useRef(new Date())
 
     const { width, height } = useWindowDim()
     const canvRef = useRef()
     const glRef = useRef()
-
     const satelliteRef = useRef()
     const earthRef = useRef()
-
     const visScale = .0001
     const modelMatRef = useRef(
         mat4.scale(
@@ -42,12 +41,11 @@ const Visualization = props => {
             100 //far
         )
     }
+    const floatSize = Float32Array.BYTES_PER_ELEMENT
 
     const frameIdRef = useRef()
     const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
     const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
-
-    const floatSize = Float32Array.BYTES_PER_ELEMENT
 
     const setupViewport = (gl, width, height) => {
         gl.viewport(0, 0, width, height)
@@ -62,7 +60,7 @@ const Visualization = props => {
 
         const [satelliteVars, earthVars] = await Promise.all([
             Satellites.setupGl(gl, props.data.length, visScale, viewMatrix),
-            Earth.setupGl(gl, viewMatrix)
+            Earth.setupGl(gl, viewMatrix, epochRef.current)
         ])
         satelliteRef.current = satelliteVars
         earthRef.current = earthVars
@@ -115,9 +113,7 @@ const Visualization = props => {
             worker.postMessage({
                 data: tles[i],
                 memory: sgp4MemoryRefs.current[i],
-                clockSpeed: clockSpeed,
-                epochYear: 22,
-                epochDay: 250
+                epoch: epochRef.current
             })
         })
 
@@ -126,13 +122,13 @@ const Visualization = props => {
     useEffect(() => {
         const gl = glRef.current
         const lastT = 0
+        const posBuffer = new Float32Array(props.data.length * 3)
 
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
-            epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
+            incrementEpoch(epochRef.current, elapsed*clockSpeed)
 
-            const posBuffer = new Float32Array(props.data.length * 3)
             let offset = 0
             sgp4MemoryRefs.current.forEach((buffer, i) => {
                 posBuffer.set(buffer, offset)
@@ -153,11 +149,6 @@ const Visualization = props => {
         const val = parseFloat(e.target.value)
         if (!isNaN(val)) {
             setClockSpeed(val)
-            sgp4WorkerRefs.current.forEach(worker =>
-                worker.postMessage({
-                    clockSpeed: val
-                })
-            )
         }
     }
 
@@ -168,7 +159,5 @@ const Visualization = props => {
         </section>
     )
 }
-
-
 
 export default Visualization
