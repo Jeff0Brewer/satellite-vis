@@ -1,0 +1,18 @@
+[package]
+name = "sgp"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+crate_type = ["cdylib"]
+
+[dependencies]
+sgp4 = "0.7"
+wasm-bindgen = "0.2.81"
+wee_alloc = "0.4.5"
+console_error_panic_hook = "0.1.6"
+substring = "1.4.5"
+
+[profile.dev]
+lto = true
+opt-level = 3

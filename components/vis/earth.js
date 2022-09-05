@@ -1,10 +1,11 @@
 import { mat4 } from 'gl-matrix'
 import getIcosphere from '../../lib/icosphere.js'
+import { getEpochYear, getEpochDay } from '../../lib/shared-epoch.js'
 import * as Glu from '../../lib/gl-help.js'
 
 const floatSize = Float32Array.BYTES_PER_ELEMENT
 
-const setupGl = async (gl, viewMatrix) => {
+const setupGl = async (gl, viewMatrix, epoch) => {
     const vertPath = './shaders/earth-vert.glsl'
     const fragPath = './shaders/earth-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
@@ -42,7 +43,10 @@ const setupGl = async (gl, viewMatrix) => {
         gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
     ])
 
-    const offsetEpoch = new Date()
+    const offsetEpoch = {
+        year: getEpochYear(epoch),
+        day: getEpochDay(epoch)
+    }
 
     return {
         program: program,
@@ -64,7 +68,8 @@ const draw = (gl, epoch, modelMatrix, glVars) => {
     if (!glVars?.program) return
     const { program, buffer, locations, numVertex, offsetEpoch } = glVars
 
-    const earthRotation = mat4.fromZRotation(mat4.create(), (epoch - offsetEpoch)/86400000 * 2*Math.PI)
+    const dt = (getEpochYear(epoch) - offsetEpoch.year)/365 + (getEpochDay(epoch) - offsetEpoch.day)
+    const earthRotation = mat4.fromZRotation(mat4.create(), dt * 2*Math.PI)
     const earthModelMat = mat4.multiply(mat4.create(), modelMatrix, earthRotation)
     
     Glu.switchShader(gl, program)

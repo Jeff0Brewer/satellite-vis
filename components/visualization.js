@@ -1,24 +1,26 @@
 import { useState, useRef, useEffect } from 'react'
-import { propagate } from 'satellite.js'
 import { mat4 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
+import { newEpoch, incrementEpoch } from '../lib/shared-epoch.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
+    const sgp4WorkerRefs = useRef([])
+    const sgp4MemoryRefs = useRef([])
+    const SGP4_THREADS = 2
+
+    const epochRef = useRef(newEpoch(new Date()))
     const defaultSpeed = 100
     const [clockSpeed, setClockSpeed] = useState(defaultSpeed)
-    const epochRef = useRef(new Date())
 
     const { width, height } = useWindowDim()
     const canvRef = useRef()
     const glRef = useRef()
-
     const satelliteRef = useRef()
     const earthRef = useRef()
-
     const visScale = .0001
     const modelMatRef = useRef(
         mat4.scale(
@@ -39,12 +41,11 @@ const Visualization = props => {
             100 //far
         )
     }
+    const floatSize = Float32Array.BYTES_PER_ELEMENT
 
     const frameIdRef = useRef()
     const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
     const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
-
-    const floatSize = Float32Array.BYTES_PER_ELEMENT
 
     const setupViewport = (gl, width, height) => {
         gl.viewport(0, 0, width, height)
@@ -59,13 +60,17 @@ const Visualization = props => {
 
         const [satelliteVars, earthVars] = await Promise.all([
             Satellites.setupGl(gl, props.data.length, visScale, viewMatrix),
-            Earth.setupGl(gl, viewMatrix)
+            Earth.setupGl(gl, viewMatrix, epochRef.current)
         ])
         satelliteRef.current = satelliteVars
         earthRef.current = earthVars
 
         const {innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
         setupViewport(gl, w * dpr, h * dpr)
+    }
+
+    const concatTle = (tles) => {
+        return tles.reduce((prev, tle) => `${prev}${tle.name}\n${tle.line1}\n${tle.line2}\n\n`, '').slice(0, -2)
     }
 
     useEffect(() => {
@@ -79,6 +84,12 @@ const Visualization = props => {
             e.preventDefault()
             modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY, .0003)
         })
+
+        sgp4WorkerRefs.current.forEach(worker => worker.terminate())
+        sgp4WorkerRefs.current = []
+        for (let i = 0; i < SGP4_THREADS; i++) {
+            sgp4WorkerRefs.current.push(new Worker(new URL('../util/sgp4-worker.js', import.meta.url)))
+        }
     }, [])
 
     useEffect(() => {
@@ -87,23 +98,41 @@ const Visualization = props => {
 
     useEffect(() => { 
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
+
+        const tlePerThread = Math.floor(props.data.length/SGP4_THREADS)
+        let tles = []
+        sgp4MemoryRefs.current = []
+        for (let i = 0; i < SGP4_THREADS; i++) {
+            const numTle = i == SGP4_THREADS - 1 ? props.data.length - tlePerThread*i : tlePerThread
+            sgp4MemoryRefs.current.push(
+                new Float32Array(new SharedArrayBuffer(numTle * 3*4))
+            )
+            tles.push(concatTle(props.data.slice(i*tlePerThread, i*tlePerThread + numTle)))
+        }
+        sgp4WorkerRefs.current.forEach((worker, i) => {
+            worker.postMessage({
+                data: tles[i],
+                memory: sgp4MemoryRefs.current[i],
+                epoch: epochRef.current
+            })
+        })
+
     }, [props.data])
-    
+
     useEffect(() => {
         const gl = glRef.current
         const lastT = 0
+        const posBuffer = new Float32Array(props.data.length * 3)
+
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
-            epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
-            const posBuffer = new Float32Array(props.data.length*3)
-            props.data.forEach((satrec, i) => {
-                const { position } = propagate(satrec, epochRef.current)
-                if (!satrec.error) {
-                    posBuffer[i*3] = position.x
-                    posBuffer[i*3+1] = position.y
-                    posBuffer[i*3+2] = position.z
-                }
+            incrementEpoch(epochRef.current, elapsed*clockSpeed)
+
+            let offset = 0
+            sgp4MemoryRefs.current.forEach((buffer, i) => {
+                posBuffer.set(buffer, offset)
+                offset += buffer.length
             })
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
@@ -118,8 +147,9 @@ const Visualization = props => {
 
     const speedInputChange = e => {
         const val = parseFloat(e.target.value)
-        if (!isNaN(val))
+        if (!isNaN(val)) {
             setClockSpeed(val)
+        }
     }
 
     return (
