@@ -7,6 +7,7 @@ import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
+    const SGP4_THREADS = 2
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
 
@@ -86,10 +87,11 @@ const Visualization = props => {
             modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY, .0003)
         })
 
-        sgp4WorkerRefs.current = [
-            new Worker(new URL('../util/sgp4-worker.js', import.meta.url)),
-            new Worker(new URL('../util/sgp4-worker.js', import.meta.url))
-        ]
+        sgp4WorkerRefs.current.forEach(worker => worker.terminate())
+        sgp4WorkerRefs.current = []
+        for (let i = 0; i < SGP4_THREADS; i++) {
+            sgp4WorkerRefs.current.push(new Worker(new URL('../util/sgp4-worker.js', import.meta.url)))
+        }
     }, [])
 
     useEffect(() => {
@@ -97,27 +99,28 @@ const Visualization = props => {
     }, [width, height])
 
     useEffect(() => { 
-        if (!props.data.length) return
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
 
-        const tleMid = Math.floor(props.data.length/2)
-        sgp4MemoryRefs.current = [
-            new SharedArrayBuffer(tleMid * 3*4),
-            new SharedArrayBuffer((props.data.length - tleMid) * 3*4)
-        ]
-        const tles = [
-            concatTle(props.data.slice(0, tleMid)),
-            concatTle(props.data.slice(tleMid))
-        ]
-        for (const i of [0, 1]) {
-            sgp4WorkerRefs.current[i].postMessage({
+        const tlePerThread = Math.floor(props.data.length/SGP4_THREADS)
+        let tles = []
+        sgp4MemoryRefs.current = []
+        for (let i = 0; i < SGP4_THREADS; i++) {
+            const numTle = i == SGP4_THREADS - 1 ? props.data.length - tlePerThread*i : tlePerThread
+            sgp4MemoryRefs.current.push(
+                new Float32Array(new SharedArrayBuffer(numTle * 3*4))
+            )
+            tles.push(concatTle(props.data.slice(i*tlePerThread, i*tlePerThread + numTle)))
+        }
+        sgp4WorkerRefs.current.forEach((worker, i) => {
+            worker.postMessage({
                 data: tles[i],
                 memory: sgp4MemoryRefs.current[i],
                 clockSpeed: clockSpeed,
                 epochYear: 22,
                 epochDay: 250
             })
-        }
+        })
+
     }, [props.data])
 
     useEffect(() => {
@@ -129,11 +132,12 @@ const Visualization = props => {
             lastT = currT
             epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
 
-            const pos0 = new Float32Array(sgp4MemoryRefs.current[0])
-            const pos1 = new Float32Array(sgp4MemoryRefs.current[1])
-            const posBuffer = new Float32Array(pos0.length + pos1.length)
-            posBuffer.set(pos0)
-            posBuffer.set(pos1, pos0.length)
+            const posBuffer = new Float32Array(props.data.length * 3)
+            let offset = 0
+            sgp4MemoryRefs.current.forEach((buffer, i) => {
+                posBuffer.set(buffer, offset)
+                offset += buffer.length
+            })
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Satellites.draw(gl, posBuffer, modelMatRef.current, satelliteRef.current)
@@ -143,7 +147,7 @@ const Visualization = props => {
         }
         requestFrame(tick)
         return cancelFrame
-    }, [props.data])
+    }, [clockSpeed, props.data])
 
     const speedInputChange = e => {
         const val = parseFloat(e.target.value)

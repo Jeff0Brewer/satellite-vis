@@ -14,26 +14,25 @@ onmessage = e => {
     const loopArgsPresent = e.data?.memory && e.data?.epochYear && e.data?.epochDay
     if (loopArgsPresent) {
         const { memory, epochYear, epochDay } = e.data
-        let curr_year = epochYear
-        let curr_day = epochDay
+        let currYear = epochYear
+        let currDay = epochDay
         let lastT = Date.now()
-        let buffer = new Float32Array(memory)
         const tick = () => {
             const currT = Date.now()
             const elapsed = currT - lastT
             lastT = currT
             if (elapsed > 100) return
 
-            curr_day += elapsed*clockSpeed/86400000
-            if (curr_day > 365) {
-                curr_year += 1
-                curr_day = curr_day - 365
+            currDay += elapsed*clockSpeed/86400000
+            if (currDay > 365) {
+                currYear += 1
+                currDay = currDay - 365
             }
-            if (curr_day < 0) {
-                curr_year -= 1
-                curr_day = curr_day + 365
+            if (currDay < 0) {
+                currYear -= 1
+                currDay = currDay + 365
             }
-            sgp4.propagate(buffer, curr_year, curr_day)
+            sgp4.propagate(memory, currYear, currDay)
         }
         if (intervalId)
             clearInterval(intervalId)
