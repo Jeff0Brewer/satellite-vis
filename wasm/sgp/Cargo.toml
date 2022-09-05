@@ -9,10 +9,5 @@ crate_type = ["cdylib"]
 [dependencies]
 sgp4 = "0.7"
 wasm-bindgen = "0.2.81"
-wasm-bindgen-futures = "0.4.32"
 console_error_panic_hook = "0.1.6"
 substring = "1.4.5"
-instant = "0.1.12"
-
-[dependencies.js-sys]
-version = "0.3.4"

@@ -7,8 +7,8 @@ import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
-    const sgp4WorkerRef = useRef()
-    const sgp4MemoryRef = useRef()
+    const sgp4WorkerRefs = useRef([])
+    const sgp4MemoryRefs = useRef([])
 
     const defaultSpeed = 100
     const [clockSpeed, setClockSpeed] = useState(defaultSpeed)
@@ -70,6 +70,10 @@ const Visualization = props => {
         setupViewport(gl, w * dpr, h * dpr)
     }
 
+    const concatTle = (tles) => {
+        return tles.reduce((prev, tle) => `${prev}${tle.name}\n${tle.line1}\n${tle.line2}\n\n`, '').slice(0, -2)
+    }
+
     useEffect(() => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
         setupGl(glRef.current)
@@ -82,8 +86,10 @@ const Visualization = props => {
             modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY, .0003)
         })
 
-        sgp4WorkerRef.current = new Worker(new URL('../util/sgp4-worker.js', import.meta.url))
-        sgp4MemoryRef.current = new WebAssembly.Memory({ initial: 10, maximum: 30, shared: true })
+        sgp4WorkerRefs.current = [
+            new Worker(new URL('../util/sgp4-worker.js', import.meta.url)),
+            new Worker(new URL('../util/sgp4-worker.js', import.meta.url))
+        ]
     }, [])
 
     useEffect(() => {
@@ -93,14 +99,25 @@ const Visualization = props => {
     useEffect(() => { 
         if (!props.data.length) return
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
-        const tles = props.data.reduce((prev, tle) => `${prev}${tle.name}\n${tle.line1}\n${tle.line2}\n\n`, '').slice(0, -2)
-        sgp4WorkerRef.current.postMessage({
-            data: tles,
-            memory: sgp4MemoryRef.current.buffer,
-            clockSpeed: clockSpeed,
-            epochYear: 22,
-            epochDay: 250
-        })
+
+        const tleMid = Math.floor(props.data.length/2)
+        sgp4MemoryRefs.current = [
+            new SharedArrayBuffer(tleMid * 3*4),
+            new SharedArrayBuffer((props.data.length - tleMid) * 3*4)
+        ]
+        const tles = [
+            concatTle(props.data.slice(0, tleMid)),
+            concatTle(props.data.slice(tleMid))
+        ]
+        for (const i of [0, 1]) {
+            sgp4WorkerRefs.current[i].postMessage({
+                data: tles[i],
+                memory: sgp4MemoryRefs.current[i],
+                clockSpeed: clockSpeed,
+                epochYear: 22,
+                epochDay: 250
+            })
+        }
     }, [props.data])
 
     useEffect(() => {
@@ -111,15 +128,12 @@ const Visualization = props => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
             epochRef.current = new Date(epochRef.current.getTime() + elapsed*clockSpeed)
-            const epochYear = epochRef.current.getUTCFullYear() % 1000
-            const epochDay = (epochRef.current - new Date(epochRef.current.getUTCFullYear(), 0))/86400000
 
-            //const posBuffer = new Float32Array(sgp4MemoryRef.current)
-            const posBuffer = new Float32Array(sgp4MemoryRef.current.buffer.slice(0, props.data.length*3*4))
-
-            //const dataView = new DataView(memory.buffer)
-            //const wasmYear = dataView.getInt16(sgp4Ref.current.curr_year_ptr(), true)
-            //const wasmDay = dataView.getFloat64(sgp4Ref.current.curr_day_ptr(), true)
+            const pos0 = new Float32Array(sgp4MemoryRefs.current[0])
+            const pos1 = new Float32Array(sgp4MemoryRefs.current[1])
+            const posBuffer = new Float32Array(pos0.length + pos1.length)
+            posBuffer.set(pos0)
+            posBuffer.set(pos1, pos0.length)
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Satellites.draw(gl, posBuffer, modelMatRef.current, satelliteRef.current)
@@ -129,15 +143,17 @@ const Visualization = props => {
         }
         requestFrame(tick)
         return cancelFrame
-    }, [clockSpeed, props.data])
+    }, [props.data])
 
     const speedInputChange = e => {
         const val = parseFloat(e.target.value)
         if (!isNaN(val)) {
             setClockSpeed(val)
-            sgp4WorkerRef.current.postMessage({
-                clockSpeed: val
-            })
+            sgp4WorkerRefs.current.forEach(worker =>
+                worker.postMessage({
+                    clockSpeed: val
+                })
+            )
         }
     }
 
