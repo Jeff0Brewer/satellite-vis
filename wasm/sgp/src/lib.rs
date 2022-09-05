@@ -1,15 +1,13 @@
 extern crate console_error_panic_hook;
+extern crate wee_alloc;
 use wasm_bindgen::prelude::*;
 use substring::Substring;
 
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 const MIN_PER_YEAR: f64 = 525600.0;
 const MIN_PER_DAY: f64 = 1440.0;
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-}
 
 #[wasm_bindgen]
 pub struct Sgp4Calc {
@@ -36,8 +34,7 @@ impl Sgp4Calc {
         self.epoch_days = Vec::new();
         let tles = data.split("\n\n");
         for text in tles {
-            let lines = text.split("\n");
-            let tle: Vec<&str> = lines.collect();
+            let tle: Vec<&str> = text.split("\n").collect();
 
             let elements: sgp4::Elements = sgp4::Elements::from_tle(
                 Some(tle[0].to_string()),
@@ -57,15 +54,16 @@ impl Sgp4Calc {
         let mut mem_i = 0;
         let mut tle_i = 0;
         for elements in &self.element_groups {
-            let t = ((epoch_year - self.epoch_years[tle_i]) as f64)*MIN_PER_YEAR + (epoch_day - self.epoch_days[tle_i])*MIN_PER_DAY;
             let constants: sgp4::Constants = sgp4::Constants::from_elements(&elements).unwrap();
+            let t = ((epoch_year - self.epoch_years[tle_i]) as f64)*MIN_PER_YEAR + (epoch_day - self.epoch_days[tle_i])*MIN_PER_DAY;
+            tle_i = tle_i + 1;
+
             if let Ok(prediction) = constants.propagate(t) {
                 for float in prediction.position.iter() {
                     memory[mem_i] = *float as f32;
                     mem_i = mem_i + 1;
                 }
             }
-            tle_i = tle_i + 1;
         }
     }
 }
