@@ -27,7 +27,7 @@ const PowRange = props => {
     }, [])
 
     return (
-        <input ref={inputRef}
+        <input ref={inputRef} className={props?.styleName}
             type="range"
             min={valToRaw(props.min)}
             max={valToRaw(props.max)}

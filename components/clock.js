@@ -8,28 +8,34 @@ const Clock = props => {
     const [speedText, setSpeedText] = useState()
     const intervalIdRef = useRef()
 
-    const dipslayEpoch = () => {
+    const displayEpoch = () => {
         setEpochText(getEpochDisplay(props.sharedEpoch))
     }
 
     const resetEpoch = () => {
         setEpochDate(props.sharedEpoch, new Date())
+        displayEpoch()
     }
 
     useEffect(() => {
-        intervalIdRef.current = setInterval(dipslayEpoch, 300)
+        intervalIdRef.current = setInterval(displayEpoch, 1000)
         return () => clearInterval(intervalIdRef.current)
     }, [])
 
     return (
         <section className={styles.clock}>
             <span>
-                {epochText}
+                <p className={styles.epochText}>
+                    {epochText}
+                </p>
                 <button className={styles.reset} onClick={resetEpoch}></button>
             </span>
             <span>
-                {speedText + 'x'}
-                <PowRange 
+                <p className={styles.speedText}>
+                    {speedText + 'x'}
+                </p>
+                <PowRange
+                    styleName={styles.speedInput}
                     pow={4}
                     min={-10000}
                     max={10000}
