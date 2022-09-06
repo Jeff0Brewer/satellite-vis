@@ -4,6 +4,7 @@ import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { newEpoch, incrementEpoch } from '../lib/shared-epoch.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
+import Clock from './clock.js'
 import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
@@ -155,7 +156,7 @@ const Visualization = props => {
     return (
         <section>
             <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>
-            <input className={styles.speed} type='text' defaultValue={defaultSpeed} onChange={speedInputChange} />
+            <Clock sharedEpoch={epochRef.current} setSpeed={setClockSpeed} />
         </section>
     )
 }
