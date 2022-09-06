@@ -1,0 +1,42 @@
+.clock {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, .8);
+    color: #fff;
+    font-size: 20px;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+.clock span {
+    display: flex;
+    justify-content: space-between;
+}
+
+.clock p {
+    margin: 0;
+}
+
+.epochText {
+    font-size: 25px;
+    padding-bottom: 10px;
+}
+
+.reset {
+    width: 25px;
+    height: 25px;
+    background-color: #fff;
+    border: 0;
+    margin-left: 10px;
+}
+
+.speedText {
+    width: 75px;
+}
+
+.speedInput {
+    width: calc(100% - 75px);
+}
