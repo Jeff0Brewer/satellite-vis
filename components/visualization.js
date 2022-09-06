@@ -137,8 +137,8 @@ const Visualization = props => {
             })
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-            Satellites.draw(gl, posBuffer, modelMatRef.current, satelliteRef.current)
             Earth.draw(gl, epochRef.current, modelMatRef.current, earthRef.current)
+            Satellites.draw(gl, posBuffer, modelMatRef.current, satelliteRef.current)
 
             requestFrame(tick)
         }
