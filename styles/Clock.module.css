@@ -7,7 +7,6 @@
     width: var(--sidebar-width);
     height: var(--clock-height);
     background-color: var(--sidebar-bg);
-    color: #fff;
     font-size: 20px;
 }
 

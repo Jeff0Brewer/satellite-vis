@@ -17,7 +17,21 @@ const Catalog = props => {
     }, [])
 
     return (
-        <section>
+        <section className={styles.catalog}>
+            <span className={styles.labels}>
+                <div>
+                    name
+                </div>
+                <div>
+                    id
+                </div>
+                <div>
+                    type
+                </div>
+                <div>
+                    trail
+                </div>
+            </span>
         </section>
     )
 }

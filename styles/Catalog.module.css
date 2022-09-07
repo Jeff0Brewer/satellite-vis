@@ -5,3 +5,15 @@
     height: calc(100vh - var(--clock-height) - var(--camera-height));
     background-color: var(--sidebar-bg);
 }
+
+.labels {
+    display: flex;
+    justify-content: space-around;
+    font-size: 16px;
+    border: solid #fff;
+    border-width: 1px 0;
+}
+
+.labels > div {
+    padding: 15px;
+}
