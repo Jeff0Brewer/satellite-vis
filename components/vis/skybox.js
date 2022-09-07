@@ -21,7 +21,7 @@ const setupGl = async (gl, viewMatrix) => {
     locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 2, 2, 0, false, floatSize)
     locations['uViewProjInverse'] = gl.getUniformLocation(gl.program, 'uViewProjInverse')
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uSkybox'), 0)
-    const texture = Glu.createCubemap(gl, 2048, [
+    const texture = Glu.createCubemap(gl, 1024, [
         './galaxy-cubemap/posx.png', './galaxy-cubemap/negx.png',
         './galaxy-cubemap/posy.png', './galaxy-cubemap/negy.png',
         './galaxy-cubemap/posz.png', './galaxy-cubemap/negz.png'
