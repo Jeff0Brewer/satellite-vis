@@ -1,4 +1,4 @@
-export default {
+const noradGroups = {
     'Resource': [
         'weather',
         'noaa',
@@ -63,4 +63,33 @@ export default {
         'cubesat',
         'other'
     ]
+}
+
+const supplementalGroups = {
+    'Resource': [
+        'planet',
+        'meteosat',
+        'cpf'
+    ],
+    'Communications': [
+        'starlink',
+        'oneweb',
+        'iridium',
+        'intelsat',
+        'ses',
+        'telesat',
+        'orbcomm'
+    ],
+    'Navigation': [
+        'gps',
+        'glonass'
+    ],
+    'Scientific': [
+        'iss'
+    ]
+}
+
+export {
+    noradGroups,
+    supplementalGroups
 }

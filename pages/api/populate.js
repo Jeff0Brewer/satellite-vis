@@ -2,10 +2,15 @@ import mongoose from 'mongoose'
 import connectMongo from '../../util/connect-mongo.js'
 import Tle from '../../models/tleModel.js'
 import { getCatalogNumber } from '../../lib/tle.js'
-import celesGroups from '../../util/celes-groups.js'
+import { noradGroups, supplementalGroups } from '../../util/celes-groups.js'
 
-const addGroup = (category, group, seenIds) => {
-    return fetch(`https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=TLE`)
+const getNoradUrl = group => 
+    `https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=TLE`
+const getSupplementalUrl = group => 
+    `https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?FILE=${group}&FORMAT=tle`
+
+const addGroup = (category, url, seenIds) => {
+    return fetch(url)
         .then(res => res.text())
         .then(text => {
             const data = text.split('\n').map(line => line.replace(/[\r]/g, '').trim())
@@ -29,6 +34,16 @@ const addGroup = (category, group, seenIds) => {
         })
 }
 
+const addGroups = (groups, groupToUrl, seenIds) => {
+    const out = []
+    for (const category in groups) {
+        for (const group of groups[category]) {
+            out.push(addGroup(category, groupToUrl(group), seenIds))
+        }
+    }
+    return out
+}
+
 const populateTles = async (req, res) => {
     await connectMongo()
     const collections = await mongoose.connection.db.listCollections({ name: 'tles' }).toArray()
@@ -37,13 +52,12 @@ const populateTles = async (req, res) => {
         console.log('COLLECTION RESET')
     }
 
-    const groups = []
     const seenIds = new Set()
-    for (const category in celesGroups) {
-        for (const group of celesGroups[category]) {
-            groups.push(addGroup(category, group, seenIds))
-        }
-    }
+    const groups = [
+        ...addGroups(noradGroups, getNoradUrl, seenIds),
+        ...addGroups(supplementalGroups, getSupplementalUrl, seenIds)
+    ]
+
     const data = await Promise.all(groups)
     let totalTles = 0
     data.forEach(group => totalTles += group.length)
