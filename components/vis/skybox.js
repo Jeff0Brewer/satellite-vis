@@ -31,7 +31,7 @@ const setupGl = async (gl, viewMatrix) => {
         gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
     ])
 
-    const angleOffset = mat4.fromYRotation(mat4.create(), 60.2 * Math.PI/180)
+    const angleOffset = mat4.fromXRotation(mat4.create(), 60.2 * Math.PI/180)
 
     return {
         program: program,
