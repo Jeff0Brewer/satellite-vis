@@ -33,7 +33,7 @@ const setupGl = async (gl, viewMatrix, epoch) => {
 
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
-    Glu.createCubemap(gl, 1024, [
+    const texture = Glu.createCubemap(gl, 1024, [
         './earth-cubemap/posx.png', './earth-cubemap/negx.png',
         './earth-cubemap/posy.png', './earth-cubemap/negy.png',
         './earth-cubemap/posz.png', './earth-cubemap/negz.png'
@@ -51,6 +51,7 @@ const setupGl = async (gl, viewMatrix, epoch) => {
     return {
         program: program,
         buffer: buffer,
+        texture: texture,
         locations: locations,
         numVertex: numVertex,
         offsetEpoch: offsetEpoch
@@ -64,9 +65,9 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     }
 }
 
-const draw = (gl, epoch, modelMatrix, glVars) => {
-    if (!glVars?.program) return
-    const { program, buffer, locations, numVertex, offsetEpoch } = glVars
+const draw = (gl, epoch, modelMatrix, ref) => {
+    if (!ref?.program) return
+    const { program, buffer, texture, locations, numVertex, offsetEpoch } = ref
 
     const dt = (getEpochYear(epoch) - offsetEpoch.year)/365 + (getEpochDay(epoch) - offsetEpoch.day)
     const earthRotation = mat4.fromZRotation(mat4.create(), dt * 2*Math.PI)
@@ -75,6 +76,7 @@ const draw = (gl, epoch, modelMatrix, glVars) => {
     Glu.switchShader(gl, program)
     gl.uniformMatrix4fv(locations.uModelMatrix, false, earthModelMat)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
     gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * floatSize, 0)
     gl.drawArrays(gl.TRIANGLES, 0, numVertex)
 }
