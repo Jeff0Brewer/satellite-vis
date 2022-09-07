@@ -17,7 +17,7 @@ const Catalog = props => {
     }, [])
 
     return (
-        <section className={styles.catalog}>
+        <section>
         </section>
     )
 }
