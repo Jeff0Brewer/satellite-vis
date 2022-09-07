@@ -54,8 +54,8 @@ const populateTles = async (req, res) => {
 
     const seenIds = new Set()
     const groups = [
-        ...addGroups(noradGroups, getNoradUrl, seenIds),
-        ...addGroups(supplementalGroups, getSupplementalUrl, seenIds)
+        ...addGroups(supplementalGroups, getSupplementalUrl, seenIds),
+        ...addGroups(noradGroups, getNoradUrl, seenIds)
     ]
 
     const data = await Promise.all(groups)
