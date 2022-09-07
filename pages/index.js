@@ -8,8 +8,8 @@ const Home = () => {
 
     return (
         <main className={styles.home}>
-            <Catalog setData={setSatData} />
             <Visualization data={satData} />
+            <Catalog setData={setSatData} />
         </main>
     )
 }

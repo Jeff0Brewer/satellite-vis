@@ -1,8 +1,16 @@
+:root {
+    --sidebar-bg: rgba(0, 0, 0, .7);
+    --sidebar-width: 400px;
+    --clock-height: 100px;
+    --camera-height: 200px;
+}
+
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 html, body {
-  padding: 0;
-  margin: 0;
+    padding: 0;
+    margin: 0;
 }

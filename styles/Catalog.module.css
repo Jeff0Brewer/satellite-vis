@@ -1,0 +1,7 @@
+.catalog {
+    position: relative;
+    z-index: 2;
+    width: var(--sidebar-width);
+    height: calc(100vh - var(--clock-height) - var(--camera-height));
+    background-color: var(--sidebar-bg);
+}
