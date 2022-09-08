@@ -1,3 +1,12 @@
+const satCategories = [
+    'Resource',
+    'Communications',
+    'Navigation',
+    'Scientific',
+    'Debris',
+    'Misc'
+]
+
 const noradGroups = {
     'Resource': [
         'weather',
@@ -90,6 +99,7 @@ const supplementalGroups = {
 }
 
 export {
+    satCategories,
     noradGroups,
     supplementalGroups
 }

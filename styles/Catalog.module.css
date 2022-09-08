@@ -66,3 +66,9 @@
 .unselected:hover * {
     color: #ddd;
 }
+
+.multiSelect {
+    position: relative;
+    width: 70px;
+    height: 20px;
+}

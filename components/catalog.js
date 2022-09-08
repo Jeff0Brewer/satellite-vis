@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { GiOrbit } from 'react-icons/gi'
 import { FaRegEye, FaBan } from 'react-icons/fa'
+import { satCategories } from '../util/celes-groups.js'
+import MultiSelect from './multi-select.js'
 import styles from '../styles/Catalog.module.css'
 
 const Catalog = props => {
     const [currItems, setCurrItems] = useState()
     const [currPage, setCurrPage] = useState(0)
-    const ITEM_PER_PAGE = 50
+    const ITEM_PER_PAGE = 25
 
 
     const getSatRecs = () => {
@@ -54,8 +56,7 @@ const Catalog = props => {
                 </div>
                 <div className={styles.labelLarge}>
                     TYPE:
-                    {/*dropdown placeholder*/}
-                    <input type="text" placeholder="Select" />
+                    <MultiSelect styleName={styles.multiSelect} placeholder="Select" items={satCategories} />
                 </div>
                 <button className={`${styles.labelSmall} ${styles.inactive}`}>
                     <FaBan />
