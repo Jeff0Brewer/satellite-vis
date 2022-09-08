@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { GiOrbit } from 'react-icons/gi'
+import { FaRegEye, FaBan } from 'react-icons/fa'
 import styles from '../styles/Catalog.module.css'
 
 const Catalog = props => {
@@ -21,18 +23,19 @@ const Catalog = props => {
     }, [])
 
     useEffect(() => {
-        console.log(props.data)
         const items = props.data.slice(currPage*ITEM_PER_PAGE, (currPage+1)*ITEM_PER_PAGE)
         setCurrItems(
-            items.map(item => (
-                <span className={styles.listItem}>
-                    <p>{item.name}</p>
-                    <p>{item.satelliteId}</p>
-                    <p>{item.category}</p>
-                    <input type="checkbox" />
-                    <div>
-                        <button>O</button>
-                    </div>
+            items.map((item, i) => (
+                <span key={i} className={styles.listItem}>
+                    <p className={styles.labelLarge}>{item.name}</p>
+                    <p className={styles.labelLarge}>{item.satelliteId}</p>
+                    <p className={styles.labelLarge}>{item.category}</p>
+                    <button className={`${styles.labelSmall} ${styles.unselected}`}>
+                        <GiOrbit />
+                    </button>
+                    <button className={`${styles.labelSmall} ${styles.unselected}`}>
+                        <FaRegEye />
+                    </button>
                 </span>
             ))
         )
@@ -41,27 +44,25 @@ const Catalog = props => {
     return (
         <section className={styles.catalog}>
             <span className={styles.labels}>
-                <div>
+                <div className={styles.labelLarge}>
                     NAME:
                     <input type="text" placeholder="Search" />
                 </div>
-                <div>
+                <div className={styles.labelLarge}>
                     ID:
                     <input type="text" placeholder="Search" />
                 </div>
-                <div>
+                <div className={styles.labelLarge}>
                     TYPE:
                     {/*dropdown placeholder*/}
                     <input type="text" placeholder="Select" />
                 </div>
-                <div>
-                    TRAIL:
-                    <button>X</button>
-                </div>
-                <div>
-                    VIEW:
-                    <button>X</button>
-                </div>
+                <button className={`${styles.labelSmall} ${styles.inactive}`}>
+                    <FaBan />
+                </button>
+                <button className={`${styles.labelSmall} ${styles.inactive}`}>
+                    <FaBan />
+                </button>
             </span>
             <section className={styles.list}>
                 {currItems}
