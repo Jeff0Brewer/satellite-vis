@@ -1,5 +1,5 @@
 :root {
-    --sidebar-bg: rgba(0, 0, 0, .7);
+    --sidebar-bg: #000;
     --sidebar-width: 400px;
     --clock-height: 100px;
     --camera-height: 200px;
