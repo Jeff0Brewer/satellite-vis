@@ -13,7 +13,7 @@ const Home = () => {
     return (
         <main className={styles.home}>
             <Clock sharedEpoch={sharedEpochRef.current} setSpeed={setClockSpeed} />
-            <Catalog setData={setSatData} />
+            <Catalog data={satData} setData={setSatData} />
             <Visualization data={satData} clockSpeed={clockSpeed} epoch={sharedEpochRef.current} />
         </main>
     )

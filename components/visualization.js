@@ -148,13 +148,6 @@ const Visualization = props => {
         return cancelFrame
     }, [props.clockSpeed, props.data])
 
-    const speedInputChange = e => {
-        const val = parseFloat(e.target.value)
-        if (!isNaN(val)) {
-            setClockSpeed(val)
-        }
-    }
-
     return (
         <canvas className={styles.vis} ref={canvRef} width={width} height={height}/>
     )

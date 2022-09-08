@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { twoline2satrec } from 'satellite.js'
 import styles from '../styles/Catalog.module.css'
 
 const Catalog = props => {
@@ -15,6 +14,10 @@ const Catalog = props => {
     useEffect(() => {
         getSatRecs()
     }, [])
+
+    useEffect(() => {
+        console.log(props.data)
+    }, [props.data])
 
     return (
         <section className={styles.catalog}>
