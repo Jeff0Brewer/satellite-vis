@@ -1,12 +1,14 @@
 .clock {
-    position: relative;
+    position: absolute;
+    left: 0;
+    bottom: 0;
     z-index: 2;
     display: flex;
     flex-direction: column;
     padding: 20px;
-    width: var(--sidebar-width);
+    width: var(--clock-width);
     height: var(--clock-height);
-    background-color: var(--sidebar-bg);
+    background-color: var(--control-bg);
     font-size: 20px;
 }
 

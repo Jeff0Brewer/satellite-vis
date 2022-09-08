@@ -1,7 +1,12 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import styles from '../styles/Catalog.module.css'
 
 const Catalog = props => {
+    const [currItems, setCurrItems] = useState()
+    const [currPage, setCurrPage] = useState(0)
+    const ITEM_PER_PAGE = 50
+
+
     const getSatRecs = () => {
         fetch('/api/get-tles')
             .then(res => res.json())
@@ -17,24 +22,50 @@ const Catalog = props => {
 
     useEffect(() => {
         console.log(props.data)
+        const items = props.data.slice(currPage*ITEM_PER_PAGE, (currPage+1)*ITEM_PER_PAGE)
+        setCurrItems(
+            items.map(item => (
+                <span className={styles.listItem}>
+                    <p>{item.name}</p>
+                    <p>{item.satelliteId}</p>
+                    <p>{item.category}</p>
+                    <input type="checkbox" />
+                    <div>
+                        <button>O</button>
+                    </div>
+                </span>
+            ))
+        )
     }, [props.data])
 
     return (
         <section className={styles.catalog}>
             <span className={styles.labels}>
                 <div>
-                    name
+                    NAME:
+                    <input type="text" placeholder="Search" />
                 </div>
                 <div>
-                    id
+                    ID:
+                    <input type="text" placeholder="Search" />
                 </div>
                 <div>
-                    type
+                    TYPE:
+                    {/*dropdown placeholder*/}
+                    <input type="text" placeholder="Select" />
                 </div>
                 <div>
-                    trail
+                    TRAIL:
+                    <button>X</button>
+                </div>
+                <div>
+                    VIEW:
+                    <button>X</button>
                 </div>
             </span>
+            <section className={styles.list}>
+                {currItems}
+            </section>
         </section>
     )
 }

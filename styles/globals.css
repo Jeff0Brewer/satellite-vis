@@ -1,8 +1,8 @@
 :root {
-    --sidebar-bg: #000;
-    --sidebar-width: 400px;
+    --control-bg: rgba(0, 0, 0, .85);
+    --clock-width: 300px;
     --clock-height: 100px;
-    --camera-height: 200px;
+    --catalog-height: 250px;
 }
 
 * {
