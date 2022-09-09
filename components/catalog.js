@@ -20,6 +20,10 @@ const Catalog = props => {
             .catch(err => console.log(err))
     }
 
+    const categoryFilter = val => {
+        console.log(val)
+    }
+
     useEffect(() => {
         getSatRecs()
     }, [])
@@ -56,7 +60,7 @@ const Catalog = props => {
                 </div>
                 <div className={styles.labelLarge}>
                     TYPE:
-                    <MultiSelect styleName={styles.multiSelect} placeholder="Select" items={satCategories} />
+                    <MultiSelect onChange={categoryFilter} styleName={styles.select} placeholder="Select" items={satCategories} />
                 </div>
                 <button className={`${styles.labelSmall} ${styles.inactive}`}>
                     <FaBan />

@@ -67,8 +67,9 @@
     color: #ddd;
 }
 
-.multiSelect {
+.select {
     position: relative;
-    width: 70px;
-    height: 20px;
+    width: 100px;
+    height: 40px;
+    font-size: 16px;
 }
