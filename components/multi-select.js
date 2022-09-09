@@ -4,22 +4,9 @@ import styles from '../styles/MultiSelect.module.css'
 
 const MultiSelect = props => {
     const [listOpen, setListOpen] = useState(false)
-    const [selected, setSelected] = useState(
-        props.items.reduce((acc, item) => {
-            acc[item] = true
-            return acc
-        }, {})
-    )
 
     const toggleOpen = () => {
         setListOpen(!listOpen)
-    }
-
-    const toggleSelect = item => {
-        const newSelected = {...selected}
-        newSelected[item] = !newSelected[item]
-        setSelected(newSelected)
-        props.onChange(newSelected)
     }
 
     return (
@@ -30,9 +17,9 @@ const MultiSelect = props => {
             <section className={styles.list}>{ 
                 listOpen ? 
                 props.items.map((item, i) => 
-                    <a key={i} onClick={() => toggleSelect(item)}>
+                    <a key={i} onClick={() => props.toggleItem(item)}>
                         <div className={styles.check}>{
-                            selected[item] ? 
+                            props.itemState.has(item) ? 
                             <BiCheck /> :
                             <></>
                         }</div>
