@@ -1,0 +1,39 @@
+.select {
+    user-select: none;
+    display: block;
+}
+
+.select a {
+    display: flex;
+    align-items: center;
+}
+
+.toggle {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+}
+
+.placeholder {
+    color: var(--placeholder-color);
+}
+
+.list {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--control-bg);
+}
+
+.list a p {
+    text-transform: lowercase;
+    margin: 5px;
+}
+
+.check {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

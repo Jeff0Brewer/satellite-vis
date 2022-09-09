@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { getEpochDisplay, setEpochDate } from '../lib/shared-epoch.js'
+import { CgUndo } from 'react-icons/cg'
 import PowRange from './pow-range.js'
 import styles from '../styles/Clock.module.css'
 
@@ -28,7 +29,9 @@ const Clock = props => {
                 <p className={styles.epochText}>
                     {epochText}
                 </p>
-                <button className={styles.reset} onClick={resetEpoch}></button>
+                <button className={styles.reset} onClick={resetEpoch}>
+                    <CgUndo />
+                </button>
             </span>
             <span>
                 <p className={styles.speedText}>

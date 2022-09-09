@@ -51,6 +51,9 @@ impl Sgp4Calc {
     }
 
     pub fn propagate(&self, memory: &mut [f32], epoch_year: i16, epoch_day: f64) {
+        if memory.len() == 0 {
+            return
+        }
         let mut mem_i = 0;
         let mut tle_i = 0;
         for elements in &self.element_groups {

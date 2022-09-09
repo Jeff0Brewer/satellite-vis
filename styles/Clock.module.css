@@ -1,19 +1,22 @@
 .clock {
-    position: relative;
+    position: absolute;
+    left: 0;
+    bottom: 0;
     z-index: 2;
     display: flex;
     flex-direction: column;
-    width: 300px;
-    padding: 20px;
-    background-color: rgba(0, 0, 0, .8);
-    color: #fff;
+    width: var(--clock-width);
+    height: var(--clock-height);
+    background-color: var(--control-bg);
     font-size: 20px;
-    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    padding: 5px;
 }
 
 .clock span {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin: 8px;
 }
 
 .clock p {
@@ -22,15 +25,17 @@
 
 .epochText {
     font-size: 25px;
-    padding-bottom: 10px;
 }
 
 .reset {
-    width: 25px;
-    height: 25px;
-    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+    background: transparent;
     border: 0;
-    margin-left: 10px;
 }
 
 .speedText {

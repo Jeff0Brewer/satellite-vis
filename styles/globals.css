@@ -1,8 +1,18 @@
+:root {
+    --control-bg: rgba(0, 0, 0, .85);
+    --clock-width: 300px;
+    --clock-height: 100px;
+    --catalog-height: 250px;
+    --placeholder-color: #777;
+}
+
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    color: #fff;
 }
 
 html, body {
-  padding: 0;
-  margin: 0;
+    padding: 0;
+    margin: 0;
 }

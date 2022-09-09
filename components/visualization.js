@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { mat4 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
-import { newEpoch, incrementEpoch } from '../lib/shared-epoch.js'
+import { incrementEpoch } from '../lib/shared-epoch.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
@@ -13,10 +13,6 @@ const Visualization = props => {
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
     const SGP4_THREADS = 2
-
-    const epochRef = useRef(newEpoch(new Date()))
-    const defaultSpeed = 100
-    const [clockSpeed, setClockSpeed] = useState(defaultSpeed)
 
     const { width, height } = useWindowDim()
     const canvRef = useRef()
@@ -64,7 +60,7 @@ const Visualization = props => {
 
         const [satelliteVars, earthVars, skyboxVars] = await Promise.all([
             Satellites.setupGl(gl, props.data.length, visScale, viewMatrix),
-            Earth.setupGl(gl, viewMatrix, epochRef.current),
+            Earth.setupGl(gl, viewMatrix, props.epoch),
             Skybox.setupGl(gl, viewMatrix)
         ])
         satelliteRef.current = satelliteVars
@@ -119,7 +115,7 @@ const Visualization = props => {
             worker.postMessage({
                 data: tles[i],
                 memory: sgp4MemoryRefs.current[i],
-                epoch: epochRef.current
+                epoch: props.epoch
             })
         })
 
@@ -133,7 +129,7 @@ const Visualization = props => {
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
-            incrementEpoch(epochRef.current, elapsed*clockSpeed)
+            incrementEpoch(props.epoch, elapsed*props.clockSpeed)
 
             let offset = 0
             sgp4MemoryRefs.current.forEach((buffer, i) => {
@@ -143,27 +139,17 @@ const Visualization = props => {
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Skybox.draw(gl, modelMatRef.current, skyboxRef.current)
-            Earth.draw(gl, epochRef.current, modelMatRef.current, earthRef.current)
+            Earth.draw(gl, props.epoch, modelMatRef.current, earthRef.current)
             Satellites.draw(gl, posBuffer, modelMatRef.current, satelliteRef.current)
 
             requestFrame(tick)
         }
         requestFrame(tick)
         return cancelFrame
-    }, [clockSpeed, props.data])
-
-    const speedInputChange = e => {
-        const val = parseFloat(e.target.value)
-        if (!isNaN(val)) {
-            setClockSpeed(val)
-        }
-    }
+    }, [props.clockSpeed, props.data])
 
     return (
-        <section>
-            <canvas className={styles.vis} ref={canvRef} width={width} height={height}></canvas>
-            <Clock sharedEpoch={epochRef.current} setSpeed={setClockSpeed} />
-        </section>
+        <canvas className={styles.vis} ref={canvRef} width={width} height={height}/>
     )
 }
 

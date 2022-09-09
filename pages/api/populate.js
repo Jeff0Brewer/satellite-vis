@@ -2,26 +2,46 @@ import mongoose from 'mongoose'
 import connectMongo from '../../util/connect-mongo.js'
 import Tle from '../../models/tleModel.js'
 import { getCatalogNumber } from '../../lib/tle.js'
-import celesGroups from '../../util/celes-groups.js'
+import { noradGroups, supplementalGroups } from '../../util/celes-groups.js'
 
-const addGroup = group => {
-    return fetch(`https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=TLE`)
+const getNoradUrl = group => 
+    `https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=TLE`
+const getSupplementalUrl = group => 
+    `https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?FILE=${group}&FORMAT=tle`
+
+const addGroup = (category, url, seenIds) => {
+    return fetch(url)
         .then(res => res.text())
-        .then(data => {
-            data = data.split('\n').map(line => line.replace(/[\r]/g, '').trim())
-            let tles = []
+        .then(text => {
+            const data = text.split('\n').map(line => line.replace(/[\r]/g, '').trim())
+            const tles = []
             for (let i = 0; i+2 < data.length; i += 3) {
                 const line1 = data[i+1]
                 const line2 = data[i+2]
-                tles.push({
-                    satelliteId: getCatalogNumber(line1, line2),
-                    name: data[i],
-                    line1: line1,
-                    line2: line2
-                })
+                const id = getCatalogNumber(line1, line2)
+                if (!seenIds.has(id)) {
+                    tles.push({
+                        name: data[i],
+                        category: category,
+                        satelliteId: id,
+                        line1: line1,
+                        line2: line2
+                    })
+                }
+                seenIds.add(id)
             }
             return Tle.insertMany(tles, { ordered: false })
         })
+}
+
+const addGroups = (groups, groupToUrl, seenIds) => {
+    const out = []
+    for (const category in groups) {
+        for (const group of groups[category]) {
+            out.push(addGroup(category, groupToUrl(group), seenIds))
+        }
+    }
+    return out
 }
 
 const populateTles = async (req, res) => {
@@ -29,17 +49,20 @@ const populateTles = async (req, res) => {
     const collections = await mongoose.connection.db.listCollections({ name: 'tles' }).toArray()
     if (collections.length) {
         await Tle.collection.drop()
-        console.log('collection reset')
+        console.log('COLLECTION RESET')
     }
 
-    let numSatellite = 0
-    for (const group of celesGroups) {
-        const data = await addGroup(group)
-        console.log(`${data.length} added from '${group}'`)
-        numSatellite += data.length
-    }
+    const seenIds = new Set()
+    const groups = [
+        ...addGroups(supplementalGroups, getSupplementalUrl, seenIds),
+        ...addGroups(noradGroups, getNoradUrl, seenIds)
+    ]
 
-    console.log(`data updated, ${numSatellite} total entries`)
+    const data = await Promise.all(groups)
+    let totalTles = 0
+    data.forEach(group => totalTles += group.length)
+
+    console.log(`UPDATE COMPLETE - ${totalTles} total tles`)
     res.status(200).end()
 }
 
