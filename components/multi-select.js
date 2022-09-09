@@ -12,7 +12,7 @@ const MultiSelect = props => {
     return (
         <div tabIndex='0' onBlur={() => setListOpen(false)} className={`${styles.select} ${props.styleName}`}>
             <a className={styles.toggle} onClick={toggleOpen}>
-                <p>{props.placeholder}</p>
+                <p className={styles.placeholder}>{props.placeholder}</p>
             </a>
             <section className={styles.list}>{ 
                 listOpen ? 

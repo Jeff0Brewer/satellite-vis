@@ -3,6 +3,7 @@
     --clock-width: 300px;
     --clock-height: 100px;
     --catalog-height: 250px;
+    --placeholder-color: #777;
 }
 
 * {

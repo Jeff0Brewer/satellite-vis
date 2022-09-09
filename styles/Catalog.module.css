@@ -1,9 +1,10 @@
 .catalog {
     position: absolute;
-    right: 0;
+    left: var(--clock-width);
     bottom: 0;
     z-index: 2;
     width: calc(100% - var(--clock-width));
+    max-width: 800px;
     height: var(--catalog-height);
     background-color: var(--control-bg);
 }
@@ -25,20 +26,35 @@
 }
 
 .labels {
-    height: 50px;
+    min-height: 50px;
     display: flex;
     font-size: 18px;
     border-bottom: 1px solid #fff;
 }
 
 .labelLarge {
-    width: 25%;
-    max-width: 250px;
+    width: 28%;
+    flex-wrap: wrap;
+    overflow: hidden;
 }
 
 .labelSmall {
-    width: 12.5%;
-    max-width: 50px;
+    width: 8%;
+}
+
+.filterInput {
+    width: 90px;
+    height: 25px;
+    font-size: 16px;
+    background-color: transparent;
+    border: solid #fff;
+    border-width: 0 0 1px 0;
+    margin: 10px;
+    padding: 0px;
+}
+
+.filterInput::placeholder {
+    color: var(--placeholder-color);
 }
 
 .list {
@@ -52,7 +68,7 @@
 .listItem {
     display: flex;
     align-items: center;
-    margin: 10px 0;
+    margin: 8px 0;
 }
 
 .inactive * {
@@ -65,11 +81,4 @@
 
 .unselected:hover * {
     color: #ddd;
-}
-
-.select {
-    position: relative;
-    width: 100px;
-    height: 40px;
-    font-size: 16px;
 }

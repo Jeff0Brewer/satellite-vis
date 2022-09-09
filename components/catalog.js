@@ -52,8 +52,8 @@ const Catalog = props => {
         <section className={styles.catalog}>
             <span className={styles.labels}>
                 <div className={styles.labelLarge}>
-                    NAME:
-                    <input 
+                    Name:
+                    <input className={styles.filterInput}
                         type="text" 
                         placeholder="Search" 
                         onChange={e => 
@@ -62,8 +62,8 @@ const Catalog = props => {
                     />
                 </div>
                 <div className={styles.labelLarge}>
-                    ID:
-                    <input 
+                    Id:
+                    <input className={styles.filterInput}
                         type="text" 
                         placeholder="Search" 
                         onChange={e => 
@@ -72,12 +72,11 @@ const Catalog = props => {
                     />
                 </div>
                 <div className={styles.labelLarge}>
-                    TYPE:
-                    <MultiSelect 
+                    Type:
+                    <MultiSelect styleName={styles.filterInput} 
                         items={satCategories} 
                         itemState={selectedCategories} 
                         toggleItem={toggleCategory} 
-                        styleName={styles.select} 
                         placeholder="Select"
                     />
                 </div>
