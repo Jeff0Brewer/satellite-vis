@@ -1,0 +1,7 @@
+.toggle {
+    display: flex;
+}
+
+.toggle a {
+    display: block;
+}
