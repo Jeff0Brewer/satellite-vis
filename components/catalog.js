@@ -49,7 +49,7 @@ const Catalog = props => {
                     <input 
                         type="text" 
                         placeholder="Search" 
-                        onChange={() => 
+                        onChange={e => 
                             setNameSearch(e.target.value.toLowerCase())
                         } 
                     />
@@ -59,7 +59,7 @@ const Catalog = props => {
                     <input 
                         type="text" 
                         placeholder="Search" 
-                        onChange={() => 
+                        onChange={e => 
                             setIdSearch(e.target.value)
                         } 
                     />
