@@ -10,10 +10,6 @@ import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
-    const sgp4WorkerRefs = useRef([])
-    const sgp4MemoryRefs = useRef([])
-    const SGP4_THREADS = 2
-
     const { width, height } = useWindowDim()
     const canvRef = useRef()
     const glRef = useRef()
@@ -41,6 +37,10 @@ const Visualization = props => {
         )
     }
     const floatSize = Float32Array.BYTES_PER_ELEMENT
+
+    const sgp4WorkerRefs = useRef([])
+    const sgp4MemoryRefs = useRef([])
+    const SGP4_THREADS = 2
 
     const frameIdRef = useRef()
     const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
@@ -79,6 +79,12 @@ const Visualization = props => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
         setupGl(glRef.current)
 
+        sgp4WorkerRefs.current.forEach(worker => worker.terminate())
+        sgp4WorkerRefs.current = []
+        for (let i = 0; i < SGP4_THREADS; i++) {
+            sgp4WorkerRefs.current.push(new Worker(new URL('../util/sgp4-worker.js', import.meta.url)))
+        }
+
         const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .002)
         canvRef.current.addEventListener('mousedown', () => canvRef.current.addEventListener('mousemove', dragHandler))
         canvRef.current.addEventListener('mouseup', () => canvRef.current.removeEventListener('mousemove', dragHandler))
@@ -86,12 +92,6 @@ const Visualization = props => {
             e.preventDefault()
             modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY, .0003)
         })
-
-        sgp4WorkerRefs.current.forEach(worker => worker.terminate())
-        sgp4WorkerRefs.current = []
-        for (let i = 0; i < SGP4_THREADS; i++) {
-            sgp4WorkerRefs.current.push(new Worker(new URL('../util/sgp4-worker.js', import.meta.url)))
-        }
     }, [])
 
     useEffect(() => {
@@ -101,9 +101,9 @@ const Visualization = props => {
     useEffect(() => { 
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
 
-        const tlePerThread = Math.floor(props.data.length/SGP4_THREADS)
         let tles = []
         sgp4MemoryRefs.current = []
+        const tlePerThread = Math.floor(props.data.length/SGP4_THREADS)
         for (let i = 0; i < SGP4_THREADS; i++) {
             const numTle = i == SGP4_THREADS - 1 ? props.data.length - tlePerThread*i : tlePerThread
             sgp4MemoryRefs.current.push(
@@ -118,7 +118,6 @@ const Visualization = props => {
                 epoch: props.epoch
             })
         })
-
     }, [props.data])
 
     useEffect(() => {
