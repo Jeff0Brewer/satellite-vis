@@ -128,7 +128,7 @@ const CatalogItem = props => {
                 <GiOrbit />
             </button>
             <button 
-                className={`${styles.labelSmall} ${styles.unselected}`}
+                className={`${styles.labelSmall} ${props.followId === props.item.satelliteId ? '' : styles.unselected}`}
                 onClick={() => props.setFollowId(props.item.satelliteId)}
             >
                 <FaRegEye />
