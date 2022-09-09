@@ -1,7 +1,27 @@
+.control {
+    position: relative;
+    width: var(--clock-width);
+    height: calc(var(--catalog-height) - var(--clock-height));
+    background-color: var(--control-bg);
+    border: solid #fff;
+    border-width: 1px 0 0 0;
+    padding: 20px;
+}
+
+.control span {
+    display: flex;
+}
+
+.control p {
+    margin: 5px;
+    font-size: 20px;
+} 
+
 .toggle {
     background-color: #000;
     color: #fff;
     border: 1px solid #fff;
+    margin-left: 10px;
 }
 
 .toggle a {

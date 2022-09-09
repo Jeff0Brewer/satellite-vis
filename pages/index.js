@@ -16,9 +16,13 @@ const Home = () => {
 
     return (
         <main className={styles.home}>
-            <Catalog data={satData} setData={setSatData} followId={followId} setFollowId={setFollowId} />
-            <CameraControl mode={cameraMode} setMode={setCameraMode} followId={followId} setFollowId={setFollowId} />
-            <Clock sharedEpoch={sharedEpochRef.current} setSpeed={setClockSpeed} />
+            <section className={styles.interface}>
+                <div>
+                    <Clock sharedEpoch={sharedEpochRef.current} setSpeed={setClockSpeed} />
+                    <CameraControl mode={cameraMode} setMode={setCameraMode} followId={followId} setFollowId={setFollowId} />
+                </div>
+                <Catalog data={satData} setData={setSatData} followId={followId} setFollowId={setFollowId} />
+            </section>
             <Visualization data={satData} clockSpeed={clockSpeed} epoch={sharedEpochRef.current} />
         </main>
     )

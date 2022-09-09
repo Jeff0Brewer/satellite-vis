@@ -1,12 +1,11 @@
 .catalog {
-    position: absolute;
-    left: var(--clock-width);
-    bottom: 0;
-    z-index: 2;
+    position: relative;
     width: calc(100% - var(--clock-width));
     max-width: 800px;
     height: var(--catalog-height);
     background-color: var(--control-bg);
+    border: solid #fff;
+    border-width: 0 0 0 1px;
 }
 
 .catalog button {
