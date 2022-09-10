@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { mat4 } from 'gl-matrix'
+import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { incrementEpoch } from '../lib/shared-epoch.js'
 import * as Satellites from './vis/satellites.js'
@@ -18,10 +18,9 @@ const Visualization = props => {
     const skyboxRef = useRef()
     const visScale = .0001
     const modelMatRef = useRef(
-        mat4.scale(
-            mat4.create(), 
-            mat4.create(), 
-            [visScale, visScale, visScale])
+        mat4.fromScaling(mat4.create(), 
+            [visScale, visScale, visScale]
+        )
     )
     const viewMatrix = mat4.lookAt(mat4.create(), 
         [0, 2, 0], // camera position
@@ -59,9 +58,9 @@ const Visualization = props => {
         gl.enable(gl.CULL_FACE)
 
         const [satelliteVars, earthVars, skyboxVars] = await Promise.all([
-            Satellites.setupGl(gl, props.data.length, visScale, viewMatrix),
-            Earth.setupGl(gl, viewMatrix, props.epoch),
-            Skybox.setupGl(gl, viewMatrix)
+            Satellites.setupGl(gl, props.data.length),
+            Earth.setupGl(gl, props.epoch),
+            Skybox.setupGl(gl)
         ])
         satelliteRef.current = satelliteVars
         earthRef.current = earthVars
@@ -125,6 +124,34 @@ const Visualization = props => {
         const lastT = 0
         const posBuffer = new Float32Array(props.data.length * 3)
 
+        let getViewMatrix
+        let getModelMatrix
+
+        if (props.followId) {
+            const modelMatrix = mat4.fromScaling(mat4.create(), [visScale, visScale, visScale])
+            getModelMatrix = () => modelMatrix
+
+            const followIndex = props.data.map(item => item.satelliteId).indexOf(props.followId)
+            getViewMatrix = () => {
+                const camPos = posBuffer.slice(followIndex*3, (followIndex+1)*3).map(v => 1.5*v*visScale)
+                return mat4.lookAt(
+                    mat4.create(), 
+                    camPos,
+                    [0, 0, 0],
+                    [0, 0, 1]
+                )
+            }
+        }
+        else {
+            getModelMatrix = () => modelMatRef.current
+            if (props.cameraMode === 'INERTIAL') {
+                getViewMatrix = () => viewMatrix
+            }
+            else {
+                
+            }
+        }
+
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
@@ -136,16 +163,19 @@ const Visualization = props => {
                 offset += buffer.length
             })
 
+            const viewMatrix = getViewMatrix()
+            const modelMatrix = getModelMatrix()
+
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-            Skybox.draw(gl, modelMatRef.current, skyboxRef.current)
-            Earth.draw(gl, props.epoch, modelMatRef.current, earthRef.current)
-            Satellites.draw(gl, posBuffer, modelMatRef.current, satelliteRef.current)
+            Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
+            Earth.draw(gl, viewMatrix, modelMatrix, props.epoch, earthRef.current)
+            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, satelliteRef.current)
 
             requestFrame(tick)
         }
         requestFrame(tick)
         return cancelFrame
-    }, [props.clockSpeed, props.data])
+    }, [props.clockSpeed, props.data, props.followId, props.cameraMode])
 
     return (
         <canvas className={styles.vis} ref={canvRef} width={width} height={height}/>

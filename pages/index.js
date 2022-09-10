@@ -23,7 +23,13 @@ const Home = () => {
                 </div>
                 <Catalog data={satData} setData={setSatData} followId={followId} setFollowId={setFollowId} />
             </section>
-            <Visualization data={satData} clockSpeed={clockSpeed} epoch={sharedEpochRef.current} />
+            <Visualization 
+                data={satData} 
+                epoch={sharedEpochRef.current} 
+                clockSpeed={clockSpeed} 
+                followId={followId} 
+                cameraMode={cameraMode} 
+            />
         </main>
     )
 }

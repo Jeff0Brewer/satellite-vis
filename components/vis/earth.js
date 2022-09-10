@@ -5,7 +5,7 @@ import * as Glu from '../../lib/gl-help.js'
 
 const floatSize = Float32Array.BYTES_PER_ELEMENT
 
-const setupGl = async (gl, viewMatrix, epoch) => {
+const setupGl = async (gl, epoch) => {
     const vertPath = './shaders/earth-vert.glsl'
     const fragPath = './shaders/earth-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
@@ -30,8 +30,8 @@ const setupGl = async (gl, viewMatrix, epoch) => {
     const locations = {}
     locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, floatSize)
     locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
+    locations['uViewMatrix'] = gl.getUniformLocation(gl.program, 'uViewMatrix')
 
-    gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
     const texture = Glu.createCubemap(gl, 1024, [
         './earth-cubemap/posx.png', './earth-cubemap/negx.png',
@@ -65,7 +65,7 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     }
 }
 
-const draw = (gl, epoch, modelMatrix, ref) => {
+const draw = (gl, viewMatrix, modelMatrix, epoch, ref) => {
     if (!ref?.program) return
     const { program, buffer, texture, locations, numVertex, offsetEpoch } = ref
 
@@ -75,6 +75,7 @@ const draw = (gl, epoch, modelMatrix, ref) => {
     
     Glu.switchShader(gl, program)
     gl.uniformMatrix4fv(locations.uModelMatrix, false, earthModelMat)
+    gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
     gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * floatSize, 0)

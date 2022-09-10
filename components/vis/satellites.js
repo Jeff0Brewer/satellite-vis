@@ -12,7 +12,7 @@ const updateBuffer = (gl, numVertex, ref) => {
     return ref
 }
 
-const setupGl = async (gl, numVertex, scale, viewMatrix) => {
+const setupGl = async (gl, numVertex) => {
     const vertPath = './shaders/satellite-vert.glsl'
     const fragPath = './shaders/satellite-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
@@ -20,17 +20,15 @@ const setupGl = async (gl, numVertex, scale, viewMatrix) => {
 
     const buffer = Glu.initBuffer(gl, new Float32Array(numVertex*3), gl.DYNAMIC_DRAW)
 
-    const aPosition = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, floatSize)
-    const uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
-    gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uViewMatrix'), false, viewMatrix)
+    const locations = {}
+    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, floatSize)
+    locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
+    locations['uViewMatrix'] = gl.getUniformLocation(gl.program, 'uViewMatrix')
 
     return {
         program: program,
         buffer: buffer,
-        locations: {
-            aPosition: aPosition,
-            uModelMatrix: uModelMatrix
-        },
+        locations: locations,
         numVertex: numVertex
     }
 }
@@ -42,7 +40,7 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     }
 }
 
-const draw = (gl, positions, modelMatrix, ref) => {
+const draw = (gl, viewMatrix, modelMatrix, positions, ref) => {
     if (!ref?.program) return
     const { program, buffer, locations, numVertex } = ref
     Glu.switchShader(gl, program)
@@ -50,6 +48,7 @@ const draw = (gl, positions, modelMatrix, ref) => {
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions)
     gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * floatSize, 0)
     gl.uniformMatrix4fv(locations.uModelMatrix, false, modelMatrix)
+    gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
     gl.drawArrays(gl.POINTS, 0, numVertex)
 
 }

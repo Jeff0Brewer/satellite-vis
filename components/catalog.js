@@ -26,6 +26,7 @@ const Catalog = props => {
 
     const setVisData = data => {
         props.setData(data)
+        props.setFollowId('')
         setMaxPage(Math.floor(data.length/ITEM_PER_PAGE))
         setCurrPage(0)
     }
