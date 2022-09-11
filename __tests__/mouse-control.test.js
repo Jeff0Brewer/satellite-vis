@@ -34,22 +34,38 @@ test('mouseRotate magnitude impacted by speed parameter', () => {
 })
 
 test('scrollZoom returns same matrix on 0 scroll', () => {
-    const startMatrix = mat4.create()
+    const startMatrix = mat4.lookAt(mat4.create(),
+        [5, 2, 1],
+        [0, 0, 0],
+        [0, 0, 1]
+    )
     const endMatrix = scrollZoom(startMatrix, 0, 1)
     endMatrix.forEach((n, i) => {
         expect(startMatrix[i]).toBeCloseTo(n)
     })
 })
 
-test('scrollZoom scales on nonzero scroll', () => {
-    const scroll = 5
-    const mat = scrollZoom(mat4.create(), scroll, 1)
-    expect(mat[0]).toBe(scroll + 1)
+test('scrollZoom scales camera position on nonzero scroll', () => {
+    const startMatrix = mat4.lookAt(mat4.create(),
+        [1, 0, 0],
+        [0, 0, 0],
+        [0, 0, 1]
+    )
+    const scroll = 1
+    const endMatrix = scrollZoom(startMatrix, scroll, 1)
+    const cameraPosition = mat4.invert(mat4.create(), endMatrix).slice(12, 15)
+    expect(cameraPosition[0]).toBe(scroll + 1)
 })
 
 test('scrollZoom magnitude impacted by speed parameter', () => {
-    const speed = 2
-    const scroll = 5
-    const mat = scrollZoom(mat4.create(), scroll, speed)
-    expect(mat[0]).toBe(scroll*speed + 1)
+    const startMatrix = mat4.lookAt(mat4.create(),
+        [1, 0, 0],
+        [0, 0, 0],
+        [0, 0, 1]
+    )
+    const scroll = 10
+    const speed = .5
+    const endMatrix = scrollZoom(startMatrix, scroll, speed)
+    const cameraPosition = mat4.invert(mat4.create(), endMatrix).slice(12, 15)
+    expect(cameraPosition[0]).toBe(scroll*speed + 1)
 })

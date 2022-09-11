@@ -16,16 +16,18 @@ const Visualization = props => {
     const satelliteRef = useRef()
     const earthRef = useRef()
     const skyboxRef = useRef()
-    const visScale = .0001
+    const scale = .0001
     const modelMatRef = useRef(
-        mat4.fromScaling(mat4.create(), 
-            [visScale, visScale, visScale]
+        mat4.fromScaling(mat4.create(),
+            [scale, scale, scale]
         )
     )
-    const viewMatrix = mat4.lookAt(mat4.create(), 
-        [0, 2, 0], // camera position
-        [0, 0, 0], // camera focus
-        [0, 0, 1] // up vector
+    const viewMatRef = useRef(
+        mat4.lookAt(mat4.create(),
+            [0, 3, 0],
+            [0, 0, 0],
+            [0, 0, 1]
+        )
     )
     const getProjMat = aspect => {
         return mat4.perspective(mat4.create(),
@@ -48,6 +50,7 @@ const Visualization = props => {
     const setupViewport = (gl, width, height) => {
         gl.viewport(0, 0, width, height)
         const projMatrix = getProjMat(width/height)
+
         Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
         skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
@@ -89,7 +92,7 @@ const Visualization = props => {
         canvRef.current.addEventListener('mouseup', () => canvRef.current.removeEventListener('mousemove', dragHandler))
         canvRef.current.addEventListener('wheel', e => { 
             e.preventDefault()
-            modelMatRef.current = scrollZoom(modelMatRef.current, e.deltaY, .0003)
+            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.0003)
         })
     }, [])
 
@@ -124,34 +127,6 @@ const Visualization = props => {
         const lastT = 0
         const posBuffer = new Float32Array(props.data.length * 3)
 
-        let getViewMatrix
-        let getModelMatrix
-
-        if (props.followId) {
-            const modelMatrix = mat4.fromScaling(mat4.create(), [visScale, visScale, visScale])
-            getModelMatrix = () => modelMatrix
-
-            const followIndex = props.data.map(item => item.satelliteId).indexOf(props.followId)
-            getViewMatrix = () => {
-                const camPos = posBuffer.slice(followIndex*3, (followIndex+1)*3).map(v => 1.5*v*visScale)
-                return mat4.lookAt(
-                    mat4.create(), 
-                    camPos,
-                    [0, 0, 0],
-                    [0, 0, 1]
-                )
-            }
-        }
-        else {
-            getModelMatrix = () => modelMatRef.current
-            if (props.cameraMode === 'INERTIAL') {
-                getViewMatrix = () => viewMatrix
-            }
-            else {
-                
-            }
-        }
-
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
@@ -163,13 +138,10 @@ const Visualization = props => {
                 offset += buffer.length
             })
 
-            const viewMatrix = getViewMatrix()
-            const modelMatrix = getModelMatrix()
-
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-            Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
-            Earth.draw(gl, viewMatrix, modelMatrix, props.epoch, earthRef.current)
-            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, satelliteRef.current)
+            Skybox.draw(gl, viewMatRef.current, modelMatRef.current, skyboxRef.current)
+            Earth.draw(gl, viewMatRef.current, modelMatRef.current, props.epoch, earthRef.current)
+            Satellites.draw(gl, viewMatRef.current, modelMatRef.current, posBuffer, satelliteRef.current)
 
             requestFrame(tick)
         }
