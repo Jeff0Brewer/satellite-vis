@@ -65,12 +65,17 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     }
 }
 
-const draw = (gl, viewMatrix, modelMatrix, epoch, ref) => {
+const getRotationMatrix = (epoch, ref) => {
     if (!ref?.program) return
-    const { program, buffer, texture, locations, numVertex, offsetEpoch } = ref
+    const { offsetEpoch } = ref
 
     const dt = (getEpochYear(epoch) - offsetEpoch.year)/365 + (getEpochDay(epoch) - offsetEpoch.day)
-    const earthRotation = mat4.fromZRotation(mat4.create(), dt * 2*Math.PI)
+    return mat4.fromZRotation(mat4.create(), dt * 2*Math.PI)
+}
+
+const draw = (gl, viewMatrix, modelMatrix, earthRotation, epoch, ref) => {
+    if (!ref?.program) return
+    const { program, buffer, texture, locations, numVertex, offsetEpoch } = ref
     const earthModelMat = mat4.multiply(mat4.create(), modelMatrix, earthRotation)
     
     Glu.switchShader(gl, program)
@@ -85,5 +90,6 @@ const draw = (gl, viewMatrix, modelMatrix, epoch, ref) => {
 export {
     setupGl,
     updateProjMatrix,
+    getRotationMatrix,
     draw
 }

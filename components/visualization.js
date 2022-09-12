@@ -47,19 +47,7 @@ const Visualization = props => {
     const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
     const cancelFrame = () => window.cancelAnimationFrame(frameIdRef.current)
 
-    const setupViewport = (gl, width, height) => {
-        gl.viewport(0, 0, width, height)
-        const projMatrix = getProjMat(width/height)
-
-        Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
-        Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
-        skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
-    }
-
     const setupGl = async gl => {
-        gl.enable(gl.DEPTH_TEST)
-        gl.enable(gl.CULL_FACE)
-
         const [satelliteVars, earthVars, skyboxVars] = await Promise.all([
             Satellites.setupGl(gl, props.data.length),
             Earth.setupGl(gl, props.epoch),
@@ -71,6 +59,52 @@ const Visualization = props => {
 
         const {innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
         setupViewport(gl, w * dpr, h * dpr)
+
+        gl.enable(gl.DEPTH_TEST)
+        gl.enable(gl.CULL_FACE)
+    }
+
+    const setupViewport = (gl, width, height) => {
+        gl.viewport(0, 0, width, height)
+        const projMatrix = getProjMat(width/height)
+
+        Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
+        Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
+        skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
+    }
+
+    const setupCameraMode = (followId, cameraMode) => {
+        let getViewMatrix, getModelMatrix
+        if (followId) {
+            const scaleMatrix = mat4.fromScaling(mat4.create(), [scale, scale, scale])
+            getModelMatrix = () => scaleMatrix
+
+            const index = props.data.map(item => item.satelliteId).indexOf(props.followId)
+            const viewDistance = .8
+            getViewMatrix = posBuffer => {
+                const satPosition = posBuffer.slice(index*3, index*3 + 3)
+                const invLen = 1/vec3.length(satPosition)
+                const camPosition = satPosition.map(v => v*scale + v*invLen*viewDistance)
+                return mat4.lookAt(mat4.create(),
+                    camPosition,
+                    [0, 0, 0],
+                    [0, 0, 1]
+                )
+            }
+            return { getViewMatrix, getModelMatrix }
+        }
+
+        getViewMatrix = () => viewMatRef.current
+        if (cameraMode === 'FIXED') {
+            getModelMatrix = earthRotation => mat4.multiply(mat4.create(),
+                modelMatRef.current,
+                mat4.invert(mat4.create(), earthRotation)
+            )
+        }
+        else {
+            getModelMatrix = () => modelMatRef.current
+        }
+        return { getViewMatrix, getModelMatrix }
     }
 
     const concatTle = (tles) => {
@@ -126,6 +160,7 @@ const Visualization = props => {
         const gl = glRef.current
         const lastT = 0
         const posBuffer = new Float32Array(props.data.length * 3)
+        const { getViewMatrix, getModelMatrix } = setupCameraMode(props.followId, props.cameraMode)
 
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
@@ -138,10 +173,14 @@ const Visualization = props => {
                 offset += buffer.length
             })
 
+            const earthRotation = Earth.getRotationMatrix(props.epoch, earthRef.current)
+            const modelMatrix = getModelMatrix(earthRotation)
+            const viewMatrix = getViewMatrix(posBuffer)
+
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-            Skybox.draw(gl, viewMatRef.current, modelMatRef.current, skyboxRef.current)
-            Earth.draw(gl, viewMatRef.current, modelMatRef.current, props.epoch, earthRef.current)
-            Satellites.draw(gl, viewMatRef.current, modelMatRef.current, posBuffer, satelliteRef.current)
+            Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
+            Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, props.epoch, earthRef.current)
+            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, satelliteRef.current)
 
             requestFrame(tick)
         }

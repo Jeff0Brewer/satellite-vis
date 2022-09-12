@@ -52,22 +52,20 @@ const updateProjMatrix = (projMatrix, ref) => {
 }
 
 const getInvMatrix = (viewMatrix, projMatrix, modelMatrix, angleOffset) => {
-    const invView = mat4.multiply(mat4.create(),
-        mat4.invert(mat4.create(),
-            viewMatrix
-        ),
+    const lookMat = mat4.multiply(mat4.create(),
+        viewMatrix,
         mat4.multiply(mat4.create(),
             modelMatrix,
             angleOffset
         )
     )
-    invView[12] = 0
-    invView[13] = 0
-    invView[14] = 0
+    lookMat[12] = 0
+    lookMat[13] = 0
+    lookMat[14] = 0
     return mat4.invert(mat4.create(),
         mat4.multiply(mat4.create(),
             projMatrix,
-            invView
+            lookMat
         )
     )
 }
