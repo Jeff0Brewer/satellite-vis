@@ -3,7 +3,7 @@ import * as Glu from '../../lib/gl-help.js'
 
 const floatSize = Float32Array.BYTES_PER_ELEMENT
 
-const setupGl = async (gl, viewMatrix) => {
+const setupGl = async (gl) => {
     const vertPath = './shaders/skybox-vert.glsl'
     const fragPath = './shaders/skybox-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
@@ -39,7 +39,6 @@ const setupGl = async (gl, viewMatrix) => {
         texture: texture,
         locations: locations,
         numVertex: numVertex,
-        viewMatrix: viewMatrix,
         projMatrix: mat4.create(),
         angleOffset: angleOffset
     }
@@ -53,29 +52,27 @@ const updateProjMatrix = (projMatrix, ref) => {
 }
 
 const getInvMatrix = (viewMatrix, projMatrix, modelMatrix, angleOffset) => {
-    const invView = mat4.multiply(mat4.create(),
-        mat4.invert(mat4.create(),
-            viewMatrix
-        ),
+    const lookMat = mat4.multiply(mat4.create(),
+        viewMatrix,
         mat4.multiply(mat4.create(),
             modelMatrix,
             angleOffset
         )
     )
-    invView[12] = 0
-    invView[13] = 0
-    invView[14] = 0
+    lookMat[12] = 0
+    lookMat[13] = 0
+    lookMat[14] = 0
     return mat4.invert(mat4.create(),
         mat4.multiply(mat4.create(),
             projMatrix,
-            invView
+            lookMat
         )
     )
 }
 
-const draw = (gl, modelMatrix, ref) => {
+const draw = (gl, viewMatrix, modelMatrix, ref) => {
     if (!ref?.program) return
-    const { program, buffer, texture, locations, numVertex, viewMatrix, projMatrix, angleOffset } = ref
+    const { program, buffer, texture, locations, numVertex, projMatrix, angleOffset } = ref
     
     Glu.switchShader(gl, program)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)

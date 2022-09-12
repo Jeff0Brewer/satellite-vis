@@ -1,11 +1,10 @@
-attribute vec3 aPosition;
+attribute vec4 aPosition;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
 
 void main() {
-    gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * vec4(aPosition, 1.0);
-    float scale = length(uModelMatrix[0].xyz);
-    gl_PointSize = pow(scale, 0.5)*800.0/gl_Position.w;
+    gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
+    gl_PointSize = 10.0/pow(gl_Position.w, 0.7);
 }

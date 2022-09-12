@@ -1,0 +1,9 @@
+.toggle {
+    display: flex;
+    width: fit-content;
+    height: fit-content;
+}
+
+.toggle a {
+    display: block;
+}

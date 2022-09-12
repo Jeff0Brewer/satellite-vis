@@ -26,6 +26,7 @@ const Catalog = props => {
 
     const setVisData = data => {
         props.setData(data)
+        props.setFollowId('')
         setMaxPage(Math.floor(data.length/ITEM_PER_PAGE))
         setCurrPage(0)
     }
@@ -53,7 +54,8 @@ const Catalog = props => {
             <span className={styles.labels}>
                 <div className={styles.labelLarge}>
                     Name:
-                    <input className={styles.filterInput}
+                    <input 
+                        className={styles.filterInput}
                         type="text" 
                         placeholder="Search" 
                         onChange={e => 
@@ -63,7 +65,8 @@ const Catalog = props => {
                 </div>
                 <div className={styles.labelLarge}>
                     Id:
-                    <input className={styles.filterInput}
+                    <input 
+                        className={styles.filterInput}
                         type="text" 
                         placeholder="Search" 
                         onChange={e => 
@@ -73,7 +76,8 @@ const Catalog = props => {
                 </div>
                 <div className={styles.labelLarge}>
                     Type:
-                    <MultiSelect styleName={styles.filterInput} 
+                    <MultiSelect 
+                        styleName={styles.filterInput} 
                         items={satCategories} 
                         itemState={selectedCategories} 
                         toggleItem={toggleCategory} 
@@ -83,13 +87,16 @@ const Catalog = props => {
                 <button className={`${styles.labelSmall} ${styles.inactive}`}>
                     <FaBan />
                 </button>
-                <button className={`${styles.labelSmall} ${styles.inactive}`}>
+                <button 
+                    className={`${styles.labelSmall} ${props.followId ? '' : styles.inactive}`}
+                    onClick={() => props.setFollowId('')}
+                >
                     <FaBan />
                 </button>
             </span>
             <section className={styles.list}>{
                 props.data.slice(currPage*ITEM_PER_PAGE, (currPage+1)*ITEM_PER_PAGE)
-                    .map((item, i) => <CatalogItem item={item} key={i} />) }{
+                    .map((item, i) => <CatalogItem item={item} followId={props.followId} setFollowId={props.setFollowId} key={i} />) }{
                 maxPage > 0 ?
                 <span>
                     <div>
@@ -109,6 +116,10 @@ const Catalog = props => {
 }
 
 const CatalogItem = props => {
+    const followItem = () => {
+        props.setFollowId(props.item.satelliteId)
+    }
+
     return (
         <span className={styles.listItem}>
             <p className={styles.labelLarge}>{props.item.name}</p>
@@ -117,7 +128,10 @@ const CatalogItem = props => {
             <button className={`${styles.labelSmall} ${styles.unselected}`}>
                 <GiOrbit />
             </button>
-            <button className={`${styles.labelSmall} ${styles.unselected}`}>
+            <button 
+                className={`${styles.labelSmall} ${props.followId === props.item.satelliteId ? '' : styles.unselected}`}
+                onClick={() => props.setFollowId(props.item.satelliteId)}
+            >
                 <FaRegEye />
             </button>
         </span>
