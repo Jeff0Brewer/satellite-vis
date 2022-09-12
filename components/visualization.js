@@ -80,7 +80,7 @@ const Visualization = props => {
             getModelMatrix = () => scaleMatrix
 
             const index = props.data.map(item => item.satelliteId).indexOf(props.followId)
-            const viewDistance = .8
+            const viewDistance = .5
             getViewMatrix = posBuffer => {
                 const satPosition = posBuffer.slice(index*3, index*3 + 3)
                 const invLen = 1/vec3.length(satPosition)
