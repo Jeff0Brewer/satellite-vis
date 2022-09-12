@@ -31,7 +31,7 @@ const Visualization = props => {
     )
     const getProjMat = aspect => {
         return mat4.perspective(mat4.create(),
-            70, //fov
+            70 * Math.PI/180, //fov
             aspect,
             .1, //near
             100 //far
