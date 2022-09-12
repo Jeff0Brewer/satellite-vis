@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
-import { incrementEpoch } from '../lib/shared-epoch.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
@@ -41,7 +40,7 @@ const Visualization = props => {
 
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
-    const SGP4_THREADS = 2
+    const SGP4_THREADS = 100
 
     const frameIdRef = useRef()
     const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
@@ -107,10 +106,6 @@ const Visualization = props => {
         return { getViewMatrix, getModelMatrix }
     }
 
-    const concatTle = (tles) => {
-        return tles.reduce((prev, tle) => `${prev}${tle.name}\n${tle.line1}\n${tle.line2}\n\n`, '').slice(0, -2)
-    }
-
     useEffect(() => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
         setupGl(glRef.current)
@@ -137,19 +132,20 @@ const Visualization = props => {
     useEffect(() => { 
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
 
-        let tles = []
+        const satrecs = props.data.map(item => item.satrec)
+        const satPerWorker = Math.floor(props.data.length/SGP4_THREADS)
+        const satPerFinal = satrecs.length - satPerWorker*(SGP4_THREADS - 1)
+
+        const workerData = []
         sgp4MemoryRefs.current = []
-        const tlePerThread = Math.floor(props.data.length/SGP4_THREADS)
         for (let i = 0; i < SGP4_THREADS; i++) {
-            const numTle = i == SGP4_THREADS - 1 ? props.data.length - tlePerThread*i : tlePerThread
-            sgp4MemoryRefs.current.push(
-                new Float32Array(new SharedArrayBuffer(numTle * 3*4))
-            )
-            tles.push(concatTle(props.data.slice(i*tlePerThread, i*tlePerThread + numTle)))
+            const numSat = i === SGP4_THREADS - 1 ? satPerFinal : satPerWorker
+            sgp4MemoryRefs.current.push(new Float32Array(new SharedArrayBuffer(numSat * 3*4)))
+            workerData.push(satrecs.slice(i*satPerWorker, i*satPerWorker + numSat))
         }
         sgp4WorkerRefs.current.forEach((worker, i) => {
             worker.postMessage({
-                data: tles[i],
+                data: workerData[i],
                 memory: sgp4MemoryRefs.current[i],
                 epoch: props.epoch
             })
@@ -165,7 +161,7 @@ const Visualization = props => {
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
-            incrementEpoch(props.epoch, elapsed*props.clockSpeed)
+            props.epoch[0] += elapsed*props.clockSpeed
 
             let offset = 0
             sgp4MemoryRefs.current.forEach((buffer, i) => {
@@ -179,7 +175,7 @@ const Visualization = props => {
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
-            Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, props.epoch, earthRef.current)
+            Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, earthRef.current)
             Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, satelliteRef.current)
 
             requestFrame(tick)

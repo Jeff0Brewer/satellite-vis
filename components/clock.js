@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { getEpochDisplay, setEpochDate } from '../lib/shared-epoch.js'
+import { getEpochDisplay } from '../lib/shared-epoch.js'
 import { CgUndo } from 'react-icons/cg'
 import PowRange from './pow-range.js'
 import styles from '../styles/Clock.module.css'
@@ -14,7 +14,7 @@ const Clock = props => {
     }
 
     const resetEpoch = () => {
-        setEpochDate(props.sharedEpoch, new Date())
+        props.sharedEpoch[0] = new Date().getTime()
         displayEpoch()
     }
 
