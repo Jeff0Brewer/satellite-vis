@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { GiOrbit } from 'react-icons/gi'
 import { FaRegEye, FaBan, FaCaretLeft, FaCaretRight } from 'react-icons/fa'
+import { twoline2satrec } from 'satellite.js'
 import { satCategories } from '../util/celes-groups.js'
 import MultiSelect from './multi-select.js'
 import styles from '../styles/Catalog.module.css'
@@ -35,8 +36,16 @@ const Catalog = props => {
         fetch('/api/get-tles')
             .then(res => res.json())
             .then(data => {
-                setDataset(data)
-                setVisData(data)
+                const satrecs = data.map(item => {
+                    return {
+                        name: item.name,
+                        satelliteId: item.satelliteId,
+                        category: item.category,
+                        satrec: twoline2satrec(item.line1, item.line2),
+                    }
+                })
+                setDataset(satrecs)
+                setVisData(satrecs)
             })
             .catch(err => console.log(err))
     }, [])

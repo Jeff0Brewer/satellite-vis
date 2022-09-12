@@ -1,20 +1,27 @@
-import { Sgp4Calc } from '../wasm/sgp/pkg/sgp.js'
-import { getEpochYear, getEpochDay } from '../lib/shared-epoch.js'
+import { propagate } from 'satellite.js'
 
-const sgp4 = new Sgp4Calc()
+const MS_PER_DAY = 86400000
 let intervalId
 
 onmessage = e => {
-    if (e.data?.data) {
-        sgp4.set_data(e.data.data)
+    const { data, memory, epoch } = e.data
+    const tick = () => {
+        const date = new Date(epoch[0])
+        data.forEach((satrec, i) => {
+            const { position } = propagate(satrec, date)
+            if (satrec.error === 0) {
+                memory[i*3] = position.x
+                memory[i*3+1] = position.y
+                memory[i*3+2] = position.z
+            }
+            else {
+                memory[i*3] = 0
+                memory[i*3+1] = 0
+                memory[i*3+2] = 0
+            }
+        })
     }
-    if (e.data?.memory && e.data?.epoch) {
-        const { memory, epoch } = e.data
-        const tick = () => {
-            sgp4.propagate(memory, getEpochYear(epoch), getEpochDay(epoch))
-        }
-        if (intervalId)
-            clearInterval(intervalId)
-        intervalId = setInterval(tick, 1000/60)
-    }
+    if (intervalId)
+        clearInterval(intervalId)
+    intervalId = setInterval(tick, 1000/60)
 }
