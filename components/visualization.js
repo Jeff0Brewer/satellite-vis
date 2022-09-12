@@ -130,7 +130,7 @@ const Visualization = props => {
     }, [width, height])
 
     useEffect(() => { 
-        satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data.length, satelliteRef.current)
+        satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data, satelliteRef.current)
 
         const satrecs = props.data.map(item => item.satrec)
         const satPerWorker = Math.floor(props.data.length/SGP4_THREADS)
