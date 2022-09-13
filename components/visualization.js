@@ -122,7 +122,7 @@ const Visualization = props => {
         canvRef.current.addEventListener('mouseup', () => canvRef.current.removeEventListener('mousemove', dragHandler))
         canvRef.current.addEventListener('wheel', e => { 
             e.preventDefault()
-            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.0003)
+            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.0005, .8, 80)
         })
     }, [])
 

@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { newEpoch } from '../lib/shared-epoch.js'
+import { FaCaretUp, FaCaretDown } from 'react-icons/fa'
 import Catalog from '../components/catalog.js'
 import CameraControl from '../components/camera-control.js'
 import Clock from '../components/clock.js'
@@ -12,16 +13,43 @@ const Home = () => {
     const [cameraMode, setCameraMode] = useState('INERTIAL')
     const [followId, setFollowId] = useState('')
     const [clockSpeed, setClockSpeed] = useState(0)
+    const [uiVisible, setUiVisible] = useState(false)
     const sharedEpochRef = useRef(newEpoch(new Date()))
+
+    const toggleUi = () => {
+        setUiVisible(!uiVisible)
+    }
 
     return (
         <main className={styles.home}>
             <section className={styles.interface}>
-                <div>
-                    <Clock sharedEpoch={sharedEpochRef.current} setSpeed={setClockSpeed} />
-                    <CameraControl mode={cameraMode} setMode={setCameraMode} followId={followId} setFollowId={setFollowId} />
+                <div className={styles.collapseWrap}>
+                    <button className={styles.collapse} onClick={toggleUi}>{
+                        uiVisible ?
+                        <FaCaretDown /> :
+                        <FaCaretUp />
+                    }</button>
                 </div>
-                <Catalog data={satData} setData={setSatData} followId={followId} setFollowId={setFollowId} />
+                <div>
+                    <Clock 
+                        sharedEpoch={sharedEpochRef.current} 
+                        setSpeed={setClockSpeed} 
+                    />
+                    <CameraControl 
+                        visible={uiVisible}
+                        mode={cameraMode} 
+                        setMode={setCameraMode} 
+                        followId={followId} 
+                        setFollowId={setFollowId} 
+                    />
+                </div>
+                <Catalog 
+                    visible={uiVisible}
+                    data={satData} 
+                    setData={setSatData} 
+                    followId={followId} 
+                    setFollowId={setFollowId} 
+                />
             </section>
             <Visualization 
                 data={satData} 

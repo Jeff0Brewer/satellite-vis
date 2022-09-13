@@ -14,7 +14,7 @@ const CameraControl = props => {
     }
 
     return (
-        <section className={styles.control}>{
+        <section className={props.visible ? styles.control : styles.hidden}>{
             props.followId ?
             <p>{`Viewing #${props.followId}`}</p> : 
             <span>

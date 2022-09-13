@@ -1,3 +1,7 @@
+.hidden {
+    display: none;
+}
+
 .catalog {
     position: relative;
     width: calc(100% - var(--clock-width));

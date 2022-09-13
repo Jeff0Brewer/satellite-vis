@@ -9,7 +9,23 @@
     position: absolute;
     z-index: 2;
     display: flex;
+    flex-wrap: wrap;
     bottom: 0;
     left: 0;
     width: 100%;
+}
+
+.collapseWrap {
+    position: relative;
+    width: 100%;
+}
+
+.collapse {
+    position: absolute;
+    bottom: 0;
+    background-color: var(--control-bg);
+    color: #fff;
+    border: none;
+    width: 30px;
+    height: 30px;
 }

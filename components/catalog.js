@@ -59,7 +59,7 @@ const Catalog = props => {
     }, [nameSearch, idSearch, selectedCategories])
 
     return (
-        <section className={styles.catalog}>
+        <section className={props.visible ? styles.catalog : styles.hidden}>
             <span className={styles.labels}>
                 <div className={styles.labelLarge}>
                     Name:

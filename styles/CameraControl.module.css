@@ -1,3 +1,7 @@
+.hidden {
+    display: none;
+}
+
 .control {
     position: relative;
     width: var(--clock-width);
