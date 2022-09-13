@@ -132,6 +132,9 @@ const Visualization = props => {
 
     useEffect(() => { 
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data, satelliteRef.current)
+        if (props.data.length > 0) {
+            earthRef.current = Earth.updateRotationOffset(props.data[0].satrec, earthRef.current)
+        }
 
         const satrecs = props.data.map(item => item.satrec)
         const satPerWorker = Math.max(Math.ceil(satrecs.length/MAX_SGP4_THREAD), MIN_PER_THREAD)
