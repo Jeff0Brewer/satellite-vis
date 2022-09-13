@@ -1,4 +1,5 @@
 import { mat4 } from 'gl-matrix'
+import { propagate, eciToGeodetic, gstime } from 'satellite.js'
 import getIcosphere from '../../lib/icosphere.js'
 import { getEpochYear, getEpochDay } from '../../lib/shared-epoch.js'
 import * as Glu from '../../lib/gl-help.js'
@@ -51,7 +52,8 @@ const setupGl = async (gl, epoch) => {
         texture: texture,
         locations: locations,
         numVertex: numVertex,
-        offsetEpoch: offsetEpoch
+        offsetEpoch: offsetEpoch,
+        rotationOffset: -1
     }
 }
 
@@ -62,12 +64,28 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     }
 }
 
+const updateRotationOffset = (satrec, ref) => {
+    if (ref?.program) {
+        const date = new Date(ref.offsetEpoch)
+        const { position } = propagate(satrec, date)
+        const { x, y } = position
+        const { longitude } = eciToGeodetic(position, gstime(date))
+        let currAngle = Math.acos(x/Math.sqrt(x*x+y*y))
+        if (y < 0)
+            currAngle = 2*Math.PI - currAngle
+        const lng = longitude + Math.PI
+        const offset = currAngle - lng
+        ref.rotationOffset = offset
+    }
+    return ref
+}
+
 const getRotationMatrix = (epoch, ref) => {
     if (!ref?.program) return
-    const { offsetEpoch } = ref
+    const { offsetEpoch, rotationOffset } = ref
 
     const dt = (epoch[0] - offsetEpoch)/86400000
-    return mat4.fromZRotation(mat4.create(), dt * 2*Math.PI)
+    return mat4.fromZRotation(mat4.create(), dt * 2*Math.PI + rotationOffset)
 }
 
 const draw = (gl, viewMatrix, modelMatrix, earthRotation, ref) => {
@@ -87,6 +105,7 @@ const draw = (gl, viewMatrix, modelMatrix, earthRotation, ref) => {
 export {
     setupGl,
     updateProjMatrix,
+    updateRotationOffset,
     getRotationMatrix,
     draw
 }
