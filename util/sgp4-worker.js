@@ -3,8 +3,7 @@ import { propagate } from 'satellite.js'
 const MS_PER_DAY = 86400000
 let intervalId
 
-onmessage = e => {
-    const { data, memory, epoch } = e.data
+const loopCalc = (data, memory, epoch) => {
     const tick = () => {
         const date = new Date(epoch[0])
         data.forEach((satrec, i) => {
@@ -24,4 +23,12 @@ onmessage = e => {
     if (intervalId)
         clearInterval(intervalId)
     intervalId = setInterval(tick, 1000/60)
+}
+
+onmessage = e => {
+    const { task } = e.data
+    if (task === 'start')
+        loopCalc(e.data.data, e.data.memory, e.data.epoch)
+    else if (intervalId)
+        clearInterval(intervalId)
 }

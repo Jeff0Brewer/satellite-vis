@@ -40,7 +40,8 @@ const Visualization = props => {
 
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
-    const SGP4_THREADS = 100
+    const MAX_SGP4_THREAD = 100
+    const MIN_PER_THREAD = 20
 
     const frameIdRef = useRef()
     const requestFrame = func => frameIdRef.current = window.requestAnimationFrame(func)
@@ -112,7 +113,7 @@ const Visualization = props => {
 
         sgp4WorkerRefs.current.forEach(worker => worker.terminate())
         sgp4WorkerRefs.current = []
-        for (let i = 0; i < SGP4_THREADS; i++) {
+        for (let i = 0; i < MAX_SGP4_THREAD; i++) {
             sgp4WorkerRefs.current.push(new Worker(new URL('../util/sgp4-worker.js', import.meta.url)))
         }
 
@@ -133,22 +134,34 @@ const Visualization = props => {
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data, satelliteRef.current)
 
         const satrecs = props.data.map(item => item.satrec)
-        const satPerWorker = Math.floor(props.data.length/SGP4_THREADS)
-        const satPerFinal = satrecs.length - satPerWorker*(SGP4_THREADS - 1)
+        const satPerWorker = Math.max(Math.ceil(satrecs.length/MAX_SGP4_THREAD), MIN_PER_THREAD)
 
         const workerData = []
         sgp4MemoryRefs.current = []
-        for (let i = 0; i < SGP4_THREADS; i++) {
-            const numSat = i === SGP4_THREADS - 1 ? satPerFinal : satPerWorker
-            sgp4MemoryRefs.current.push(new Float32Array(new SharedArrayBuffer(numSat * 3*4)))
-            workerData.push(satrecs.slice(i*satPerWorker, i*satPerWorker + numSat))
+        let doneSats = 0
+        let threadCount = 0
+        while (doneSats < satrecs.length) {
+            const numSats = Math.min(satPerWorker, satrecs.length - doneSats)
+            sgp4MemoryRefs.current.push(new Float32Array(new SharedArrayBuffer(numSats*3*4)))
+            workerData.push(satrecs.slice(doneSats, doneSats + numSats))
+            doneSats += numSats
+            threadCount++
         }
+
         sgp4WorkerRefs.current.forEach((worker, i) => {
-            worker.postMessage({
-                data: workerData[i],
-                memory: sgp4MemoryRefs.current[i],
-                epoch: props.epoch
-            })
+            if (i < threadCount) {
+                worker.postMessage({
+                    task: 'start',
+                    data: workerData[i],
+                    memory: sgp4MemoryRefs.current[i],
+                    epoch: props.epoch
+                })
+            }
+            else {
+                worker.postMessage({
+                    task: 'stop'
+                })
+            }
         })
     }, [props.data])
 
