@@ -1,6 +1,5 @@
 notes.md
-/wasm/*/target
-/wasm/*/Cargo.lock
+/public/tles.json
 
 # dependencies
 /node_modules
