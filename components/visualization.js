@@ -74,35 +74,37 @@ const Visualization = props => {
     }
 
     const setupCameraMode = (followId, cameraMode) => {
-        let getViewMatrix, getModelMatrix
+        let getViewMatrix = () => viewMatRef.current
+        let getModelMatrix = () => modelMatRef.current
         if (followId) {
-            const scaleMatrix = mat4.fromScaling(mat4.create(), [scale, scale, scale])
-            getModelMatrix = () => scaleMatrix
-
             const index = props.data.map(item => item.satelliteId).indexOf(props.followId)
+            if (index < 0) {
+                return { getViewMatrix, getModelMatrix }
+            }
             const viewDistance = .5
             getViewMatrix = posBuffer => {
                 const satPosition = posBuffer.slice(index*3, index*3 + 3)
-                const invLen = 1/vec3.length(satPosition)
-                const camPosition = satPosition.map(v => v*scale + v*invLen*viewDistance)
+                const len = vec3.length(satPosition)
+                if (!len) return
+                const camPosition = satPosition.map(v => v*scale + v/len*viewDistance)
                 return mat4.lookAt(mat4.create(),
                     camPosition,
                     [0, 0, 0],
                     [0, 0, 1]
                 )
             }
+
+            const scaleMatrix = mat4.fromScaling(mat4.create(), [scale, scale, scale])
+            getModelMatrix = () => scaleMatrix
+
             return { getViewMatrix, getModelMatrix }
         }
 
-        getViewMatrix = () => viewMatRef.current
         if (cameraMode === 'FIXED') {
             getModelMatrix = earthRotation => mat4.multiply(mat4.create(),
                 modelMatRef.current,
                 mat4.invert(mat4.create(), earthRotation)
             )
-        }
-        else {
-            getModelMatrix = () => modelMatRef.current
         }
         return { getViewMatrix, getModelMatrix }
     }
@@ -192,6 +194,10 @@ const Visualization = props => {
             const earthRotation = Earth.getRotationMatrix(props.epoch, earthRef.current)
             const modelMatrix = getModelMatrix(earthRotation)
             const viewMatrix = getViewMatrix(posBuffer)
+            if (!viewMatrix) {
+                requestFrame(tick)
+                return
+            }
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
