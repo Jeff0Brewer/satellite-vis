@@ -5,7 +5,7 @@
 .catalog {
     position: relative;
     width: calc(100% - var(--clock-width));
-    max-width: 800px;
+    max-width: 700px;
     height: var(--catalog-height);
     background-color: var(--control-bg);
     border: solid #fff;
@@ -36,13 +36,13 @@
 }
 
 .labelLarge {
-    width: 28%;
+    width: 30%;
     flex-wrap: wrap;
     overflow: hidden;
 }
 
 .labelSmall {
-    width: 8%;
+    width: 10%;
 }
 
 .filterInput {
