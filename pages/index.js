@@ -10,7 +10,7 @@ import styles from '../styles/Home.module.css'
 
 const Home = () => {
     const [satData, setSatData] = useState([])
-    const [lighting, setLighting] = useState('ON')
+    const [lighting, setLighting] = useState('OFF')
     const [cameraMode, setCameraMode] = useState('INERTIAL')
     const [followId, setFollowId] = useState('')
     const [clockSpeed, setClockSpeed] = useState(0)
