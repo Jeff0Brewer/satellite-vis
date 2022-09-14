@@ -50,7 +50,7 @@ const Visualization = props => {
     const setupGl = async gl => {
         const [satelliteVars, earthVars, skyboxVars] = await Promise.all([
             Satellites.setupGl(gl, props.data.length),
-            Earth.setupGl(gl, props.epoch),
+            Earth.setupGl(gl, props.epoch, props.lighting),
             Skybox.setupGl(gl)
         ])
         satelliteRef.current = satelliteVars
@@ -129,6 +129,10 @@ const Visualization = props => {
     useEffect(() => {
         setupViewport(glRef.current, width, height)
     }, [width, height])
+
+    useEffect(() => {
+        Earth.updateLighting(glRef.current, props.lighting, earthRef.current)
+    }, [props.lighting])
 
     useEffect(() => { 
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data, satelliteRef.current)

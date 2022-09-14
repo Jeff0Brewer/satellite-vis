@@ -6,8 +6,12 @@ import { getEpochYear, getEpochDay } from '../../lib/shared-epoch.js'
 import * as Glu from '../../lib/gl-help.js'
 
 const floatSize = Float32Array.BYTES_PER_ELEMENT
+const lightingMap = {
+    'ON': 1,
+    'OFF': 0
+}
 
-const setupGl = async (gl, epoch) => {
+const setupGl = async (gl, epoch, lighting) => {
     const vertPath = './shaders/earth-vert.glsl'
     const fragPath = './shaders/earth-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
@@ -34,6 +38,8 @@ const setupGl = async (gl, epoch) => {
     locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
     locations['uViewMatrix'] = gl.getUniformLocation(gl.program, 'uViewMatrix')
     locations['uSunNormal'] = gl.getUniformLocation(gl.program, 'uSunNormal')
+    locations['uLighting'] = gl.getUniformLocation(gl.program, 'uLighting')
+    gl.uniform1i(locations.uLighting, lightingMap[lighting])
 
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
     const texture = Glu.createCubemap(gl, 1024, [
@@ -82,12 +88,20 @@ const updateRotationOffset = (satrec, ref) => {
     return ref
 }
 
-const getRotationMatrix = (epoch, ref) => {
-    if (!ref?.program) return
-    const { offsetEpoch, rotationOffset } = ref
+const updateLighting = (gl, val, ref) => {
+    if (ref?.program) {
+        const { locations } = ref
+        Glu.switchShader(gl, ref.program)
+        gl.uniform1i(locations.uLighting, lightingMap[val])
+    }
+}
 
-    const dt = (epoch[0] - offsetEpoch)/86400000
-    return mat4.fromZRotation(mat4.create(), dt * 2*Math.PI + rotationOffset)
+const getRotationMatrix = (epoch, ref) => {
+    if (ref?.program) {
+        const { offsetEpoch, rotationOffset } = ref
+        const dt = (epoch[0] - offsetEpoch)/86400000
+        return mat4.fromZRotation(mat4.create(), dt * 2*Math.PI + rotationOffset)
+    }
 }
 
 const draw = (gl, epoch, viewMatrix, modelMatrix, earthRotation, ref) => {
@@ -121,6 +135,7 @@ export {
     setupGl,
     updateProjMatrix,
     updateRotationOffset,
+    updateLighting,
     getRotationMatrix,
     draw
 }

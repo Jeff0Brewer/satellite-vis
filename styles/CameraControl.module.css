@@ -9,15 +9,17 @@
     background-color: var(--control-bg);
     border: solid #fff;
     border-width: 1px 0 0 0;
-    padding: 20px;
+    padding: 10px;
 }
 
 .control span {
     display: flex;
+    align-items: center;
+    margin: 5px;
 }
 
 .control p {
-    margin: 5px;
+    margin: 0 5px;
     font-size: 20px;
 } 
 
@@ -29,7 +31,7 @@
 }
 
 .toggle a {
-    padding: 10px;
+    padding: 8px;
 }
 
 .toggleActive {

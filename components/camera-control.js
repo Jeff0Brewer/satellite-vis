@@ -27,8 +27,19 @@ const CameraControl = props => {
                     currValue={props.mode}
                     setValue={props.setMode}
                 />
+            </span>}
+            <span>
+                <p>Lighting:</p>
+                <TextToggle
+                    styleName={styles.toggle}
+                    selectedStyle={styles.toggleActive}
+                    value0={'ON'}
+                    value1={'OFF'}
+                    currValue={props.lighting}
+                    setValue={props.setLighting}
+                />
             </span>
-        }</section>
+        </section>
     )
 }
 
