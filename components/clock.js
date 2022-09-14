@@ -43,7 +43,7 @@ const Clock = props => {
                     min={-10000}
                     max={10000}
                     step={0.01}
-                    defaultValue={100}
+                    defaultValue={75}
                     onChange={value => props.setSpeed(value)}
                     onInput={value => setSpeedText(Math.round(value))}
                 />
