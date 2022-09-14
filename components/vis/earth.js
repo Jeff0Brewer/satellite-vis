@@ -1,5 +1,6 @@
-import { mat4 } from 'gl-matrix'
+import { mat4, vec3 } from 'gl-matrix'
 import { propagate, eciToGeodetic, gstime } from 'satellite.js'
+import { getSunPosition } from '../../lib/sun.js'
 import getIcosphere from '../../lib/icosphere.js'
 import { getEpochYear, getEpochDay } from '../../lib/shared-epoch.js'
 import * as Glu from '../../lib/gl-help.js'
@@ -32,6 +33,7 @@ const setupGl = async (gl, epoch) => {
     locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, floatSize)
     locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
     locations['uViewMatrix'] = gl.getUniformLocation(gl.program, 'uViewMatrix')
+    locations['uSunNormal'] = gl.getUniformLocation(gl.program, 'uSunNormal')
 
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
     const texture = Glu.createCubemap(gl, 1024, [
@@ -88,14 +90,27 @@ const getRotationMatrix = (epoch, ref) => {
     return mat4.fromZRotation(mat4.create(), dt * 2*Math.PI + rotationOffset)
 }
 
-const draw = (gl, viewMatrix, modelMatrix, earthRotation, ref) => {
+const draw = (gl, epoch, viewMatrix, modelMatrix, earthRotation, ref) => {
     if (!ref?.program) return
     const { program, buffer, texture, locations, numVertex, offsetEpoch } = ref
     const earthModelMat = mat4.multiply(mat4.create(), modelMatrix, earthRotation)
+    const sunNormal = vec3.normalize(
+        vec3.create(), 
+        vec3.transformMat4(
+            vec3.create(),
+            getSunPosition(epoch),
+            mat4.invert(
+                mat4.create(),
+                earthRotation
+            )
+        )
+    )
     
     Glu.switchShader(gl, program)
+    gl.uniform3fv(locations.uSunNormal, sunNormal)
     gl.uniformMatrix4fv(locations.uModelMatrix, false, earthModelMat)
     gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
+
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
     gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * floatSize, 0)

@@ -191,7 +191,7 @@ const Visualization = props => {
 
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
-            Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, earthRef.current)
+            Earth.draw(gl, props.epoch[0], viewMatrix, modelMatrix, earthRotation, earthRef.current)
             Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, satelliteRef.current)
 
             requestFrame(tick)
