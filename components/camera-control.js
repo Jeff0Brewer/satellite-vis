@@ -33,8 +33,8 @@ const CameraControl = props => {
                 <TextToggle
                     styleName={styles.toggle}
                     selectedStyle={styles.toggleActive}
-                    value0={'ON'}
-                    value1={'OFF'}
+                    value0={'OFF'}
+                    value1={'ON'}
                     currValue={props.lighting}
                     setValue={props.setLighting}
                 />

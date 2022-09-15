@@ -7,7 +7,7 @@
     width: var(--clock-width);
     height: calc(var(--catalog-height) - var(--clock-height));
     background-color: var(--control-bg);
-    border: solid #fff;
+    border: var(--border-style);
     border-width: 1px 0 0 0;
     padding: 10px;
 }
@@ -16,22 +16,26 @@
     display: flex;
     align-items: center;
     margin: 5px;
+    justify-content: space-between;
 }
 
 .control p {
     margin: 0 5px;
-    font-size: 20px;
+    font-size: var(--control-font-size);
 } 
 
 .toggle {
     background-color: #000;
     color: #fff;
-    border: 1px solid #fff;
+    border: var(--border-style);
+    border-width: 1px;
     margin-left: 10px;
 }
 
 .toggle a {
     padding: 8px;
+    min-width: 80px;
+    text-align: center;
 }
 
 .toggleActive {

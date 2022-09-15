@@ -5,7 +5,7 @@
     width: var(--clock-width);
     height: var(--clock-height);
     background-color: var(--control-bg);
-    font-size: 20px;
+    font-size: var(--control-font-size);
     padding: 5px;
 }
 

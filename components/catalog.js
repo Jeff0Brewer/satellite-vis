@@ -32,8 +32,8 @@ const Catalog = props => {
     }
 
     useEffect(() => {
-        //fetch('/api/get-tles')
-        fetch('./tles.json') // for offline dev
+        fetch('/api/get-tles')
+        //fetch('./tles.json') // for offline dev
             .then(res => res.json())
             .then(data => {
                 const satrecs = data.map(item => {

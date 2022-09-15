@@ -6,4 +6,5 @@
 
 .toggle a {
     display: block;
+    text-transform: lowercase;
 }
