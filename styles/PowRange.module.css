@@ -1,0 +1,95 @@
+.pow {
+    -webkit-appearance: none; 
+    width: 100%;
+    background: transparent;
+}
+
+.pow::-ms-track {
+    width: 100%;
+    cursor: pointer;
+
+    background: transparent; 
+    border-color: transparent;
+    color: transparent;
+}
+
+.pow::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 0;
+    background: #fff;
+    cursor: pointer;
+}
+
+.pow::-moz-range-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 0;
+    background: #fff;
+    cursor: pointer;
+}
+
+.pow::-ms-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 0;
+    background: #fff;
+    cursor: pointer;
+}
+
+.pow::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 18px;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid #fff;
+}
+
+.pow:focus::-webkit-slider-runnable-track {
+  background: transparent;
+}
+
+.pow::-moz-range-track {
+  width: 100%;
+  height: 16px;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid #fff;
+}
+
+.pow::-ms-track {
+  width: 100%;
+  height: 18px;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid #fff;
+}
+
+.pow::-ms-fill-lower {
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid #fff;
+}
+
+.pow:focus::-ms-fill-lower {
+  background: transparent;
+}
+
+.pow::-ms-fill-upper {
+  background: transparent;
+  border-radius: 0;
+  border: 1px solid #fff;
+}
+
+.pow:focus::-ms-fill-upper {
+  background: transparent;
+}

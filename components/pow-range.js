@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import styles from '../styles/PowRange.module.css'
 
 const PowRange = props => {
     const inputRef = useRef()
@@ -27,7 +28,7 @@ const PowRange = props => {
     }, [])
 
     return (
-        <input ref={inputRef} className={props?.styleName}
+        <input ref={inputRef} className={`${styles.pow} ${props?.styleName}`}
             type="range"
             min={valToRaw(props.min)}
             max={valToRaw(props.max)}

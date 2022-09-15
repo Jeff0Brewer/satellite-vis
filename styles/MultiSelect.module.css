@@ -6,6 +6,7 @@
 .select a {
     display: flex;
     align-items: center;
+    cursor: pointer;
 }
 
 .toggle {
@@ -16,6 +17,9 @@
 
 .placeholder {
     color: var(--placeholder-color);
+    text-transform: lowercase;
+    font-size: var(--control-font-size);
+    cursor: pointer;
 }
 
 .list {
@@ -27,7 +31,8 @@
 
 .list a p {
     text-transform: lowercase;
-    margin: 5px;
+    margin: 3px;
+    font-size: 16px;
 }
 
 .check {

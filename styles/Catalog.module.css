@@ -5,10 +5,10 @@
 .catalog {
     position: relative;
     width: calc(100% - var(--clock-width));
-    max-width: 800px;
+    max-width: 700px;
     height: var(--catalog-height);
     background-color: var(--control-bg);
-    border: solid #fff;
+    border: var(--border-style);
     border-width: 0 0 0 1px;
 }
 
@@ -31,26 +31,27 @@
 .labels {
     min-height: 50px;
     display: flex;
-    font-size: 18px;
-    border-bottom: 1px solid #fff;
+    font-size: var(--control-font-size);
+    border: var(--border-style);
+    border-width: 0 0 1px 0;
 }
 
 .labelLarge {
-    width: 28%;
+    width: 30%;
     flex-wrap: wrap;
     overflow: hidden;
 }
 
 .labelSmall {
-    width: 8%;
+    width: 10%;
 }
 
 .filterInput {
     width: 90px;
     height: 25px;
-    font-size: 16px;
+    font-size: var(--control-font-size);
     background-color: transparent;
-    border: solid #fff;
+    border: var(--border-style);
     border-width: 0 0 1px 0;
     margin: 10px;
     padding: 0px;
@@ -58,6 +59,8 @@
 
 .filterInput::placeholder {
     color: var(--placeholder-color);
+    text-transform: lowercase;
+    font-size: var(--control-font-size);
 }
 
 .list {
@@ -74,8 +77,20 @@
     margin: 8px 0;
 }
 
+.inactive {
+    cursor: default;
+}
+
+.active {
+    cursor: pointer;
+}
+
 .inactive * {
     color: #444;
+}
+
+.unselected {
+    cursor: pointer;
 }
 
 .unselected * {

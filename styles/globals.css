@@ -1,14 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap');
+
 :root {
     --control-bg: rgba(0, 0, 0, .85);
     --clock-width: 300px;
     --clock-height: 120px;
     --catalog-height: 250px;
     --placeholder-color: #777;
+    --border-style: solid #fff;
+    --control-font-size: 18px;
 }
 
 * {
     box-sizing: border-box;
     font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     color: #fff;
 }
 

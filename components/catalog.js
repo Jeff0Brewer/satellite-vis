@@ -27,7 +27,6 @@ const Catalog = props => {
 
     const setVisData = data => {
         props.setData(data)
-        props.setFollowId('')
         setMaxPage(Math.floor(data.length/ITEM_PER_PAGE))
         setCurrPage(0)
     }
@@ -94,11 +93,8 @@ const Catalog = props => {
                         placeholder="Select"
                     />
                 </div>
-                <button className={`${styles.labelSmall} ${styles.inactive}`}>
-                    <FaBan />
-                </button>
                 <button 
-                    className={`${styles.labelSmall} ${props.followId ? '' : styles.inactive}`}
+                    className={`${styles.labelSmall} ${props.followId ? styles.active : styles.inactive}`}
                     onClick={() => props.setFollowId('')}
                 >
                     <FaBan />
@@ -135,9 +131,6 @@ const CatalogItem = props => {
             <p className={styles.labelLarge}>{props.item.name}</p>
             <p className={styles.labelLarge}>{props.item.satelliteId}</p>
             <p className={styles.labelLarge}>{props.item.category}</p>
-            <button className={`${styles.labelSmall} ${styles.unselected}`}>
-                <GiOrbit />
-            </button>
             <button 
                 className={`${styles.labelSmall} ${props.followId === props.item.satelliteId ? '' : styles.unselected}`}
                 onClick={() => props.setFollowId(props.item.satelliteId)}

@@ -10,6 +10,7 @@ import styles from '../styles/Home.module.css'
 
 const Home = () => {
     const [satData, setSatData] = useState([])
+    const [lighting, setLighting] = useState('OFF')
     const [cameraMode, setCameraMode] = useState('INERTIAL')
     const [followId, setFollowId] = useState('')
     const [clockSpeed, setClockSpeed] = useState(0)
@@ -40,7 +41,9 @@ const Home = () => {
                         mode={cameraMode} 
                         setMode={setCameraMode} 
                         followId={followId} 
-                        setFollowId={setFollowId} 
+                        setFollowId={setFollowId}
+                        lighting={lighting}
+                        setLighting={setLighting}
                     />
                 </div>
                 <Catalog 
@@ -57,6 +60,7 @@ const Home = () => {
                 clockSpeed={clockSpeed} 
                 followId={followId} 
                 cameraMode={cameraMode} 
+                lighting={lighting}
             />
         </main>
     )
