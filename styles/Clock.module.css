@@ -33,6 +33,7 @@
     font-size: 40px;
     background: transparent;
     border: 0;
+    cursor: pointer;
 }
 
 .speedText {

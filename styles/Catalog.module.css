@@ -77,8 +77,20 @@
     margin: 8px 0;
 }
 
+.inactive {
+    cursor: default;
+}
+
+.active {
+    cursor: pointer;
+}
+
 .inactive * {
     color: #444;
+}
+
+.unselected {
+    cursor: pointer;
 }
 
 .unselected * {

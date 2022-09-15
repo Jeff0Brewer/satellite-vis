@@ -94,7 +94,7 @@ const Catalog = props => {
                     />
                 </div>
                 <button 
-                    className={`${styles.labelSmall} ${props.followId ? '' : styles.inactive}`}
+                    className={`${styles.labelSmall} ${props.followId ? styles.active : styles.inactive}`}
                     onClick={() => props.setFollowId('')}
                 >
                     <FaBan />

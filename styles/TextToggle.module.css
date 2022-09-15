@@ -7,4 +7,5 @@
 .toggle a {
     display: block;
     text-transform: lowercase;
+    cursor: pointer;
 }
