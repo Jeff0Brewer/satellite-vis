@@ -5,7 +5,7 @@ import getIcosphere from '../../lib/icosphere.js'
 import { getEpochYear, getEpochDay } from '../../lib/shared-epoch.js'
 import * as Glu from '../../lib/gl-help.js'
 
-const floatSize = Float32Array.BYTES_PER_ELEMENT
+const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 const lightingMap = {
     'ON': 1,
     'OFF': 0
@@ -34,7 +34,7 @@ const setupGl = async (gl, epoch, lighting) => {
     const numVertex = icoBuffer.length / 3
 
     const locations = {}
-    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, floatSize)
+    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, FLOAT_SIZE)
     locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
     locations['uViewMatrix'] = gl.getUniformLocation(gl.program, 'uViewMatrix')
     locations['uSunNormal'] = gl.getUniformLocation(gl.program, 'uSunNormal')
@@ -127,7 +127,7 @@ const draw = (gl, epoch, viewMatrix, modelMatrix, earthRotation, ref) => {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
-    gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * floatSize, 0)
+    gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
     gl.drawArrays(gl.TRIANGLES, 0, numVertex)
 }
 

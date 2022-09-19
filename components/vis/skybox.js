@@ -1,7 +1,7 @@
 import { mat4, vec3 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 
-const floatSize = Float32Array.BYTES_PER_ELEMENT
+const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 
 const setupGl = async (gl) => {
     const vertPath = './shaders/skybox-vert.glsl'
@@ -18,7 +18,7 @@ const setupGl = async (gl) => {
     const numVertex = positions.length / 2
 
     const locations = {}
-    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 2, 2, 0, false, floatSize)
+    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 2, 2, 0, false, FLOAT_SIZE)
     locations['uViewProjInverse'] = gl.getUniformLocation(gl.program, 'uViewProjInverse')
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uSkybox'), 0)
     const texture = Glu.createCubemap(gl, 1024, [
@@ -78,7 +78,7 @@ const draw = (gl, viewMatrix, modelMatrix, ref) => {
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
     gl.uniformMatrix4fv(locations.uViewProjInverse, false, getInvMatrix(viewMatrix, projMatrix, modelMatrix, angleOffset))
-    gl.vertexAttribPointer(locations.aPosition, 2, gl.FLOAT, false, 2 * floatSize, 0)
+    gl.vertexAttribPointer(locations.aPosition, 2, gl.FLOAT, false, 2 * FLOAT_SIZE, 0)
 
     gl.disable(gl.DEPTH_TEST)
     gl.drawArrays(gl.TRIANGLES, 0, numVertex)

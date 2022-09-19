@@ -1,7 +1,7 @@
 import { mat4 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 
-const floatSize = Float32Array.BYTES_PER_ELEMENT
+const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 const categoryColors = {
     'Resource': [1, 1, .6],
     'Communications': [1, .8, 1],
@@ -39,8 +39,8 @@ const setupGl = async (gl, numVertex) => {
     const colBuffer = Glu.initBuffer(gl, new Float32Array(numVertex*3), gl.STATIC_DRAW)
 
     const locations = {}
-    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, floatSize)
-    locations['aColor'] = Glu.initAttribute(gl, 'aColor', 3, 3, 0, false, floatSize)
+    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, FLOAT_SIZE)
+    locations['aColor'] = Glu.initAttribute(gl, 'aColor', 3, 3, 0, false, FLOAT_SIZE)
     locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
     locations['uViewMatrix'] = gl.getUniformLocation(gl.program, 'uViewMatrix')
 
@@ -68,10 +68,10 @@ const draw = (gl, viewMatrix, modelMatrix, positions, ref) => {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer)
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions)
-    gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * floatSize, 0)
+    gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
 
     gl.bindBuffer(gl.ARRAY_BUFFER, colBuffer)
-    gl.vertexAttribPointer(locations.aColor, 3, gl.FLOAT, false, 3 * floatSize, 0)
+    gl.vertexAttribPointer(locations.aColor, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
 
     gl.uniformMatrix4fv(locations.uModelMatrix, false, modelMatrix)
     gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
