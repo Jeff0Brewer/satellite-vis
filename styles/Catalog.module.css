@@ -39,6 +39,7 @@
 .labelLarge {
     width: 30%;
     flex-wrap: wrap;
+    text-align: center;
     overflow: hidden;
 }
 
