@@ -12,17 +12,14 @@
     padding: 10px;
 }
 
-.control span {
+.control > span, .control > p  {
     display: flex;
     align-items: center;
-    margin: 5px;
     justify-content: space-between;
-}
-
-.control p {
-    margin: 0 5px;
     font-size: var(--control-font-size);
-} 
+    height: 50%;
+    margin: 0;
+}
 
 .toggle {
     background-color: #000;
@@ -30,6 +27,7 @@
     border: var(--border-style);
     border-width: 1px;
     margin-left: 10px;
+    font-size: 16px;
 }
 
 .toggle a {
