@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { GiOrbit } from 'react-icons/gi'
 import { FaRegEye, FaBan, FaCaretLeft, FaCaretRight } from 'react-icons/fa'
 import { twoline2satrec } from 'satellite.js'
 import { satCategories } from '../util/celes-groups.js'
@@ -33,7 +32,6 @@ const Catalog = props => {
 
     useEffect(() => {
         fetch('/api/get-tles')
-        //fetch('./tles.json') // for offline dev
             .then(res => res.json())
             .then(data => {
                 const satrecs = data.map(item => {
