@@ -12,17 +12,15 @@
     padding: 10px;
 }
 
-.control span {
+.control > span, .control > p  {
     display: flex;
     align-items: center;
-    margin: 5px;
     justify-content: space-between;
+    font-size: var(--control-font-size);
+    height: 50%;
+    margin: 0;
 }
 
-.control p {
-    margin: 0 5px;
-    font-size: var(--control-font-size);
-} 
 
 .toggle {
     background-color: #000;
