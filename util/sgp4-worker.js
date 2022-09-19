@@ -1,6 +1,7 @@
 import { propagate } from 'satellite.js'
 
 const MS_PER_DAY = 86400000
+const TICKRATE = 1000/90
 let intervalId
 
 const loopCalc = (data, memory, epoch) => {
@@ -22,7 +23,7 @@ const loopCalc = (data, memory, epoch) => {
     }
     if (intervalId)
         clearInterval(intervalId)
-    intervalId = setInterval(tick, 1000/60)
+    intervalId = setInterval(tick, TICKRATE)
 }
 
 onmessage = e => {
