@@ -1,4 +1,4 @@
-import { mat4, vec3 } from 'gl-matrix'
+import { mat4 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 
 const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
@@ -71,18 +71,19 @@ const getInvMatrix = (viewMatrix, projMatrix, modelMatrix, angleOffset) => {
 }
 
 const draw = (gl, viewMatrix, modelMatrix, ref) => {
-    if (!ref?.program) return
-    const { program, buffer, texture, locations, numVertex, projMatrix, angleOffset } = ref
-    
-    Glu.switchShader(gl, program)
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-    gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
-    gl.uniformMatrix4fv(locations.uViewProjInverse, false, getInvMatrix(viewMatrix, projMatrix, modelMatrix, angleOffset))
-    gl.vertexAttribPointer(locations.aPosition, 2, gl.FLOAT, false, 2 * FLOAT_SIZE, 0)
+    if (ref?.program) {
+        const { program, buffer, texture, locations, numVertex, projMatrix, angleOffset } = ref
 
-    gl.disable(gl.DEPTH_TEST)
-    gl.drawArrays(gl.TRIANGLES, 0, numVertex)
-    gl.enable(gl.DEPTH_TEST)
+        Glu.switchShader(gl, program)
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
+        gl.uniformMatrix4fv(locations.uViewProjInverse, false, getInvMatrix(viewMatrix, projMatrix, modelMatrix, angleOffset))
+        gl.vertexAttribPointer(locations.aPosition, 2, gl.FLOAT, false, 2 * FLOAT_SIZE, 0)
+
+        gl.disable(gl.DEPTH_TEST)
+        gl.drawArrays(gl.TRIANGLES, 0, numVertex)
+        gl.enable(gl.DEPTH_TEST)
+    }
 }
 
 export {

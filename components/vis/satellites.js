@@ -1,4 +1,3 @@
-import { mat4 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 
 const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
@@ -61,22 +60,22 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
 }
 
 const draw = (gl, viewMatrix, modelMatrix, positions, ref) => {
-    if (!ref?.program) return
-    const { program, posBuffer, colBuffer, locations, numVertex } = ref
+    if (ref?.program) {
+        const { program, posBuffer, colBuffer, locations, numVertex } = ref
 
-    Glu.switchShader(gl, program)
+        Glu.switchShader(gl, program)
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer)
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions)
-    gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
+        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer)
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions)
+        gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, colBuffer)
-    gl.vertexAttribPointer(locations.aColor, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
+        gl.bindBuffer(gl.ARRAY_BUFFER, colBuffer)
+        gl.vertexAttribPointer(locations.aColor, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
 
-    gl.uniformMatrix4fv(locations.uModelMatrix, false, modelMatrix)
-    gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
-    gl.drawArrays(gl.POINTS, 0, numVertex)
-
+        gl.uniformMatrix4fv(locations.uModelMatrix, false, modelMatrix)
+        gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
+        gl.drawArrays(gl.POINTS, 0, numVertex)
+    }
 }
 
 export {
