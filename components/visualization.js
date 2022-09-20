@@ -60,10 +60,11 @@ const Visualization = props => {
     }
 
     const setupViewport = gl => {
-        const {innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
-        gl.viewport(0, 0, w*dpr, h*dpr)
-        setWidth(w*dpr)
-        setHeight(h*dpr)
+        const w = innerWidth*devicePixelRatio
+        const h = innerHeight*devicePixelRatio
+        gl.viewport(0, 0, w, h)
+        setWidth(w)
+        setHeight(h)
 
         const projMatrix = getProjMat(w/h)
         Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
