@@ -127,9 +127,7 @@ const Visualization = props => {
             viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.0005, .8, 80)
         })
         canvRef.current.addEventListener('mousemove', e => {
-            const mouseX = 2*e.clientX/innerWidth - 1
-            const mouseY = -(2*e.clientY/innerHeight - 1)
-            Satellites.updateMousePos(glRef.current, mouseX, mouseY, modelMatRef, viewMatRef, projMatRef, satelliteRef.current)
+            Satellites.updateMousePos(glRef.current, e.clientX, e.clientY, modelMatRef, viewMatRef, projMatRef, satelliteRef.current)
         })
         window.addEventListener('resize', () => setupViewport(glRef.current))
     }, [])

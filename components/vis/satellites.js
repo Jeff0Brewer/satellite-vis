@@ -1,4 +1,4 @@
-import { mat4, vec4 } from 'gl-matrix'
+import { mat4, vec4, vec3 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 
 const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
@@ -55,28 +55,70 @@ const updateBuffer = (gl, data, ref) => {
     return ref
 }
 
-const updateMousePos = (gl, mouseX, mouseY, modelRef, viewRef, projRef, ref) => {
-    if (ref?.program) {
-        const { locations, program } = ref
-        const mvpMat = mat4.multiply(mat4.create(),
-            mat4.multiply(mat4.create(),
-                projRef.current,
-                viewRef.current
-            ),
-            modelRef.current
-        )
-        const invMat = mat4.invert(mat4.create(), mvpMat)
-        Glu.switchShader(gl, program)
-        gl.uniformMatrix4fv(locations.uInvMatrix, false, invMat)
-        gl.uniform2f(locations.uMousePos, mouseX, mouseY)
-    }
-}
-
 const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref?.program) {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
     }
+}
+
+const getInvMat = (modelRef, viewRef, projRef) => {
+    const mvpMat = mat4.multiply(mat4.create(),
+        mat4.multiply(mat4.create(),
+            projRef.current,
+            viewRef.current
+        ),
+        modelRef.current
+    )
+    return mat4.invert(mat4.create(), mvpMat)
+}
+
+const updateMousePos = (gl, mouseX, mouseY, modelRef, viewRef, projRef, ref) => {
+    if (ref?.program) {
+        const { locations, program } = ref
+        Glu.switchShader(gl, program)
+        gl.uniformMatrix4fv(locations.uInvMatrix, false, getInvMat(modelRef, viewRef, projRef))
+        gl.uniform2f(locations.uMousePos, 2*mouseX/innerWidth - 1, -(2*mouseY/innerHeight - 1))
+    }
+}
+
+const distLinePoint = (line0, line1, point) => {
+    const numer = vec3.length(
+        vec3.cross(vec3.create(),
+            vec3.subtract(vec3.create(), point, line0),
+            vec3.subtract(vec3.create(), point, line1)
+        )
+    )
+    const denom = vec3.length(
+        vec3.subtract(vec3.create(),
+            line0,
+            line1
+        )
+    )
+    return numer/denom
+}
+
+const filterMouseClick = (mouseX, mouseY, modelRef, viewRef, projRef, posData) => {
+    const mouseClipX = 2*mouseX/innerWidth - 1
+    const mouseClipY = -(2*mouseY/innerHeight - 1)
+    const mouseNear = vec4.fromValues(mouseClipX, mouseClipY, 0, 1)
+    const mouseFar = vec4.fromValues(mouseClipX, mouseClipY, 1, 1)
+    const invMat = getInvMat(modelRef, viewRef, projRef)
+    const unprojNear = vec4.transformMat4(vec4.create(), mouseNear, invMat)
+    const unprojFar = vec4.transformMat4(vec4.create(), mouseFar, invMat)
+    const lineNear = vec3.scale(vec3.create(), unprojNear, unprojNear[3])
+    const lineFar = vec3.scale(vec3.create(), unprojFar, unprojFar[3])
+    const lineVec = vec3.subtract(vec3.create(), lineFar, lineNear)
+    let minDist = 10000
+    let nearest
+    for (let i = 0; i < posData.length; i += 3) {
+        const point = posData.slice(i*3, (i+1)*3)
+        const dist = distLinePoint(lineNear, lineFar, point)
+        if (dist < minDist) {
+            nearest = i/3
+        }
+    }
+    return nearest
 }
 
 const draw = (gl, viewMatrix, modelMatrix, positions, ref) => {
@@ -103,5 +145,6 @@ export {
     updateMousePos,
     updateProjMatrix,
     updateBuffer,
+    filterMouseClick,
     draw
 }
