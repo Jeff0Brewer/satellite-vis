@@ -1,14 +1,14 @@
-import { useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
-import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
-    const { width, height } = useWindowDim()
+    const [width, setWidth] = useState(0)
+    const [height, setHeight] = useState(0)
     const canvRef = useRef()
     const glRef = useRef()
     const satelliteRef = useRef()
@@ -53,22 +53,19 @@ const Visualization = props => {
         earthRef.current = earthVars
         skyboxRef.current = skyboxVars
 
-        if (width && height) {
-            setupViewport(gl, width, height)
-        }
-        else {
-            const {innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
-            setupViewport(gl, w * dpr, h * dpr)
-        }
+        setupViewport(gl)
 
         gl.enable(gl.DEPTH_TEST)
         gl.enable(gl.CULL_FACE)
     }
 
-    const setupViewport = (gl, width, height) => {
-        gl.viewport(0, 0, width, height)
-        const projMatrix = getProjMat(width/height)
+    const setupViewport = gl => {
+        const {innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
+        gl.viewport(0, 0, w*dpr, h*dpr)
+        setWidth(w*dpr)
+        setHeight(h*dpr)
 
+        const projMatrix = getProjMat(w/h)
         Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
         skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
@@ -126,11 +123,8 @@ const Visualization = props => {
             e.preventDefault()
             viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.0005, .8, 80)
         })
+        window.addEventListener('resize', () => setupViewport(glRef.current))
     }, [])
-
-    useEffect(() => {
-        setupViewport(glRef.current, width, height)
-    }, [width, height])
 
     useEffect(() => {
         Earth.updateLighting(glRef.current, props.lighting, earthRef.current)
