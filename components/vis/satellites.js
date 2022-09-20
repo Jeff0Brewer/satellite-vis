@@ -1,3 +1,4 @@
+import { mat4, vec4 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 
 const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
@@ -8,6 +9,32 @@ const categoryColors = {
     'Scientific': [.8, 1, .8],
     'Debris': [.6, .6, .6],
     'Misc': [1, 1, 1]
+}
+
+const setupGl = async (gl, numVertex) => {
+    const vertPath = './shaders/satellite-vert.glsl'
+    const fragPath = './shaders/satellite-frag.glsl'
+    const program = await Glu.loadProgram(gl, vertPath, fragPath)
+    Glu.switchShader(gl, program)
+
+    const posBuffer = Glu.initBuffer(gl, new Float32Array(numVertex*3), gl.DYNAMIC_DRAW)
+    const colBuffer = Glu.initBuffer(gl, new Float32Array(numVertex*3), gl.STATIC_DRAW)
+
+    const locations = {}
+    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, FLOAT_SIZE)
+    locations['aColor'] = Glu.initAttribute(gl, 'aColor', 3, 3, 0, false, FLOAT_SIZE)
+    locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
+    locations['uViewMatrix'] = gl.getUniformLocation(gl.program, 'uViewMatrix')
+    locations['uInvMatrix'] = gl.getUniformLocation(gl.program, 'uInvMatrix')
+    locations['uMousePos'] = gl.getUniformLocation(gl.program, 'uMousePos')
+
+    return {
+        program: program,
+        posBuffer: posBuffer,
+        colBuffer: colBuffer,
+        locations: locations,
+        numVertex: numVertex
+    }
 }
 
 const updateBuffer = (gl, data, ref) => {
@@ -28,27 +55,20 @@ const updateBuffer = (gl, data, ref) => {
     return ref
 }
 
-const setupGl = async (gl, numVertex) => {
-    const vertPath = './shaders/satellite-vert.glsl'
-    const fragPath = './shaders/satellite-frag.glsl'
-    const program = await Glu.loadProgram(gl, vertPath, fragPath)
-    Glu.switchShader(gl, program)
-
-    const posBuffer = Glu.initBuffer(gl, new Float32Array(numVertex*3), gl.DYNAMIC_DRAW)
-    const colBuffer = Glu.initBuffer(gl, new Float32Array(numVertex*3), gl.STATIC_DRAW)
-
-    const locations = {}
-    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, FLOAT_SIZE)
-    locations['aColor'] = Glu.initAttribute(gl, 'aColor', 3, 3, 0, false, FLOAT_SIZE)
-    locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
-    locations['uViewMatrix'] = gl.getUniformLocation(gl.program, 'uViewMatrix')
-
-    return {
-        program: program,
-        posBuffer: posBuffer,
-        colBuffer: colBuffer,
-        locations: locations,
-        numVertex: numVertex
+const updateMousePos = (gl, mouseX, mouseY, modelRef, viewRef, projRef, ref) => {
+    if (ref?.program) {
+        const { locations, program } = ref
+        const mvpMat = mat4.multiply(mat4.create(),
+            mat4.multiply(mat4.create(),
+                projRef.current,
+                viewRef.current
+            ),
+            modelRef.current
+        )
+        const invMat = mat4.invert(mat4.create(), mvpMat)
+        Glu.switchShader(gl, program)
+        gl.uniformMatrix4fv(locations.uInvMatrix, false, invMat)
+        gl.uniform2f(locations.uMousePos, mouseX, mouseY)
     }
 }
 
@@ -80,6 +100,7 @@ const draw = (gl, viewMatrix, modelMatrix, positions, ref) => {
 
 export {
     setupGl,
+    updateMousePos,
     updateProjMatrix,
     updateBuffer,
     draw

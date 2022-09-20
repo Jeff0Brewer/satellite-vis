@@ -27,6 +27,7 @@ const Visualization = props => {
             [0, 0, 1]
         )
     )
+    const projMatRef = useRef()
     const getProjMat = aspect => {
         return mat4.perspective(mat4.create(),
             50 * Math.PI/180,
@@ -67,6 +68,7 @@ const Visualization = props => {
         setHeight(h)
 
         const projMatrix = getProjMat(w/h)
+        projMatRef.current = projMatrix
         Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
         skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
@@ -123,6 +125,11 @@ const Visualization = props => {
         canvRef.current.addEventListener('wheel', e => { 
             e.preventDefault()
             viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.0005, .8, 80)
+        })
+        canvRef.current.addEventListener('mousemove', e => {
+            const mouseX = 2*e.clientX/innerWidth - 1
+            const mouseY = -(2*e.clientY/innerHeight - 1)
+            Satellites.updateMousePos(glRef.current, mouseX, mouseY, modelMatRef, viewMatRef, projMatRef, satelliteRef.current)
         })
         window.addEventListener('resize', () => setupViewport(glRef.current))
     }, [])
