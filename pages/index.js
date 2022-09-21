@@ -18,15 +18,14 @@ const Home = () => {
     const [uiVisible, setUiVisible] = useState(false)
     const sharedEpochRef = useRef(newEpoch(new Date()))
 
-    const toggleUi = () => {
-        setUiVisible(!uiVisible)
-    }
-
     return (
         <main className={styles.home}>
             <section className={styles.interface}>
                 <div className={styles.collapseWrap}>
-                    <button className={styles.collapse} onClick={toggleUi}>{
+                    <button 
+                        className={styles.collapseButton} 
+                        onClick={() => setUiVisible(!uiVisible)}
+                    >{
                         uiVisible ?
                         <FaCaretDown /> :
                         <FaCaretUp />
