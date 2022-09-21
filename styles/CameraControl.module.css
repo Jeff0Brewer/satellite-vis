@@ -2,7 +2,11 @@
     display: none;
 }
 
-.control {
+.camControl p {
+    margin: 0;
+}
+
+.camControl {
     position: relative;
     width: var(--clock-width);
     height: calc(var(--catalog-height) - var(--clock-height));
@@ -12,7 +16,7 @@
     padding: 10px;
 }
 
-.control > span, .control > p  {
+.row {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -22,6 +26,9 @@
 }
 
 .toggle {
+    display: flex;
+    width: fit-content;
+    height: fit-content;
     background-color: #000;
     color: #fff;
     border: var(--border-style);
@@ -30,7 +37,10 @@
     font-size: 16px;
 }
 
-.toggle a {
+.toggleItem {
+    display: block;
+    text-transform: lowercase;
+    cursor: pointer;
     padding: 8px;
     min-width: 80px;
     text-align: center;
@@ -40,3 +50,4 @@
     background-color: #fff;
     color: #000;
 }
+
