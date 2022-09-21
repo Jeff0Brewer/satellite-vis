@@ -61,6 +61,7 @@ const Catalog = props => {
         if (props.selectId) {
             idInputRef.current.value = props.selectId
             setIdSearch(props.selectId)
+            props.setSelectId('')
         }
     }, [props.selectId])
 

@@ -54,6 +54,7 @@ const Home = () => {
                     followId={followId} 
                     setFollowId={setFollowId} 
                     selectId={selectId}
+                    setSelectId={setSelectId}
                 />
             </section>
             <Visualization 
