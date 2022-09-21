@@ -2,10 +2,6 @@
     display: none;
 }
 
-.camControl p {
-    margin: 0;
-}
-
 .camControl {
     position: relative;
     width: var(--clock-width);

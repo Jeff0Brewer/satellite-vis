@@ -2,10 +2,6 @@
     display: none;
 }
 
-.catalog p {
-    margin: 0;
-}
-
 .catalog button, .catalog a {
     cursor: pointer;
 }

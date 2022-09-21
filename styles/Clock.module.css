@@ -1,7 +1,3 @@
-.clock p {
-    margin: 0;
-}
-
 .clock {
     position: relative;
     display: flex;
