@@ -56,7 +56,6 @@ const Catalog = props => {
         }
     }, [props.selectId])
 
-
     return (
         <section className={props.visible ? styles.catalog : styles.hidden}>
             <span className={styles.catalogLabels}>
