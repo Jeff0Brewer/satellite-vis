@@ -16,8 +16,8 @@
 
 .catalog {
     position: relative;
-    width: calc(100% - var(--clock-width));
-    width: 700px;
+    width: 100vw;
+    max-width: var(--catalog-width);
     height: var(--catalog-height);
     background-color: var(--control-bg);
     border: var(--border-style);
@@ -37,6 +37,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    text-align: center;
     justify-content: center;
     overflow: hidden;
 }
@@ -160,4 +161,24 @@
 
 .clearInactive * {
     color: #444;
+}
+
+@media (max-width: 1000px) {
+    .catalog {
+        border: none;
+    }
+}
+
+@media (max-width: 700px) {
+    .labelLarge {
+        flex-direction: column;
+    }
+
+    .catalogLabels {
+        height: 70px;
+    }
+
+    .catalogList {
+        height: calc(var(--catalog-height) - 70px);
+    }
 }

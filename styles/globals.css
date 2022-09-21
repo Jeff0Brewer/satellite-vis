@@ -3,6 +3,8 @@
 :root {
     --control-bg: rgba(0, 0, 0, .85);
     --clock-width: 300px;
+    --catalog-width: 700px;
+    --default-width: 1000px;
     --clock-height: 120px;
     --catalog-height: 250px;
     --border-style: solid #fff;
