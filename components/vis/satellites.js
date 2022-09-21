@@ -1,5 +1,6 @@
 import { mat4, vec4, vec3 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
+import { byteToHex, hexToByte } from '../../lib/hex.js'
 
 const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 const categoryColors = {
@@ -10,6 +11,15 @@ const categoryColors = {
     'Debris': [.6, .6, .6],
     'Misc': [1, 1, 1]
 }
+const selectColors = []
+for (let r = 0; r < 25; r++) {
+    for (let g = 0; g < 25; g++) {
+        for (let b = 0; b < 25; b++) {
+            const hex = byteToHex([225 + r, 225 + g, 225 + b])
+            selectColors.push(hex)
+        }
+    }
+}
 
 const setupGl = async (gl, numVertex) => {
     const vertPath = './shaders/satellite-vert.glsl'
@@ -18,11 +28,12 @@ const setupGl = async (gl, numVertex) => {
     Glu.switchShader(gl, program)
 
     const posBuffer = Glu.initBuffer(gl, new Float32Array(numVertex*3), gl.DYNAMIC_DRAW)
-    const colBuffer = Glu.initBuffer(gl, new Float32Array(numVertex*3), gl.STATIC_DRAW)
+    const colBuffer = Glu.initBuffer(gl, new Float32Array(numVertex*3*2), gl.STATIC_DRAW)
 
     const locations = {}
     locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, FLOAT_SIZE)
-    locations['aColor'] = Glu.initAttribute(gl, 'aColor', 3, 3, 0, false, FLOAT_SIZE)
+    locations['aColor'] = Glu.initAttribute(gl, 'aColor', 3, 6, 0, false, FLOAT_SIZE)
+    locations['aSelectColor'] = Glu.initAttribute(gl, 'aSelectColor', 3, 6, 3, false, FLOAT_SIZE)
     locations['uModelMatrix'] = gl.getUniformLocation(gl.program, 'uModelMatrix')
     locations['uViewMatrix'] = gl.getUniformLocation(gl.program, 'uViewMatrix')
     locations['uInvMatrix'] = gl.getUniformLocation(gl.program, 'uInvMatrix')
@@ -42,13 +53,15 @@ const updateBuffer = (gl, data, ref) => {
         gl.bindBuffer(gl.ARRAY_BUFFER, ref.posBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.length*3), gl.DYNAMIC_DRAW)
 
-        const colors = new Float32Array(data.length*3)
+        const colors = new Float32Array(data.length*3*2)
         data.forEach((item, i) => {
             const color = categoryColors[item.category]
-            colors.set(color, i*3)
+            colors.set(color, i*3*2)
+            const select = hexToByte(selectColors[i]).map(byte => byte/255)
+            colors.set(select, 3 + i*3*2)
         })
         gl.bindBuffer(gl.ARRAY_BUFFER, ref.colBuffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
+        gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW)
 
         ref.numVertex = data.length
     }
@@ -62,63 +75,21 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     }
 }
 
-const getInvMat = (modelRef, viewRef, projRef) => {
-    const mvpMat = mat4.multiply(mat4.create(),
-        mat4.multiply(mat4.create(),
-            projRef.current,
-            viewRef.current
-        ),
-        modelRef.current
-    )
-    return mat4.invert(mat4.create(), mvpMat)
-}
-
 const updateMousePos = (gl, mouseX, mouseY, modelRef, viewRef, projRef, ref) => {
     if (ref?.program) {
         const { locations, program } = ref
         Glu.switchShader(gl, program)
-        gl.uniformMatrix4fv(locations.uInvMatrix, false, getInvMat(modelRef, viewRef, projRef))
+        const mvpMat = mat4.multiply(mat4.create(),
+            mat4.multiply(mat4.create(),
+                projRef.current,
+                viewRef.current
+            ),
+            modelRef.current
+        )
+        const invMat =  mat4.invert(mat4.create(), mvpMat)
+        gl.uniformMatrix4fv(locations.uInvMatrix, false, invMat)
         gl.uniform2f(locations.uMousePos, 2*mouseX/innerWidth - 1, -(2*mouseY/innerHeight - 1))
     }
-}
-
-const distLinePoint = (line0, line1, point) => {
-    const numer = vec3.length(
-        vec3.cross(vec3.create(),
-            vec3.subtract(vec3.create(), point, line0),
-            vec3.subtract(vec3.create(), point, line1)
-        )
-    )
-    const denom = vec3.length(
-        vec3.subtract(vec3.create(),
-            line0,
-            line1
-        )
-    )
-    return numer/denom
-}
-
-const filterMouseClick = (mouseX, mouseY, modelRef, viewRef, projRef, posData) => {
-    const mouseClipX = 2*mouseX/innerWidth - 1
-    const mouseClipY = -(2*mouseY/innerHeight - 1)
-    const mouseNear = vec4.fromValues(mouseClipX, mouseClipY, 0, 1)
-    const mouseFar = vec4.fromValues(mouseClipX, mouseClipY, 1, 1)
-    const invMat = getInvMat(modelRef, viewRef, projRef)
-    const unprojNear = vec4.transformMat4(vec4.create(), mouseNear, invMat)
-    const unprojFar = vec4.transformMat4(vec4.create(), mouseFar, invMat)
-    const lineNear = vec3.scale(vec3.create(), unprojNear, unprojNear[3])
-    const lineFar = vec3.scale(vec3.create(), unprojFar, unprojFar[3])
-    const lineVec = vec3.subtract(vec3.create(), lineFar, lineNear)
-    let minDist = 10000
-    let nearest
-    for (let i = 0; i < posData.length; i += 3) {
-        const point = posData.slice(i*3, (i+1)*3)
-        const dist = distLinePoint(lineNear, lineFar, point)
-        if (dist < minDist) {
-            nearest = i/3
-        }
-    }
-    return nearest
 }
 
 const draw = (gl, viewMatrix, modelMatrix, positions, ref) => {
@@ -132,7 +103,8 @@ const draw = (gl, viewMatrix, modelMatrix, positions, ref) => {
         gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
 
         gl.bindBuffer(gl.ARRAY_BUFFER, colBuffer)
-        gl.vertexAttribPointer(locations.aColor, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
+        gl.vertexAttribPointer(locations.aColor, 3, gl.FLOAT, false, 6 * FLOAT_SIZE, 0)
+        gl.vertexAttribPointer(locations.aSelectColor, 3, gl.FLOAT, false, 6 * FLOAT_SIZE, 3 * FLOAT_SIZE)
 
         gl.uniformMatrix4fv(locations.uModelMatrix, false, modelMatrix)
         gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
@@ -145,6 +117,6 @@ export {
     updateMousePos,
     updateProjMatrix,
     updateBuffer,
-    filterMouseClick,
+    selectColors,
     draw
 }

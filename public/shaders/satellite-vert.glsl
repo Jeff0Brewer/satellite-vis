@@ -1,5 +1,6 @@
 attribute vec4 aPosition;
 attribute vec4 aColor;
+attribute vec4 aSelectColor;
 
 uniform mat4 uModelMatrix;
 uniform mat4 uViewMatrix;
@@ -24,8 +25,7 @@ void main() {
     float mouseDist = distLinePoint(mouseNear.xyz/mouseNear.w, mouseFar.xyz/mouseFar.w, aPosition.xyz);
     float mouseRange = 100.0*depthScale;
     if (mouseDist < mouseRange) {
-        float effectScale = abs((mouseDist - mouseRange)/mouseRange);
-        vColor = mix(aColor, vec4(1.0, 1.0, 1.0, 1.0), effectScale);
-        gl_PointSize = gl_PointSize + 5.0*effectScale;
+        vColor = aSelectColor;
+        gl_PointSize = gl_PointSize + 5.0*abs((mouseDist - mouseRange)/mouseRange);
     }
 }

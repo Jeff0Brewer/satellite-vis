@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
+import { byteToHex } from '../lib/hex.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
@@ -43,6 +44,7 @@ const Visualization = props => {
     const MIN_PER_THREAD = 20
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
+    const selectHandlerRef = useRef({})
 
     const setupGl = async gl => {
         const [satelliteVars, earthVars, skyboxVars] = await Promise.all([
@@ -110,7 +112,7 @@ const Visualization = props => {
     }
 
     useEffect(() => {
-        glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
+        glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: true })
         setupGl(glRef.current)
 
         if (!sgp4WorkerRefs.current?.length) {
@@ -172,6 +174,29 @@ const Visualization = props => {
                 })
             }
         })
+
+        if (selectHandlerRef.current) {
+            canvRef.current.removeEventListener('mousedown', selectHandlerRef.current.mousedown)
+            canvRef.current.removeEventListener('mouseup', selectHandlerRef.current.mouseup)
+        }
+        let gl = glRef.current
+        let clickTime = 0
+        selectHandlerRef.current['mousedown'] = () => clickTime = Date.now()
+        selectHandlerRef.current['mouseup'] = e => {
+            const currTime = Date.now()
+            if (currTime - clickTime > 300) 
+                return
+            const clickColor = new Uint8Array(4)
+            const clickX = e.clientX*devicePixelRatio
+            const clickY = (innerHeight - e.clientY)*devicePixelRatio
+            gl.readPixels(clickX, clickY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickColor)
+            const colorHex = byteToHex(clickColor.slice(0, 3))
+            const ind = Satellites.selectColors.indexOf(colorHex)
+            if (ind != -1)
+                props.setSelectId(props.data[ind].satelliteId)
+        }
+        canvRef.current.addEventListener('mousedown', selectHandlerRef.current.mousedown)
+        canvRef.current.addEventListener('mouseup', selectHandlerRef.current.mouseup)
     }, [props.data])
 
     useEffect(() => {

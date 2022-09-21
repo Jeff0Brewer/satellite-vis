@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { FaRegEye, FaBan, FaCaretLeft, FaCaretRight } from 'react-icons/fa'
 import { twoline2satrec } from 'satellite.js'
 import { satCategories } from '../util/celes-groups.js'
@@ -14,6 +14,7 @@ const Catalog = props => {
     const [nameSearch, setNameSearch] = useState('')
     const [idSearch, setIdSearch] = useState('')
     const [selectedCategories, setSelectedCategories] = useState(new Set(satCategories))
+    const idInputRef = useRef()
 
     const toggleCategory = category => {
         const selected = new Set(selectedCategories)
@@ -56,6 +57,13 @@ const Catalog = props => {
         }))
     }, [nameSearch, idSearch, selectedCategories])
 
+    useEffect(() => {
+        if (props.selectId) {
+            idInputRef.current.value = props.selectId
+            setIdSearch(props.selectId)
+        }
+    }, [props.selectId])
+
     return (
         <section className={props.visible ? styles.catalog : styles.hidden}>
             <span className={styles.labels}>
@@ -74,6 +82,7 @@ const Catalog = props => {
                     Id:
                     <input 
                         className={styles.filterInput}
+                        ref={idInputRef}
                         type="text" 
                         placeholder="Search" 
                         onChange={e => 
