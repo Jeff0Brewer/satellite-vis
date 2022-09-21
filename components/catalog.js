@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { FaRegEye, FaBan, FaCaretLeft, FaCaretRight } from 'react-icons/fa'
+import { IoClose } from 'react-icons/io5'
 import { twoline2satrec } from 'satellite.js'
 import { satCategories } from '../util/celes-groups.js'
 import MultiSelect from './multi-select.js'
@@ -14,7 +15,6 @@ const Catalog = props => {
     const [nameSearch, setNameSearch] = useState('')
     const [idSearch, setIdSearch] = useState('')
     const [selectedCategories, setSelectedCategories] = useState(new Set(satCategories))
-    const idInputRef = useRef()
 
     const toggleCategory = category => {
         const selected = new Set(selectedCategories)
@@ -59,7 +59,6 @@ const Catalog = props => {
 
     useEffect(() => {
         if (props.selectId) {
-            idInputRef.current.value = props.selectId
             setIdSearch(props.selectId)
             props.setSelectId('')
         }
@@ -68,38 +67,29 @@ const Catalog = props => {
     return (
         <section className={props.visible ? styles.catalog : styles.hidden}>
             <span className={styles.labels}>
-                <div className={styles.labelLarge}>
-                    Name:
-                    <input 
-                        className={styles.filterInput}
-                        type="text" 
-                        placeholder="Search" 
-                        onChange={e => 
-                            setNameSearch(e.target.value.toLowerCase())
-                        } 
-                    />
-                </div>
-                <div className={styles.labelLarge}>
-                    Id:
-                    <input 
-                        className={styles.filterInput}
-                        ref={idInputRef}
-                        type="text" 
-                        placeholder="Search" 
-                        onChange={e => 
-                            setIdSearch(e.target.value)
-                        } 
-                    />
-                </div>
+                <SearchInput
+                    styleName={styles.labelLarge}
+                    label="Name:"
+                    value={nameSearch}
+                    setValue={val => setNameSearch(val.toLowerCase())}
+                />
+                <SearchInput
+                    styleName={styles.labelLarge}
+                    label="Id:"
+                    value={idSearch}
+                    setValue={val => setIdSearch(val)}
+                />
                 <div className={styles.labelLarge}>
                     Type:
-                    <MultiSelect 
-                        styleName={styles.filterInput} 
-                        items={satCategories} 
-                        itemState={selectedCategories} 
-                        toggleItem={toggleCategory} 
-                        placeholder="Select"
-                    />
+                    <div className={styles.inputWrap}>
+                        <MultiSelect 
+                            styleName={styles.filterInput} 
+                            items={satCategories} 
+                            itemState={selectedCategories} 
+                            toggleItem={toggleCategory} 
+                            placeholder="Select"
+                        />
+                    </div>
                 </div>
                 <button 
                     className={`${styles.labelSmall} ${props.followId ? styles.active : styles.inactive}`}
@@ -129,11 +119,40 @@ const Catalog = props => {
     )
 }
 
-const CatalogItem = props => {
-    const followItem = () => {
-        props.setFollowId(props.item.satelliteId)
-    }
+const SearchInput = props => {
+    const inputRef = useRef()
 
+    useEffect(() => {
+        if (inputRef.current.value != props.value)
+            inputRef.current.value = props.value
+    }, [props.value])
+
+    return (
+        <span className={props.styleName}>
+            {props.label}
+            <div className={styles.inputWrap}>
+                <input 
+                    className={styles.filterInput}
+                    ref={inputRef}
+                    type="text" 
+                    placeholder="Search"
+                    onChange={e => props.setValue(e.target.value)}
+                />
+                <button
+                    className={`${styles.clearSearch} ${props.value ? styles.active : styles.invisible}`}
+                    onClick={() => {
+                        props.setValue('')
+                        inputRef.current.value = ''
+                    }}
+                >
+                    <IoClose />
+                </button>
+            </div>
+        </span>
+    )
+}
+
+const CatalogItem = props => {
     return (
         <span className={styles.listItem}>
             <p className={styles.labelLarge}>{props.item.name}</p>
