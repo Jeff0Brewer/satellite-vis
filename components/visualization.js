@@ -28,7 +28,6 @@ const Visualization = props => {
             [0, 0, 1]
         )
     )
-    const projMatRef = useRef()
     const getProjMat = aspect => {
         return mat4.perspective(mat4.create(),
             50 * Math.PI/180,
@@ -45,6 +44,7 @@ const Visualization = props => {
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
     const selectHandlerRef = useRef({})
+    const mousePosRef = useRef({'x': 0, 'y': 0})
 
     const setupGl = async gl => {
         const [satelliteVars, earthVars, skyboxVars] = await Promise.all([
@@ -70,9 +70,8 @@ const Visualization = props => {
         setHeight(h)
 
         const projMatrix = getProjMat(w/h)
-        projMatRef.current = projMatrix
-        Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
+        satelliteRef.current = Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
     }
 
@@ -129,7 +128,8 @@ const Visualization = props => {
             viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.0005, .8, 80)
         })
         canvRef.current.addEventListener('mousemove', e => {
-            Satellites.updateMousePos(glRef.current, e.clientX, e.clientY, modelMatRef, viewMatRef, projMatRef, satelliteRef.current)
+            mousePosRef.current.x = e.clientX
+            mousePosRef.current.y = e.clientY
         })
         window.addEventListener('resize', () => setupViewport(glRef.current))
     }, [])
@@ -174,7 +174,9 @@ const Visualization = props => {
                 })
             }
         })
+    }, [props.data])
 
+    useEffect(() => {
         if (selectHandlerRef.current) {
             canvRef.current.removeEventListener('mousedown', selectHandlerRef.current.mousedown)
             canvRef.current.removeEventListener('mouseup', selectHandlerRef.current.mouseup)
@@ -227,7 +229,7 @@ const Visualization = props => {
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
             Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, earthRef.current)
-            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, satelliteRef.current)
+            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, mousePosRef.current, satelliteRef.current)
 
             requestFrame(tick)
         }

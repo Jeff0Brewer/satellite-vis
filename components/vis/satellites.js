@@ -1,4 +1,4 @@
-import { mat4, vec4, vec3 } from 'gl-matrix'
+import { mat4 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 import { byteToHex, hexToByte } from '../../lib/hex.js'
 
@@ -44,7 +44,8 @@ const setupGl = async (gl, numVertex) => {
         posBuffer: posBuffer,
         colBuffer: colBuffer,
         locations: locations,
-        numVertex: numVertex
+        numVertex: numVertex,
+        projMatrix: mat4.create()
     }
 }
 
@@ -72,31 +73,30 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref?.program) {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
+        ref.projMatrix = projMatrix
     }
+    return ref
 }
 
-const updateMousePos = (gl, mouseX, mouseY, modelRef, viewRef, projRef, ref) => {
-    if (ref?.program) {
-        const { locations, program } = ref
-        Glu.switchShader(gl, program)
-        const mvpMat = mat4.multiply(mat4.create(),
-            mat4.multiply(mat4.create(),
-                projRef.current,
-                viewRef.current
-            ),
-            modelRef.current
-        )
-        const invMat =  mat4.invert(mat4.create(), mvpMat)
-        gl.uniformMatrix4fv(locations.uInvMatrix, false, invMat)
-        gl.uniform2f(locations.uMousePos, 2*mouseX/innerWidth - 1, -(2*mouseY/innerHeight - 1))
-    }
+const getInvMat = (projMatrix, viewMatrix, modelMatrix) => {
+    const mvpMat = mat4.multiply(mat4.create(),
+        mat4.multiply(mat4.create(),
+            projMatrix,
+            viewMatrix
+        ),
+        modelMatrix
+    )
+    return mat4.invert(mat4.create(), mvpMat)
 }
 
-const draw = (gl, viewMatrix, modelMatrix, positions, ref) => {
+const draw = (gl, viewMatrix, modelMatrix, positions, mousePos, ref) => {
     if (ref?.program) {
-        const { program, posBuffer, colBuffer, locations, numVertex } = ref
+        const { program, posBuffer, colBuffer, locations, numVertex, projMatrix } = ref
 
         Glu.switchShader(gl, program)
+        
+        gl.uniformMatrix4fv(locations.uInvMatrix, false, getInvMat(projMatrix, viewMatrix, modelMatrix))
+        gl.uniform2f(locations.uMousePos, 2*mousePos.x/innerWidth - 1, -(2*mousePos.y/innerHeight - 1))
 
         gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer)
         gl.bufferSubData(gl.ARRAY_BUFFER, 0, positions)
@@ -114,7 +114,6 @@ const draw = (gl, viewMatrix, modelMatrix, positions, ref) => {
 
 export {
     setupGl,
-    updateMousePos,
     updateProjMatrix,
     updateBuffer,
     selectColors,
