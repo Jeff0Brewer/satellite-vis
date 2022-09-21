@@ -188,10 +188,12 @@ const Visualization = props => {
             const currTime = Date.now()
             if (currTime - clickTime > 300) 
                 return
+
             const clickColor = new Uint8Array(4)
             const clickX = e.clientX*devicePixelRatio
             const clickY = (innerHeight - e.clientY)*devicePixelRatio
             gl.readPixels(clickX, clickY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickColor)
+
             const colorHex = byteToHex(clickColor.slice(0, 3))
             const ind = Satellites.selectColors.indexOf(colorHex)
             if (ind != -1)
