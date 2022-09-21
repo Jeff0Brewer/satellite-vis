@@ -1,3 +1,7 @@
+.clock p {
+    margin: 0;
+}
+
 .clock {
     position: relative;
     display: flex;
@@ -5,32 +9,27 @@
     width: var(--clock-width);
     height: var(--clock-height);
     background-color: var(--control-bg);
-    font-size: var(--control-font-size);
-    padding: 5px;
+    padding: 15px;
 }
 
-.clock span {
+.clockRow {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 8px;
-}
-
-.clock p {
-    margin: 0;
+    margin: 5px 0;
 }
 
 .epochText {
     font-size: 22px;
 }
 
-.reset {
+.resetEpoch {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
-    font-size: 30px;
+    font-size: 25px;
     background: transparent;
     border: 0;
     cursor: pointer;
@@ -38,8 +37,9 @@
 
 .speedText {
     width: 75px;
+    font-size: var(--control-font-size);
 }
 
 .speedInput {
-    width: calc(100% - 75px);
+    width: calc(100% - 80px);
 }
