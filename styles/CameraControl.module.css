@@ -2,35 +2,39 @@
     display: none;
 }
 
-.control {
+.camControl {
     position: relative;
     width: var(--clock-width);
     height: calc(var(--catalog-height) - var(--clock-height));
     background-color: var(--control-bg);
     border: var(--border-style);
     border-width: 1px 0 0 0;
-    padding: 10px;
+    padding: 15px;
 }
 
-.control > span, .control > p  {
+.row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-size: var(--control-font-size);
     height: 50%;
-    margin: 0;
 }
 
 .toggle {
+    display: flex;
+    width: fit-content;
+    height: fit-content;
     background-color: #000;
     color: #fff;
     border: var(--border-style);
     border-width: 1px;
-    margin-left: 10px;
     font-size: 16px;
 }
 
-.toggle a {
+.toggleItem {
+    display: block;
+    text-transform: lowercase;
+    cursor: pointer;
     padding: 8px;
     min-width: 80px;
     text-align: center;
@@ -39,4 +43,10 @@
 .toggleActive {
     background-color: #fff;
     color: #000;
+}
+
+@media (max-width: 1000px) {
+    .camControl {
+        border-width: 1px 0;
+    }
 }

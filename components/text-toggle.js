@@ -1,24 +1,24 @@
-import styles from '../styles/TextToggle.module.css'
+import styles from '../styles/CameraControl.module.css'
 
 const TextToggle = props => {
     return (
-        <span className={`${styles.toggle} ${props.styleName}`}>
+        <span className={props.styleName}>
             <a 
-                className={
+                className={`${styles.toggleItem} ${
                     props.currValue === props.value0 ? 
-                    props.selectedStyle :
+                    styles.toggleActive :
                     ''
-                }
+                }`}
                 onClick={() => props.setValue(props.value0)}
             >{
                 props.value0
             }</a>
             <a 
-                className={
+                className={`${styles.toggleItem} ${
                     props.currValue === props.value1 ? 
-                    props.selectedStyle :
+                    styles.toggleActive :
                     ''
-                }
+                }`}
                 onClick={() => props.setValue(props.value1)}
             >{
                 props.value1

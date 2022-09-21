@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { BiCheck } from 'react-icons/bi'
-import styles from '../styles/MultiSelect.module.css'
+import styles from '../styles/Catalog.module.css'
 
 const MultiSelect = props => {
     const [listOpen, setListOpen] = useState(false)
@@ -9,25 +9,49 @@ const MultiSelect = props => {
         setListOpen(!listOpen)
     }
 
+    const toggleItem = item => {
+        const selected = new Set(props.itemState)
+        if (selected.has(item))
+            selected.delete(item)
+        else
+            selected.add(item)
+        props.setState(selected)
+    }
+
     return (
-        <div tabIndex='0' onBlur={() => setListOpen(false)} className={`${styles.select} ${props.styleName}`}>
-            <a className={styles.toggle} onClick={toggleOpen}>
-                <p className={styles.placeholder}>{props.placeholder}</p>
-            </a>
-            <section className={styles.list}>{ 
-                listOpen ? 
-                props.items.map((item, i) => 
-                    <a key={i} onClick={() => props.toggleItem(item)}>
-                        <div className={styles.check}>{
-                            props.itemState.has(item) ? 
-                            <BiCheck /> :
-                            <></>
-                        }</div>
-                        <p>{item}</p>
+        <div className={props.styleName}>
+            {props.label}
+            <div className={styles.inputWrap}>
+                <div 
+                    className={`${styles.multiSelect} ${styles.filterInput}`}
+                    tabIndex='0' 
+                    onBlur={() => setListOpen(false)} 
+                >
+                    <a className={styles.multiSelectToggle} onClick={toggleOpen}>
+                        <p className={styles.multiSelectPlaceholder}>
+                            Select
+                        </p>
                     </a>
-                ) :
-                <></>
-            }</section>
+                    <section className={styles.selectList}>{ 
+                        listOpen ? 
+                        props.items.map((item, i) => 
+                            <a 
+                                className={styles.selectItem}
+                                key={i} 
+                                onClick={() => toggleItem(item)}
+                            >
+                                <div className={styles.selectMark}>{
+                                    props.itemState.has(item) ? 
+                                    <BiCheck /> :
+                                    <></>
+                                }</div>
+                                <p>{item}</p>
+                            </a>
+                        ) :
+                        <></>
+                    }</section>
+                </div>
+            </div>
         </div>
     )
 }

@@ -2,49 +2,60 @@
     display: none;
 }
 
+.catalog button, .catalog a {
+    cursor: pointer;
+}
+
+.catalog button {
+    background: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+}
+
 .catalog {
     position: relative;
-    width: calc(100% - var(--clock-width));
-    width: 700px;
+    width: 100vw;
+    max-width: var(--catalog-width);
     height: var(--catalog-height);
     background-color: var(--control-bg);
     border: var(--border-style);
     border-width: 0 0 0 1px;
 }
 
-.catalog button {
-    background: transparent;
-    border: none;
-    font-size: 20px;
-}
-
-.catalog span > * {
+.catalogLabels {
+    height: 45px;
     display: flex;
     align-items: center;
-    justify-content: center;
-}
-
-.catalog p {
-    margin: 0;
-}
-
-.labels {
-    min-height: 50px;
-    display: flex;
     font-size: var(--control-font-size);
     border: var(--border-style);
     border-width: 0 0 1px 0;
 }
 
+.labelSmall, .labelLarge {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
 .labelLarge {
     width: 30%;
-    flex-wrap: wrap;
-    text-align: center;
-    overflow: hidden;
 }
 
 .labelSmall {
     width: 10%;
+}
+
+.inputWrap {
+    margin: 5px;
+    border: var(--border-style);
+    border-width: 0 0 1px 0;
+    display: flex;
+    justify-content: space-between;
 }
 
 .filterInput {
@@ -52,52 +63,122 @@
     height: 25px;
     font-size: var(--control-font-size);
     background-color: transparent;
-    border: var(--border-style);
-    border-width: 0 0 1px 0;
-    margin: 10px;
-    padding: 0px;
+    border: none;
+    margin: 0;
+    padding: 0;
 }
 
-.filterInput::placeholder {
-    color: var(--placeholder-color);
+.filterInput::placeholder, .multiSelectPlaceholder {
+    color: #777;
     text-transform: lowercase;
     font-size: var(--control-font-size);
 }
 
-.list {
+.multiSelect {
+    user-select: none;
+    display: block;
+}
+
+.multiSelectToggle {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+}
+
+.selectList {
+    position: absolute;
     display: flex;
     flex-direction: column;
-    height: calc(var(--catalog-height) - 50px);
-    overflow-y: scroll;
+    background-color: var(--control-bg);
+    padding: 0 5px;
+}
+
+.selectItem {
+    display: flex;
+    align-items: center;
+    text-transform: lowercase;
+}
+
+.selectItem * {
     font-size: 16px;
 }
 
-.listItem {
+.selectMark {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+}
+
+.clearSearch {
     display: flex;
     align-items: center;
-    margin: 8px 0;
+    justify-content: center;
+    font-size: 20px;
 }
 
-.inactive {
-    cursor: default;
+.clearSearchHidden {
+    visibility: hidden;
 }
 
-.active {
-    cursor: pointer;
+.catalogList{
+    height: calc(var(--catalog-height) - 45px);
+    overflow-y: scroll;
 }
 
-.inactive * {
+.catalogItem {
+    display: flex;
+    align-items: center;
+    margin: 12px 0 0 0;
+}
+
+.pageControls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    margin: 5px;
+}
+
+.pageArrow * {
+    font-size: 16px;
+}
+
+.followSelected, .clearInactive {
+    pointer-events: none;
+}
+
+.clearActive:hover *, .followUnselected:hover * {
+    color: #ccc;
+}
+
+.followUnselected * {
+    color: #888;
+}
+
+.clearInactive * {
     color: #444;
 }
 
-.unselected {
-    cursor: pointer;
+@media (max-width: 1000px) {
+    .catalog {
+        border: none;
+    }
 }
 
-.unselected * {
-    color: #999;
-}
+@media (max-width: 700px) {
+    .labelLarge {
+        flex-direction: column;
+    }
 
-.unselected:hover * {
-    color: #ddd;
+    .catalogLabels {
+        height: 70px;
+    }
+
+    .catalogList {
+        height: calc(var(--catalog-height) - 70px);
+    }
 }

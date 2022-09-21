@@ -2,37 +2,24 @@ import TextToggle from '../components/text-toggle.js'
 import styles from '../styles/CameraControl.module.css'
 
 const CameraControl = props => {
-    const toggleMode = () => {
-        if (props.mode === 'INERTIAL')
-            props.setMode('FIXED')
-        else
-            props.setMode('INERTIAL')
-    }
-
-    const cancelFollow = () => {
-        props.setFollowId('')
-    }
-
     return (
-        <section className={props.visible ? styles.control : styles.hidden}>{
+        <section className={props.visible ? styles.camControl : styles.hidden}>{
             props.followId ?
-            <p>{`Viewing #${props.followId}`}</p> : 
-            <span>
-                <p>View:</p>
+            <p className={styles.row} >{`Following #${props.followId}`}</p> : 
+            <span className={styles.row}>
+                <p>Reference:</p>
                 <TextToggle
                     styleName={styles.toggle}
-                    selectedStyle={styles.toggleActive}
                     value0={'INERTIAL'}
                     value1={'FIXED'}
                     currValue={props.mode}
                     setValue={props.setMode}
                 />
             </span>}
-            <span>
+            <span className={styles.row}>
                 <p>Lighting:</p>
                 <TextToggle
                     styleName={styles.toggle}
-                    selectedStyle={styles.toggleActive}
                     value0={'OFF'}
                     value1={'ON'}
                     currValue={props.lighting}
