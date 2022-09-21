@@ -1,14 +1,15 @@
-import { useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
+import { byteToHex } from '../lib/hex.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
-import useWindowDim from '../util/window-dim.js'
 import styles from '../styles/Visualization.module.css'
 
 const Visualization = props => {
-    const { width, height } = useWindowDim()
+    const [width, setWidth] = useState(0)
+    const [height, setHeight] = useState(0)
     const canvRef = useRef()
     const glRef = useRef()
     const satelliteRef = useRef()
@@ -42,6 +43,8 @@ const Visualization = props => {
     const MIN_PER_THREAD = 20
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
+    const selectHandlerRef = useRef({})
+    const mousePosRef = useRef({'x': 0, 'y': 0})
 
     const setupGl = async gl => {
         const [satelliteVars, earthVars, skyboxVars] = await Promise.all([
@@ -53,24 +56,22 @@ const Visualization = props => {
         earthRef.current = earthVars
         skyboxRef.current = skyboxVars
 
-        if (width && height) {
-            setupViewport(gl, width, height)
-        }
-        else {
-            const {innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
-            setupViewport(gl, w * dpr, h * dpr)
-        }
+        setupViewport(gl)
 
         gl.enable(gl.DEPTH_TEST)
         gl.enable(gl.CULL_FACE)
     }
 
-    const setupViewport = (gl, width, height) => {
-        gl.viewport(0, 0, width, height)
-        const projMatrix = getProjMat(width/height)
+    const setupViewport = gl => {
+        const w = innerWidth*devicePixelRatio
+        const h = innerHeight*devicePixelRatio
+        gl.viewport(0, 0, w, h)
+        setWidth(w)
+        setHeight(h)
 
-        Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
+        const projMatrix = getProjMat(w/h)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
+        satelliteRef.current = Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
     }
 
@@ -110,7 +111,7 @@ const Visualization = props => {
     }
 
     useEffect(() => {
-        glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: false })
+        glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: true })
         setupGl(glRef.current)
 
         if (!sgp4WorkerRefs.current?.length) {
@@ -126,11 +127,12 @@ const Visualization = props => {
             e.preventDefault()
             viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.0005, .8, 80)
         })
+        canvRef.current.addEventListener('mousemove', e => {
+            mousePosRef.current.x = e.clientX
+            mousePosRef.current.y = e.clientY
+        })
+        window.addEventListener('resize', () => setupViewport(glRef.current))
     }, [])
-
-    useEffect(() => {
-        setupViewport(glRef.current, width, height)
-    }, [width, height])
 
     useEffect(() => {
         Earth.updateLighting(glRef.current, props.lighting, earthRef.current)
@@ -175,6 +177,33 @@ const Visualization = props => {
     }, [props.data])
 
     useEffect(() => {
+        if (selectHandlerRef.current) {
+            canvRef.current.removeEventListener('mousedown', selectHandlerRef.current.mousedown)
+            canvRef.current.removeEventListener('mouseup', selectHandlerRef.current.mouseup)
+        }
+        let gl = glRef.current
+        let clickTime = 0
+        selectHandlerRef.current['mousedown'] = () => clickTime = Date.now()
+        selectHandlerRef.current['mouseup'] = e => {
+            const currTime = Date.now()
+            if (currTime - clickTime > 300) 
+                return
+
+            const clickColor = new Uint8Array(4)
+            const clickX = e.clientX*devicePixelRatio
+            const clickY = (innerHeight - e.clientY)*devicePixelRatio
+            gl.readPixels(clickX, clickY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, clickColor)
+
+            const colorHex = byteToHex(clickColor.slice(0, 3))
+            const ind = Satellites.selectColors.indexOf(colorHex)
+            if (ind != -1)
+                props.setSelectId(props.data[ind].satelliteId)
+        }
+        canvRef.current.addEventListener('mousedown', selectHandlerRef.current.mousedown)
+        canvRef.current.addEventListener('mouseup', selectHandlerRef.current.mouseup)
+    }, [props.data])
+
+    useEffect(() => {
         const gl = glRef.current
         const lastT = 0
         const posBuffer = new Float32Array(props.data.length * 3)
@@ -202,7 +231,7 @@ const Visualization = props => {
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
             Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, earthRef.current)
-            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, satelliteRef.current)
+            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, mousePosRef.current, satelliteRef.current)
 
             requestFrame(tick)
         }

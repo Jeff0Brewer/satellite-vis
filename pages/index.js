@@ -13,6 +13,7 @@ const Home = () => {
     const [lighting, setLighting] = useState('OFF')
     const [cameraMode, setCameraMode] = useState('INERTIAL')
     const [followId, setFollowId] = useState('')
+    const [selectId, setSelectId] = useState('')
     const [clockSpeed, setClockSpeed] = useState(0)
     const [uiVisible, setUiVisible] = useState(false)
     const sharedEpochRef = useRef(newEpoch(new Date()))
@@ -52,6 +53,7 @@ const Home = () => {
                     setData={setSatData} 
                     followId={followId} 
                     setFollowId={setFollowId} 
+                    selectId={selectId}
                 />
             </section>
             <Visualization 
@@ -61,6 +63,7 @@ const Home = () => {
                 followId={followId} 
                 cameraMode={cameraMode} 
                 lighting={lighting}
+                setSelectId={setSelectId}
             />
         </main>
     )
