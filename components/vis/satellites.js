@@ -12,10 +12,10 @@ const categoryColors = {
     'Misc': [1, 1, 1]
 }
 const selectColors = []
-for (let r = 0; r < 25; r++) {
-    for (let g = 0; g < 25; g++) {
-        for (let b = 0; b < 25; b++) {
-            const hex = byteToHex([225 + r, 225 + g, 225 + b])
+for (let r = 0; r < 40; r++) {
+    for (let g = 0; g < 40; g++) {
+        for (let b = 0; b < 40; b++) {
+            const hex = byteToHex([210 + r, 210 + g, 210 + b])
             selectColors.push(hex)
         }
     }
