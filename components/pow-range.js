@@ -13,17 +13,21 @@ const PowRange = props => {
     }
 
     useEffect(() => {
+        const eventHandlers = {}
         if (props?.onChange) {
-            inputRef.current.addEventListener('change',
-                e => props.onChange(rawToVal(e.target.value))
-            )
+            eventHandlers['change'] = e => props.onChange(rawToVal(e.target.value))
+            inputRef.current.addEventListener('change', eventHandlers.change)
             props.onChange(props.defaultValue)
         }
         if (props?.onInput) {
-            inputRef.current.addEventListener('input',
-                e => props.onInput(rawToVal(e.target.value))
-            )
+            eventHandlers['input'] = e => props.onInput(rawToVal(e.target.value))
+            inputRef.current.addEventListener('input', eventHandlers.input)
             props.onInput(props.defaultValue)
+        }
+        return () => {
+            for (const [type, handler] of Object.entries(eventHandlers)) {
+                inputRef.current.removeEventListener(type, handler)
+            }
         }
     }, [])
 
