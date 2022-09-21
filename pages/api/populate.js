@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import mongoose from 'mongoose'
 import connectMongo from '../../util/connect-mongo.js'
 import Tle from '../../models/tleModel.js'
@@ -45,6 +46,13 @@ const addGroups = (groups, groupToUrl, seenIds) => {
 }
 
 const populateTles = async (req, res) => {
+    if (req.headers?.authorization !== process.env.POPULATE_KEY) {
+        console.log('POPULATE AUTHENTICATION FAILED')
+        return res.status(401).send({
+            'status': 'error',
+            'message': 'unauthorized'
+        })
+    }
     await connectMongo()
     const collections = await mongoose.connection.db.listCollections({ name: 'tles' }).toArray()
     if (collections.length) {
@@ -57,13 +65,16 @@ const populateTles = async (req, res) => {
         ...addGroups(supplementalGroups, getSupplementalUrl, seenIds),
         ...addGroups(noradGroups, getNoradUrl, seenIds)
     ]
-
     const data = await Promise.all(groups)
+
     let totalTles = 0
     data.forEach(group => totalTles += group.length)
-
     console.log(`UPDATE COMPLETE - ${totalTles} total tles`)
-    res.status(200).end()
+
+    res.status(200).send({
+        'status': 'success',
+        'data': { 'num-tles': totalTles }
+    })
 }
 
 export default populateTles
