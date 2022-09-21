@@ -26,6 +26,6 @@ void main() {
     float mouseRange = 100.0*depthScale;
     if (mouseDist < mouseRange) {
         vColor = aSelectColor;
-        gl_PointSize = gl_PointSize + 5.0*abs((mouseDist - mouseRange)/mouseRange);
+        gl_PointSize = gl_PointSize + 10.0*abs((mouseDist - mouseRange)/mouseRange);
     }
 }
