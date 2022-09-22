@@ -21,9 +21,7 @@ const addGroup = (category, url, seenIds) => {
                 const line1 = data[i+1]
                 const line2 = data[i+2]
                 const id = getCatalogNumber(line1, line2)
-                const checkedCategory = (name + '!').match(/ DEB(?:[ )!])?/) ? 
-                    'Debris' : 
-                    category
+                const checkedCategory = (name + '!').match(/ DEB(?:[ )!])?/) ? 'Debris' : category
                 if (!seenIds.has(id)) {
                     tles.push({
                         name: name,
