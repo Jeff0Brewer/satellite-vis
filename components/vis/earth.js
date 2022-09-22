@@ -4,11 +4,11 @@ import { getSunPosition } from '../../lib/sun.js'
 import getIcosphere from '../../lib/icosphere.js'
 import * as Glu from '../../lib/gl-help.js'
 
-const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 const lightingMap = {
     'ON': 1,
     'OFF': 0
 }
+const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 
 const setupGl = async (gl, epoch, lighting) => {
     const vertPath = './shaders/earth-vert.glsl'
@@ -16,8 +16,8 @@ const setupGl = async (gl, epoch, lighting) => {
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
     Glu.switchShader(gl, program)
 
-    const earthRadius = 6371
     const { vertices, triangles } = getIcosphere(3)
+    const earthRadius = 6371
     vertices = vertices.map(vert => vert.map(val => val*earthRadius))
     const icoBuffer = new Float32Array(triangles.length*9)
     triangles.forEach((triangle, ti) =>
@@ -85,17 +85,15 @@ const updateRotationOffset = (satrec, ref) => {
 
 const updateLighting = (gl, val, ref) => {
     if (ref) {
-        const { locations } = ref
         Glu.switchShader(gl, ref.program)
-        gl.uniform1i(locations.uLighting, lightingMap[val])
+        gl.uniform1i(ref.locations.uLighting, lightingMap[val])
     }
 }
 
 const getRotationMatrix = (epoch, ref) => {
     if (ref) {
-        const { offsetEpoch, rotationOffset } = ref
-        const dt = (epoch - offsetEpoch)/86400000
-        return mat4.fromZRotation(mat4.create(), dt * 2*Math.PI + rotationOffset)
+        const dt = (epoch - ref.offsetEpoch)/86400000
+        return mat4.fromZRotation(mat4.create(), dt * 2*Math.PI + ref.rotationOffset)
     }
 }
 
@@ -103,15 +101,10 @@ const draw = (gl, viewMatrix, modelMatrix, earthRotation, ref) => {
     if (ref) {
         const { program, buffer, texture, locations, numVertex, epoch } = ref
         const earthModelMat = mat4.multiply(mat4.create(), modelMatrix, earthRotation)
-        const sunNormal = vec3.normalize(
-            vec3.create(), 
-            vec3.transformMat4(
-                vec3.create(),
+        const sunNormal = vec3.normalize(vec3.create(), 
+            vec3.transformMat4(vec3.create(),
                 getSunPosition(epoch[0]),
-                mat4.invert(
-                    mat4.create(),
-                    earthRotation
-                )
+                mat4.invert(mat4.create(), earthRotation)
             )
         )
 
@@ -120,8 +113,8 @@ const draw = (gl, viewMatrix, modelMatrix, earthRotation, ref) => {
         gl.uniformMatrix4fv(locations.uModelMatrix, false, earthModelMat)
         gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
         gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
         gl.drawArrays(gl.TRIANGLES, 0, numVertex)
     }
