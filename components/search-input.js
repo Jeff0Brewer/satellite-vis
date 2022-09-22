@@ -22,7 +22,7 @@ const SearchInput = props => {
                     onChange={e => props.setValue(e.target.value)}
                 />
                 <button
-                    className={`${styles.clearSearch} ${props.value ? styles.active : styles.clearSearchHidden}`}
+                    className={`${styles.clearSearch} ${props.value ? '' : styles.clearSearchHidden}`}
                     onClick={() => {
                         props.setValue('')
                         inputRef.current.value = ''
