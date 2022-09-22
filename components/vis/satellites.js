@@ -50,7 +50,7 @@ const setupGl = async (gl, numVertex) => {
 }
 
 const updateBuffer = (gl, data, ref) => {
-    if (ref?.program) {
+    if (ref) {
         gl.bindBuffer(gl.ARRAY_BUFFER, ref.posBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.length*3), gl.DYNAMIC_DRAW)
 
@@ -70,7 +70,7 @@ const updateBuffer = (gl, data, ref) => {
 }
 
 const updateProjMatrix = (gl, projMatrix, ref) => {
-    if (ref?.program) {
+    if (ref) {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
         ref.projMatrix = projMatrix
@@ -90,7 +90,7 @@ const getInvMat = (projMatrix, viewMatrix, modelMatrix) => {
 }
 
 const draw = (gl, viewMatrix, modelMatrix, positions, mousePos, ref) => {
-    if (ref?.program) {
+    if (ref) {
         const { program, posBuffer, colBuffer, locations, numVertex, projMatrix } = ref
 
         Glu.switchShader(gl, program)

@@ -61,14 +61,14 @@ const setupGl = async (gl, epoch, lighting) => {
 }
 
 const updateProjMatrix = (gl, projMatrix, ref) => {
-    if (ref?.program) {
+    if (ref) {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
     }
 }
 
 const updateRotationOffset = (satrec, ref) => {
-    if (ref?.program) {
+    if (ref) {
         const date = new Date(ref.offsetEpoch)
         const { position } = propagate(satrec, date)
         const { x, y } = position
@@ -84,7 +84,7 @@ const updateRotationOffset = (satrec, ref) => {
 }
 
 const updateLighting = (gl, val, ref) => {
-    if (ref?.program) {
+    if (ref) {
         const { locations } = ref
         Glu.switchShader(gl, ref.program)
         gl.uniform1i(locations.uLighting, lightingMap[val])
@@ -92,7 +92,7 @@ const updateLighting = (gl, val, ref) => {
 }
 
 const getRotationMatrix = (epoch, ref) => {
-    if (ref?.program) {
+    if (ref) {
         const { offsetEpoch, rotationOffset } = ref
         const dt = (epoch[0] - offsetEpoch)/86400000
         return mat4.fromZRotation(mat4.create(), dt * 2*Math.PI + rotationOffset)
@@ -100,7 +100,7 @@ const getRotationMatrix = (epoch, ref) => {
 }
 
 const draw = (gl, viewMatrix, modelMatrix, earthRotation, ref) => {
-    if (ref?.program) {
+    if (ref) {
         const { program, buffer, texture, locations, numVertex, epoch } = ref
         const earthModelMat = mat4.multiply(mat4.create(), modelMatrix, earthRotation)
         const sunNormal = vec3.normalize(
