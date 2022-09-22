@@ -46,7 +46,7 @@ const Catalog = props => {
         setVisData(dataset.filter(item => {
             return selectedCategories.has(item.category) &&
                 item.name.toLowerCase().includes(nameSearch) &&
-                item.satelliteId.toString().includes(idSearch)
+                item.satelliteId.includes(idSearch)
         }))
     }, [nameSearch, idSearch, selectedCategories])
 
