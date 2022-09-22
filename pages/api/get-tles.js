@@ -1,4 +1,3 @@
-import mongoose from 'mongoose'
 import connectMongo from '../../util/connect-mongo.js'
 import Tle from '../../models/tleModel.js'
 
