@@ -8,16 +8,15 @@ import Clock from '../components/clock.js'
 import Visualization from '../components/visualization.js'
 import styles from '../styles/Home.module.css'
 
-
 const Home = () => {
     const [loaded, setLoaded] = useState(false)
+    const [uiVisible, setUiVisible] = useState(false)
     const [satData, setSatData] = useState([])
     const [lighting, setLighting] = useState('OFF')
     const [cameraMode, setCameraMode] = useState('INERTIAL')
     const [followId, setFollowId] = useState('')
     const [selectId, setSelectId] = useState('')
     const [clockSpeed, setClockSpeed] = useState(0)
-    const [uiVisible, setUiVisible] = useState(false)
     const sharedEpochRef = useRef(newEpoch(new Date()))
 
     return (
