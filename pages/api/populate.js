@@ -17,13 +17,17 @@ const addGroup = (category, url, seenIds) => {
             const data = text.split('\n').map(line => line.replace(/[\r]/g, '').trim())
             const tles = []
             for (let i = 0; i+2 < data.length; i += 3) {
+                const name = data[i]
                 const line1 = data[i+1]
                 const line2 = data[i+2]
                 const id = getCatalogNumber(line1, line2)
+                const checkedCategory = (name + '!').match(/ DEB(?:[ )!])?/) ? 
+                    'Debris' : 
+                    category
                 if (!seenIds.has(id)) {
                     tles.push({
-                        name: data[i],
-                        category: category,
+                        name: name,
+                        category: checkedCategory,
                         satelliteId: id,
                         line1: line1,
                         line2: line2
