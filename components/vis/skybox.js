@@ -10,16 +10,16 @@ const setupGl = async (gl) => {
     Glu.switchShader(gl, program)
 
     const posBuffer = new Float32Array([
-        -1, -1,  1, -1, 
-        -1,  1, -1,  1,
-         1, -1,  1,  1
+        -1, -1, 1, -1,
+        -1, 1, -1, 1,
+        1, -1, 1, 1
     ])
     const buffer = Glu.initBuffer(gl, posBuffer, gl.STATIC_DRAW)
     const numVertex = posBuffer.length / 2
 
     const locations = {}
-    locations['aPosition'] = Glu.initAttribute(gl, 'aPosition', 2, 2, 0, false, FLOAT_SIZE)
-    locations['uViewProjInverse'] = gl.getUniformLocation(gl.program, 'uViewProjInverse')
+    locations.aPosition = Glu.initAttribute(gl, 'aPosition', 2, 2, 0, false, FLOAT_SIZE)
+    locations.uViewProjInverse = gl.getUniformLocation(gl.program, 'uViewProjInverse')
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uSkybox'), 0)
 
     const texture = Glu.createCubemap(gl, 1024, [
@@ -32,16 +32,16 @@ const setupGl = async (gl) => {
         gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
     ])
 
-    const angleOffset = mat4.fromXRotation(mat4.create(), 60.2 * Math.PI/180)
+    const angleOffset = mat4.fromXRotation(mat4.create(), 60.2 * Math.PI / 180)
 
     return {
-        program: program,
-        buffer: buffer,
-        texture: texture,
-        locations: locations,
-        numVertex: numVertex,
+        program,
+        buffer,
+        texture,
+        locations,
+        numVertex,
         projMatrix: mat4.create(),
-        angleOffset: angleOffset
+        angleOffset
     }
 }
 

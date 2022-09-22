@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { IoClose } from 'react-icons/io5'
 import styles from '../styles/Catalog.module.css'
 
@@ -6,18 +6,17 @@ const SearchInput = props => {
     const inputRef = useRef()
 
     useEffect(() => {
-        if (inputRef.current.value !== props.value)
-            inputRef.current.value = props.value
+        if (inputRef.current.value !== props.value) { inputRef.current.value = props.value }
     }, [props.value])
 
     return (
         <span className={props.styleName}>
             {props.label}
             <div className={styles.inputWrap}>
-                <input 
+                <input
                     className={styles.filterInput}
                     ref={inputRef}
-                    type="text" 
+                    type="text"
                     placeholder="Search"
                     onChange={e => props.setValue(e.target.value)}
                 />

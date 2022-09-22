@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { byteToHex } from '../lib/hex.js'
@@ -15,7 +15,7 @@ const Visualization = props => {
     const satelliteRef = useRef()
     const earthRef = useRef()
     const skyboxRef = useRef()
-    const VIS_SCALE = .0001
+    const VIS_SCALE = 0.0001
     const modelMatRef = useRef(
         mat4.fromScaling(mat4.create(),
             [VIS_SCALE, VIS_SCALE, VIS_SCALE]
@@ -30,9 +30,9 @@ const Visualization = props => {
     )
     const getProjMat = aspect => {
         return mat4.perspective(mat4.create(),
-            50 * Math.PI/180,
+            50 * Math.PI / 180,
             aspect,
-            .1,
+            0.1,
             100
         )
     }
@@ -40,7 +40,7 @@ const Visualization = props => {
     const MIN_PER_THREAD = 20
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
-    const mousePosRef = useRef({'x': 0, 'y': 0})
+    const mousePosRef = useRef({ x: 0, y: 0 })
     const frameIdRef = useRef()
 
     const setupGl = async gl => {
@@ -60,13 +60,13 @@ const Visualization = props => {
     }
 
     const setupViewport = gl => {
-        const w = innerWidth*devicePixelRatio
-        const h = innerHeight*devicePixelRatio
+        const w = innerWidth * devicePixelRatio
+        const h = innerHeight * devicePixelRatio
         setWidth(w)
         setHeight(h)
         gl.viewport(0, 0, w, h)
 
-        const projMatrix = getProjMat(w/h)
+        const projMatrix = getProjMat(w / h)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
         satelliteRef.current = Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
@@ -85,15 +85,14 @@ const Visualization = props => {
 
         if (followId) {
             const index = props.data.map(item => item.satelliteId).indexOf(props.followId)
-            if (index < 0)
-                return { getViewMatrix, getModelMatrix }
+            if (index < 0) { return { getViewMatrix, getModelMatrix } }
 
-            const followDistance = .5
+            const followDistance = 0.5
             getViewMatrix = posBuffer => {
-                const satPosition = posBuffer.slice(index*3, index*3 + 3)
+                const satPosition = posBuffer.slice(index * 3, index * 3 + 3)
                 const len = vec3.length(satPosition)
                 if (!len) return
-                const camPosition = satPosition.map(v => v*VIS_SCALE + v/len*followDistance)
+                const camPosition = satPosition.map(v => v * VIS_SCALE + v / len * followDistance)
                 return mat4.lookAt(mat4.create(),
                     camPosition,
                     [0, 0, 0],
@@ -117,15 +116,17 @@ const Visualization = props => {
         const resizeHandler = () => setupViewport(glRef.current)
         window.addEventListener('resize', resizeHandler)
 
-        const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .004, Math.PI/2)
+        const dragHandler = e => {
+            modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, 0.004, Math.PI / 2)
+        }
         const canvHandlers = {}
-        canvHandlers['mousedown'] = () => canvRef.current.addEventListener('mousemove', dragHandler)
-        canvHandlers['mouseup'] = () => canvRef.current.removeEventListener('mousemove', dragHandler)
-        canvHandlers['wheel'] = e => { 
-            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.001, .8, 80)
+        canvHandlers.mousedown = () => canvRef.current.addEventListener('mousemove', dragHandler)
+        canvHandlers.mouseup = () => canvRef.current.removeEventListener('mousemove', dragHandler)
+        canvHandlers.wheel = e => {
+            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.001, 0.8, 80)
             e.preventDefault()
         }
-        canvHandlers['mousemove'] = e => {
+        canvHandlers.mousemove = e => {
             mousePosRef.current.x = e.clientX
             mousePosRef.current.y = e.clientY
         }
@@ -144,20 +145,19 @@ const Visualization = props => {
         }
     }, [])
 
-    useEffect(() => { 
+    useEffect(() => {
         const satrecs = props.data.map(item => item.satrec)
 
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data, satelliteRef.current)
-        if (satrecs.length > 0)
-            earthRef.current = Earth.updateRotationOffset(satrecs[0], earthRef.current)
+        if (satrecs.length > 0) { earthRef.current = Earth.updateRotationOffset(satrecs[0], earthRef.current) }
 
-        const satPerWorker = Math.max(Math.ceil(satrecs.length/MAX_SGP4_THREAD), MIN_PER_THREAD)
+        const satPerWorker = Math.max(Math.ceil(satrecs.length / MAX_SGP4_THREAD), MIN_PER_THREAD)
         sgp4MemoryRefs.current = []
         const workerData = []
         let doneSats = 0
         while (doneSats < satrecs.length) {
             const numSats = Math.min(satPerWorker, satrecs.length - doneSats)
-            sgp4MemoryRefs.current.push(new Float32Array(new SharedArrayBuffer(numSats*3*4)))
+            sgp4MemoryRefs.current.push(new Float32Array(new SharedArrayBuffer(numSats * 3 * 4)))
             workerData.push(satrecs.slice(doneSats, doneSats + numSats))
             doneSats += numSats
         }
@@ -170,8 +170,7 @@ const Visualization = props => {
                     memory: sgp4MemoryRefs.current[i],
                     epoch: props.epoch
                 })
-            }
-            else {
+            } else {
                 worker.postMessage({
                     task: 'stop'
                 })
@@ -182,26 +181,27 @@ const Visualization = props => {
     useEffect(() => {
         const selectHandlers = {}
         let clickTime = 0
-        selectHandlers['mousedown'] = () => clickTime = Date.now()
-        selectHandlers['mouseup'] = e => {
+        selectHandlers.mousedown = () => {
+            clickTime = Date.now()
+        }
+        selectHandlers.mouseup = e => {
             const currTime = Date.now()
             if (currTime - clickTime > 300) return
 
-            const clickX = e.clientX*devicePixelRatio
-            const clickY = (innerHeight - e.clientY)*devicePixelRatio
+            const clickX = e.clientX * devicePixelRatio
+            const clickY = (innerHeight - e.clientY) * devicePixelRatio
             const clickColor = new Uint8Array(4)
             glRef.current.readPixels(clickX, clickY, 1, 1, glRef.current.RGBA, glRef.current.UNSIGNED_BYTE, clickColor)
 
             const colorHex = byteToHex(clickColor.slice(0, 3))
             const ind = Satellites.selectColors.indexOf(colorHex)
-            if (ind !== -1)
-                props.setSelectId(props.data[ind].satelliteId)
+            if (ind !== -1) { props.setSelectId(props.data[ind].satelliteId) }
         }
-        for (const [type, handler] of Object.entries(selectHandlers)){
+        for (const [type, handler] of Object.entries(selectHandlers)) {
             canvRef.current.addEventListener(type, handler)
         }
         return () => {
-            for (const [type, handler] of Object.entries(selectHandlers)){
+            for (const [type, handler] of Object.entries(selectHandlers)) {
                 canvRef.current.removeEventListener(type, handler)
             }
         }
@@ -220,7 +220,7 @@ const Visualization = props => {
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT
-            props.epoch[0] += elapsed*props.clockSpeed
+            props.epoch[0] += elapsed * props.clockSpeed
 
             let offset = 0
             sgp4MemoryRefs.current.forEach(buffer => {

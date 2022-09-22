@@ -8,7 +8,7 @@ const satCategories = [
 ]
 
 const noradGroups = {
-    'Resource': [
+    Resource: [
         'weather',
         'noaa',
         'goes',
@@ -18,9 +18,9 @@ const noradGroups = {
         'tdrss',
         'argos',
         'planet',
-        'spire',
+        'spire'
     ],
-    'Communications': [
+    Communications: [
         'geo',
         'intelsat',
         'ses',
@@ -37,9 +37,9 @@ const noradGroups = {
         'satnogs',
         'gorizont',
         'raduga',
-        'molniya',
+        'molniya'
     ],
-    'Navigation': [
+    Navigation: [
         'gnss',
         'gps-ops',
         'glo-ops',
@@ -47,22 +47,22 @@ const noradGroups = {
         'beidou',
         'sbas',
         'nnss',
-        'musson',
+        'musson'
     ],
-    'Scientific': [
+    Scientific: [
         'science',
         'geodetic',
         'engineering',
         'education',
-        'stations',
+        'stations'
     ],
-    'Debris': [
+    Debris: [
         '1982-092',
         '1999-025',
         'iridium-33-debris',
-        'cosmos-2251-debris',
+        'cosmos-2251-debris'
     ],
-    'Misc': [
+    Misc: [
         'last-30-days',
         'visual',
         'active',
@@ -75,12 +75,12 @@ const noradGroups = {
 }
 
 const supplementalGroups = {
-    'Resource': [
+    Resource: [
         'planet',
         'meteosat',
         'cpf'
     ],
-    'Communications': [
+    Communications: [
         'starlink',
         'oneweb',
         'iridium',
@@ -89,11 +89,11 @@ const supplementalGroups = {
         'telesat',
         'orbcomm'
     ],
-    'Navigation': [
+    Navigation: [
         'gps',
         'glonass'
     ],
-    'Scientific': [
+    Scientific: [
         'iss'
     ]
 }
