@@ -5,10 +5,6 @@ import styles from '../styles/Catalog.module.css'
 const MultiSelect = props => {
     const [listOpen, setListOpen] = useState(false)
 
-    const toggleOpen = () => {
-        setListOpen(!listOpen)
-    }
-
     const toggleItem = item => {
         const selected = new Set(props.itemState)
         if (selected.has(item))
@@ -27,7 +23,7 @@ const MultiSelect = props => {
                     tabIndex='0' 
                     onBlur={() => setListOpen(false)} 
                 >
-                    <a className={styles.multiSelectToggle} onClick={toggleOpen}>
+                    <a className={styles.multiSelectToggle} onClick={() => setListOpen(!listOpen)}>
                         <p className={styles.multiSelectPlaceholder}>
                             Select
                         </p>
