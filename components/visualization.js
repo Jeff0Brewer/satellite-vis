@@ -43,7 +43,6 @@ const Visualization = props => {
     const MIN_PER_THREAD = 20
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
-    const selectHandlerRef = useRef({})
     const mousePosRef = useRef({'x': 0, 'y': 0})
 
     const setupGl = async gl => {
@@ -174,17 +173,18 @@ const Visualization = props => {
                 })
             }
         })
+
+        if (props.data.length > 0) {
+            props.setLoaded(true)
+        }
     }, [props.data])
 
     useEffect(() => {
-        if (selectHandlerRef.current) {
-            canvRef.current.removeEventListener('mousedown', selectHandlerRef.current.mousedown)
-            canvRef.current.removeEventListener('mouseup', selectHandlerRef.current.mouseup)
-        }
         let gl = glRef.current
         let clickTime = 0
-        selectHandlerRef.current['mousedown'] = () => clickTime = Date.now()
-        selectHandlerRef.current['mouseup'] = e => {
+        const selectHandlers = {}
+        selectHandlers['mousedown'] = () => clickTime = Date.now()
+        selectHandlers['mouseup'] = e => {
             const currTime = Date.now()
             if (currTime - clickTime > 300) 
                 return
@@ -199,8 +199,12 @@ const Visualization = props => {
             if (ind != -1)
                 props.setSelectId(props.data[ind].satelliteId)
         }
-        canvRef.current.addEventListener('mousedown', selectHandlerRef.current.mousedown)
-        canvRef.current.addEventListener('mouseup', selectHandlerRef.current.mouseup)
+        canvRef.current.addEventListener('mousedown', selectHandlers.mousedown)
+        canvRef.current.addEventListener('mouseup', selectHandlers.mouseup)
+        return () => {
+            canvRef.current.removeEventListener('mousedown', selectHandlers.mousedown)
+            canvRef.current.removeEventListener('mouseup', selectHandlers.mouseup)
+        }
     }, [props.data])
 
     useEffect(() => {
