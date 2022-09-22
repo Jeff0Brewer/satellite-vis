@@ -117,7 +117,7 @@ const Visualization = props => {
         const resizeHandler = () => setupViewport(glRef.current)
         window.addEventListener('resize', resizeHandler)
 
-        const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .004)
+        const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .004, Math.PI/2)
         const canvHandlers = {}
         canvHandlers['mousedown'] = () => canvRef.current.addEventListener('mousemove', dragHandler)
         canvHandlers['mouseup'] = () => canvRef.current.removeEventListener('mousemove', dragHandler)
