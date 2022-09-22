@@ -2,7 +2,6 @@ import { mat4 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 import { byteToHex, hexToByte } from '../../lib/hex.js'
 
-const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 const categoryColors = {
     'Resource': [1, 1, .6],
     'Communications': [1, .8, 1],
@@ -20,6 +19,7 @@ for (let r = 0; r < 40; r++) {
         }
     }
 }
+const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 
 const setupGl = async (gl, numVertex) => {
     const vertPath = './shaders/satellite-vert.glsl'
@@ -56,10 +56,10 @@ const updateBuffer = (gl, data, ref) => {
 
         const colors = new Float32Array(data.length*3*2)
         data.forEach((item, i) => {
-            const color = categoryColors[item.category]
-            colors.set(color, i*3*2)
-            const select = hexToByte(selectColors[i]).map(byte => byte/255)
-            colors.set(select, 3 + i*3*2)
+            const categoryColor = categoryColors[item.category]
+            colors.set(categoryColor, i*3*2)
+            const selectColor = hexToByte(selectColors[i]).map(byte => byte/255)
+            colors.set(selectColor, 3 + i*3*2)
         })
         gl.bindBuffer(gl.ARRAY_BUFFER, ref.colBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW)
