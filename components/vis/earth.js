@@ -94,7 +94,7 @@ const updateLighting = (gl, val, ref) => {
 const getRotationMatrix = (epoch, ref) => {
     if (ref) {
         const { offsetEpoch, rotationOffset } = ref
-        const dt = (epoch[0] - offsetEpoch)/86400000
+        const dt = (epoch - offsetEpoch)/86400000
         return mat4.fromZRotation(mat4.create(), dt * 2*Math.PI + rotationOffset)
     }
 }
