@@ -216,7 +216,7 @@ const Visualization = props => {
         const posBuffer = new Float32Array(props.data.length * 3)
         const gl = glRef.current
 
-        const lastT = 0
+        let lastT = 0
         const tick = currT => {
             const elapsed = currT - lastT > 100 ? 0 : currT - lastT
             lastT = currT

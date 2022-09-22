@@ -1,6 +1,5 @@
 import { propagate } from 'satellite.js'
 
-const MS_PER_DAY = 86400000
 const TICKRATE = 1000/90
 let intervalId
 

@@ -16,7 +16,7 @@ const setupGl = async (gl, epoch, lighting) => {
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
     Glu.switchShader(gl, program)
 
-    const { vertices, triangles } = getIcosphere(3)
+    let { vertices, triangles } = getIcosphere(3)
     const earthRadius = 6371
     vertices = vertices.map(vert => vert.map(val => val*earthRadius))
     const icoBuffer = new Float32Array(triangles.length*9)

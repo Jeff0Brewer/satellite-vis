@@ -6,7 +6,7 @@ const SearchInput = props => {
     const inputRef = useRef()
 
     useEffect(() => {
-        if (inputRef.current.value != props.value)
+        if (inputRef.current.value !== props.value)
             inputRef.current.value = props.value
     }, [props.value])
 
