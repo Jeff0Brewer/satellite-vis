@@ -37,6 +37,7 @@ const Catalog = props => {
                 })
                 setDataset(satrecs)
                 setVisData(satrecs)
+                props.setLoaded(true)
             })
             .catch(err => console.log(err))
     }, [])

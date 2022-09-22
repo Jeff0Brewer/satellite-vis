@@ -57,6 +57,7 @@ const Home = () => {
                         setFollowId={setFollowId} 
                         selectId={selectId}
                         setSelectId={setSelectId}
+                        setLoaded={setLoaded}
                     />
                 </section>
                 <Visualization 
@@ -67,7 +68,6 @@ const Home = () => {
                     cameraMode={cameraMode} 
                     lighting={lighting}
                     setSelectId={setSelectId}
-                    setLoaded={setLoaded}
                 />
             </main> {
             loaded ?

@@ -173,10 +173,6 @@ const Visualization = props => {
                 })
             }
         })
-
-        if (props.data.length > 0) {
-            props.setLoaded(true)
-        }
     }, [props.data])
 
     useEffect(() => {
