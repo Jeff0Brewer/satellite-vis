@@ -117,12 +117,12 @@ const Visualization = props => {
         const resizeHandler = () => setupViewport(glRef.current)
         window.addEventListener('resize', resizeHandler)
 
-        const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .002)
+        const dragHandler = e => modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, .004)
         const canvHandlers = {}
         canvHandlers['mousedown'] = () => canvRef.current.addEventListener('mousemove', dragHandler)
         canvHandlers['mouseup'] = () => canvRef.current.removeEventListener('mousemove', dragHandler)
         canvHandlers['wheel'] = e => { 
-            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.0005, .8, 80)
+            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.001, .8, 80)
             e.preventDefault()
         }
         canvHandlers['mousemove'] = e => {
