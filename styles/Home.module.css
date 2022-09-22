@@ -1,3 +1,7 @@
+.hidden {
+    display: none;
+}
+
 .home {
     min-height: 100vh;
     background-color: #111;
@@ -30,4 +34,28 @@
     color: #fff;
     border: none;
     cursor: pointer;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    font-size: 100px;
+    background-color: #000;
+}
+
+.loading > * {
+    animation: rotate 1.5s infinite linear;
+    transform-origin: center;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotateY(0deg);
+    }
+    to {
+        transform: rotateY(360deg);
+    }
 }

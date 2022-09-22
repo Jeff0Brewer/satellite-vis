@@ -71,7 +71,7 @@ const getInvMatrix = (viewMatrix, projMatrix, modelMatrix, angleOffset) => {
 }
 
 const draw = (gl, viewMatrix, modelMatrix, ref) => {
-    if (ref?.program) {
+    if (ref) {
         const { program, buffer, texture, locations, numVertex, projMatrix, angleOffset } = ref
 
         Glu.switchShader(gl, program)
