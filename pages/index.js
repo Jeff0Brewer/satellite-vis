@@ -20,10 +20,14 @@ const Home = () => {
     const [clockSpeed, setClockSpeed] = useState(0)
     const sharedEpochRef = useRef(newEpoch(new Date()))
 
+    const [tickrate, setTickrate] = useState(1000 / 90)
+    const [threadCount, setThreadCount] = useState(100)
     useEffect(() => {
         if (getBrowserName(window) === 'Safari') {
+            setTickrate(1000 / 30) // throttle to reduce cpu load
+            setThreadCount(5) // minimize safari specific thrashing
             window.alert(
-                'Safari runs this application much slower than other browsers. ' +
+                'Safari runs this application ~10x slower than other browsers. ' +
                 'For best performance use Chrome, Firefox, Edge, Opera, or other alternatives.'
             )
         }
@@ -41,7 +45,8 @@ const Home = () => {
                                 uiVisible
                                     ? <FaCaretDown />
                                     : <FaCaretUp />
-                            }</button>
+                            }
+                        </button>
                     </div>
                     <div>
                         <Clock
@@ -77,15 +82,17 @@ const Home = () => {
                     cameraMode={cameraMode}
                     lighting={lighting}
                     setSelectId={setSelectId}
+                    tickrate={tickrate}
+                    threadCount={threadCount}
                 />
             </main> {
-            loaded
-                ? <></>
-                : <p className={styles.loading}>
-                    <IoEarthSharp />
-                </p>
+                loaded
+                    ? <></>
+                    : <p className={styles.loading}>
+                        <IoEarthSharp />
+                    </p>
             }
-        </div> 
+        </div>
     )
 }
 

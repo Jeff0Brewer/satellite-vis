@@ -36,7 +36,6 @@ const Visualization = props => {
             100
         )
     }
-    const MAX_SGP4_THREAD = 100
     const MIN_PER_THREAD = 20
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
@@ -109,10 +108,6 @@ const Visualization = props => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: true })
         setupGl(glRef.current)
 
-        for (let i = 0; i < MAX_SGP4_THREAD; i++) {
-            sgp4WorkerRefs.current.push(new Worker(new URL('../util/sgp4-worker.js', import.meta.url)))
-        }
-
         const resizeHandler = () => setupViewport(glRef.current)
         window.addEventListener('resize', resizeHandler)
 
@@ -135,9 +130,6 @@ const Visualization = props => {
         }
 
         return () => {
-            sgp4WorkerRefs.current.forEach(worker => worker.terminate())
-            sgp4WorkerRefs.current = []
-
             window.removeEventListener('resize', resizeHandler)
             canvRef.current.removeEventListener('mousemove', dragHandler)
             for (const [type, handler] of Object.entries(canvHandlers)) {
@@ -147,12 +139,23 @@ const Visualization = props => {
     }, [])
 
     useEffect(() => {
+        for (let i = 0; i < props.threadCount; i++) {
+            sgp4WorkerRefs.current.push(new Worker(new URL('../util/sgp4-worker.js', import.meta.url)))
+        }
+
+        return () => {
+            sgp4WorkerRefs.current.forEach(worker => worker.terminate())
+            sgp4WorkerRefs.current = []
+        }
+    }, [props.threadCount])
+
+    useEffect(() => {
         const satrecs = props.data.map(item => item.satrec)
 
         satelliteRef.current = Satellites.updateBuffer(glRef.current, props.data, satelliteRef.current)
         if (satrecs.length > 0) { earthRef.current = Earth.updateRotationOffset(satrecs[0], earthRef.current) }
 
-        const satPerWorker = Math.max(Math.ceil(satrecs.length / MAX_SGP4_THREAD), MIN_PER_THREAD)
+        const satPerWorker = Math.max(Math.ceil(satrecs.length / props.threadCount), MIN_PER_THREAD)
         sgp4MemoryRefs.current = []
         const workerData = []
         let doneSats = 0
@@ -169,7 +172,8 @@ const Visualization = props => {
                     task: 'start',
                     data: workerData[i],
                     memory: sgp4MemoryRefs.current[i],
-                    epoch: props.epoch
+                    epoch: props.epoch,
+                    tickrate: props.tickrate
                 })
             } else {
                 worker.postMessage({
@@ -177,7 +181,7 @@ const Visualization = props => {
                 })
             }
         })
-    }, [props.data])
+    }, [props.data, props.threadCount, props.tickrate])
 
     useEffect(() => {
         const selectHandlers = {}
