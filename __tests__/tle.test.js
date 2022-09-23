@@ -1,9 +1,9 @@
 import { validateTleChecksum, validateTleLine1, validateTleLine2, getCatalogNumber } from '../lib/tle.js'
 
 test('getCatalogNumber returns correct value', () => {
-    const line1 = "1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991"
-    const line2 = "2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783"
-    expect(getCatalogNumber(line1, line2)).toBe(44252)
+    const line1 = '1 44252U 19029T   22206.44213736  .00061111  00000+0  13529-2 0  9991'
+    const line2 = '2 44252  52.9947 286.2236 0003334  26.4946 333.6228 15.43229799174783'
+    expect(getCatalogNumber(line1, line2)).toBe('44252')
 })
 
 const checksumCases = [

@@ -5,13 +5,13 @@ const tleSchema = new Schema({
     satelliteId: { type: String, required: true },
     name: { type: String, required: true },
     category: { type: String, required: true },
-    line1: { 
-        type: String, 
+    line1: {
+        type: String,
         required: true,
         validate: [validateTleLine1, 'tle line 1 invalid']
     },
-    line2: { 
-        type: String, 
+    line2: {
+        type: String,
         required: true,
         validate: [validateTleLine2, 'tle line 2 invalid']
     }

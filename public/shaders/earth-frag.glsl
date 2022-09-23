@@ -1,10 +1,10 @@
 precision highp float;
 
-varying vec3 vNormal;
-
 uniform int uLighting;
 uniform vec3 uSunNormal;
 uniform samplerCube uEarthMap;
+
+varying vec3 vNormal;
 
 void main() {
     vec4 texColor = textureCube(uEarthMap, normalize(vNormal));

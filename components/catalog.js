@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FaBan, FaCaretLeft, FaCaretRight } from 'react-icons/fa'
 import { twoline2satrec } from 'satellite.js'
 import { satCategories } from '../util/celes-groups.js'
@@ -19,7 +19,7 @@ const Catalog = props => {
 
     const setVisData = data => {
         props.setData(data)
-        setMaxPage(Math.floor(data.length/ITEM_PER_PAGE))
+        setMaxPage(Math.floor(data.length / ITEM_PER_PAGE))
         setCurrPage(0)
     }
 
@@ -32,7 +32,7 @@ const Catalog = props => {
                         name: item.name,
                         satelliteId: item.satelliteId,
                         category: item.category,
-                        satrec: twoline2satrec(item.line1, item.line2),
+                        satrec: twoline2satrec(item.line1, item.line2)
                     }
                 })
                 setDataset(satrecs)
@@ -46,7 +46,7 @@ const Catalog = props => {
         setVisData(dataset.filter(item => {
             return selectedCategories.has(item.category) &&
                 item.name.toLowerCase().includes(nameSearch) &&
-                item.satelliteId.toString().includes(idSearch)
+                item.satelliteId.includes(idSearch)
         }))
     }, [nameSearch, idSearch, selectedCategories])
 
@@ -79,7 +79,7 @@ const Catalog = props => {
                     itemState={selectedCategories}
                     setState={setSelectedCategories}
                 />
-                <button 
+                <button
                     className={`${styles.labelSmall} ${props.followId ? styles.clearActive : styles.clearInactive}`}
                     onClick={() => props.setFollowId('')}
                 >
@@ -88,28 +88,28 @@ const Catalog = props => {
             </span>
             <section className={styles.catalogList}>{
                 props.data
-                    .slice(currPage*ITEM_PER_PAGE, (currPage+1)*ITEM_PER_PAGE)
-                    .map((item, i) => 
-                        <CatalogItem item={item} followId={props.followId} setFollowId={props.setFollowId} key={i} />) 
-                }{
-                maxPage > 0 ?
-                <span className={styles.pageControls}>
-                    <button 
-                        className={styles.pageArrow}
-                        onClick={() => setCurrPage(Math.max(currPage - 1, 0))}
-                    >
-                        <FaCaretLeft />
-                    </button>
-                    <p>{`${currPage + 1} / ${maxPage + 1}`}</p>
-                    <button 
-                        className={styles.pageArrow}
-                        onClick={() => setCurrPage(Math.min(currPage + 1, maxPage))}
-                    >
-                        <FaCaretRight />
-                    </button>
-                </span> :
-                <></>
-                }
+                    .slice(currPage * ITEM_PER_PAGE, (currPage + 1) * ITEM_PER_PAGE)
+                    .map((item, i) =>
+                        <CatalogItem item={item} followId={props.followId} setFollowId={props.setFollowId} key={i} />)
+            }{
+                maxPage > 0
+                    ? <span className={styles.pageControls}>
+                        <button
+                            className={styles.pageArrow}
+                            onClick={() => setCurrPage(Math.max(currPage - 1, 0))}
+                        >
+                            <FaCaretLeft />
+                        </button>
+                        <p>{`${currPage + 1} / ${maxPage + 1}`}</p>
+                        <button
+                            className={styles.pageArrow}
+                            onClick={() => setCurrPage(Math.min(currPage + 1, maxPage))}
+                        >
+                            <FaCaretRight />
+                        </button>
+                    </span>
+                    : <></>
+            }
             </section>
         </section>
     )

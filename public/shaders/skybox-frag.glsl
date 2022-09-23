@@ -6,6 +6,6 @@ uniform mat4 uViewProjInverse;
 varying vec4 vPosition;
 
 void main() {
-    vec4 t = uViewProjInverse * vPosition;
-    gl_FragColor = textureCube(uSkybox, normalize(t.xyz / t.w));
+    vec4 texNormal = uViewProjInverse * vPosition;
+    gl_FragColor = textureCube(uSkybox, normalize(texNormal.xyz / texNormal.w));
 }

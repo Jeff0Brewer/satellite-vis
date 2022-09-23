@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { getEpochDisplay } from '../lib/shared-epoch.js'
 import { IoMdRefresh } from 'react-icons/io'
 import PowRange from './pow-range.js'

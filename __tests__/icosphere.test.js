@@ -22,7 +22,7 @@ test('2 iteration getIcosphere returns 320 sides', () => {
 })
 
 test('getIcosphere returns normalized vertices', () => {
-    const getLength = v => Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
+    const getLength = v => Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
     const { vertices } = getIcosphere(1)
     vertices.forEach(vertex => {
         expect(getLength(vertex)).toBeCloseTo(1)
@@ -35,36 +35,36 @@ test('geticosphere returns edges of similar length', () => {
         Math.pow(a[1] - b[1], 2) +
         Math.pow(a[2] - b[2], 2)
     )
-    const {triangles: t, vertices: v} = getIcosphere(2)
+    const { triangles: t, vertices: v } = getIcosphere(2)
     const distCheck = getDistance(v[t[0][0]], v[t[0][1]])
     t.forEach(tri => {
         [
             getDistance(v[tri[0]], v[tri[1]]),
             getDistance(v[tri[1]], v[tri[2]]),
             getDistance(v[tri[2]], v[tri[0]])
-        ].forEach(d => expect(Math.abs(d - distCheck)).toBeLessThan(.1))
+        ].forEach(d => expect(Math.abs(d - distCheck)).toBeLessThan(0.1))
     })
 })
 
 test('normalize3 returns vector of length 1', () => {
     const v = [12, -1, -90]
     const n = normalize3(v)
-    const length = Math.sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])
+    const length = Math.sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2])
     expect(length).toBeCloseTo(1, 2)
 })
 
 test('normalize3 returns vector of length 1', () => {
-    const v = [-.02, -.1, .0001]
+    const v = [-0.02, -0.1, 0.0001]
     const n = normalize3(v)
-    const length = Math.sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2])
+    const length = Math.sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2])
     expect(length).toBeCloseTo(1, 2)
 })
 
 test('normalize3 returns vector in same direction', () => {
     const v = [-1, 1, -10]
     const n = normalize3(v)
-    const length = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])
-    v.forEach((val, i) => expect(val).toBeCloseTo(n[i]*length, 2))
+    const length = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
+    v.forEach((val, i) => expect(val).toBeCloseTo(n[i] * length, 2))
 })
 
 test('normalize3 returns zero vector for input of length 0', () => {
@@ -84,7 +84,7 @@ test('midpoint3 returns correct point', () => {
     const a = [1, 5, -10]
     const b = [3, -1, 10]
     const mid = midpoint3(a, b)
-    mid.forEach((val, i) => expect(val).toBe((a[i] + b[i])/2))
+    mid.forEach((val, i) => expect(val).toBe((a[i] + b[i]) / 2))
 })
 
 test('midpoint3 does not mutate inputs', () => {
