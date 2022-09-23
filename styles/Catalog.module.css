@@ -70,6 +70,7 @@
 
 .filterInput::placeholder, .multiSelectPlaceholder {
     color: #777;
+    opacity: 1;
     text-transform: lowercase;
     font-size: var(--control-font-size);
 }
