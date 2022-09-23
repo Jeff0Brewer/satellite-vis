@@ -15,6 +15,6 @@ test('newEpoch returns SharedArrayBuffer backed array', () => {
 test('getEpochDisplay returns properly formatted string', () => {
     const ms = 1343891235384
     const epoch = newEpoch(new Date(ms))
-    const display = '08/02/12, 01:07 am'
-    expect(getEpochDisplay(epoch)).toBe(display)
+    const epochRegex = /\d{2}\/\d{2}\/\d{2}, \d{2}:\d{2} [ap]m/
+    expect(getEpochDisplay(epoch).match(epochRegex)).toBeTruthy()
 })
