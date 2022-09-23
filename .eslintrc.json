@@ -8,6 +8,14 @@
         "standard"
     ],
     "overrides": [
+        {
+            "files": [
+                "__tests__/*"
+            ],
+            "env": {
+                "jest": true
+            }
+        }
     ],
     "parserOptions": {
         "ecmaVersion": "latest",
