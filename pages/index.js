@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { getBrowserName } from '../util/get-browser.js'
 import { newEpoch } from '../lib/shared-epoch.js'
 import { FaCaretUp, FaCaretDown } from 'react-icons/fa'
 import { IoEarthSharp } from 'react-icons/io5'
@@ -18,6 +19,15 @@ const Home = () => {
     const [selectId, setSelectId] = useState('')
     const [clockSpeed, setClockSpeed] = useState(0)
     const sharedEpochRef = useRef(newEpoch(new Date()))
+
+    useEffect(() => {
+        if (getBrowserName(window) === 'Safari') {
+            window.alert(
+                'Safari runs this application much slower than other browsers. ' +
+                'For best performance use Chrome, Firefox, Edge, Opera, or other alternatives.'
+            )
+        }
+    }, [])
 
     return (
         <div>
@@ -69,12 +79,13 @@ const Home = () => {
                     setSelectId={setSelectId}
                 />
             </main> {
-                loaded
-                    ? <></>
-                    : <p className={styles.loading}>
-                        <IoEarthSharp />
-                    </p>
-            }</div>
+            loaded
+                ? <></>
+                : <p className={styles.loading}>
+                    <IoEarthSharp />
+                </p>
+            }
+        </div> 
     )
 }
 
