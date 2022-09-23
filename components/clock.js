@@ -4,6 +4,7 @@ import { IoMdRefresh } from 'react-icons/io'
 import PowRange from './pow-range.js'
 import styles from '../styles/Clock.module.css'
 
+// controls for visualization epoch
 const Clock = props => {
     const [epochText, setEpochText] = useState()
     const [speedText, setSpeedText] = useState()
@@ -13,11 +14,13 @@ const Clock = props => {
         setEpochText(getEpochDisplay(props.sharedEpoch))
     }
 
+    // set current epoch to current time
     const resetEpoch = () => {
         props.sharedEpoch[0] = new Date().getTime()
         displayEpoch()
     }
 
+    // update epoch text on interval
     useEffect(() => {
         intervalIdRef.current = setInterval(displayEpoch, 1000)
         return () => clearInterval(intervalIdRef.current)

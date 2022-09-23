@@ -4,18 +4,22 @@ import { getSunPosition } from '../../lib/sun.js'
 import getIcosphere from '../../lib/icosphere.js'
 import * as Glu from '../../lib/gl-help.js'
 
+// convert lighting string to int
 const lightingMap = {
     ON: 1,
     OFF: 0
 }
 const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 
+// init required variables
 const setupGl = async (gl, epoch, lighting) => {
+    // load program from shader files
     const vertPath = './shaders/earth-vert.glsl'
     const fragPath = './shaders/earth-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
     Glu.switchShader(gl, program)
 
+    // init position buffer
     let { vertices, triangles } = getIcosphere(3)
     const earthRadius = 6371
     vertices = vertices.map(vert => vert.map(val => val * earthRadius))
@@ -29,6 +33,7 @@ const setupGl = async (gl, epoch, lighting) => {
     )
     const buffer = Glu.initBuffer(gl, icoBuffer, gl.STATIC_DRAW)
 
+    // get shader locations, init uniforms
     const locations = {}
     locations.aPosition = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, FLOAT_SIZE)
     locations.uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
@@ -38,6 +43,7 @@ const setupGl = async (gl, epoch, lighting) => {
     gl.uniform1i(locations.uLighting, lightingMap[lighting])
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
 
+    // setup earth cubemap texture
     const texture = Glu.createCubemap(gl, 1024, [
         './earth-cubemap/posx.png', './earth-cubemap/negx.png',
         './earth-cubemap/posy.png', './earth-cubemap/negy.png',
@@ -48,6 +54,7 @@ const setupGl = async (gl, epoch, lighting) => {
         gl.TEXTURE_CUBE_MAP_POSITIVE_Z, gl.TEXTURE_CUBE_MAP_NEGATIVE_Z
     ])
 
+    // return ref of all required variables
     return {
         program,
         buffer,
@@ -60,6 +67,7 @@ const setupGl = async (gl, epoch, lighting) => {
     }
 }
 
+// update projMatrix uniform on change
 const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref) {
         Glu.switchShader(gl, ref.program)
@@ -67,21 +75,7 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     }
 }
 
-const updateRotationOffset = (satrec, ref) => {
-    if (ref) {
-        const date = new Date(ref.offsetEpoch)
-        const { position } = propagate(satrec, date)
-        const { x, y } = position
-        const { longitude } = eciToGeodetic(position, gstime(date))
-        let currAngle = Math.acos(x / Math.sqrt(x * x + y * y))
-        if (y < 0) { currAngle = 2 * Math.PI - currAngle }
-        const lng = longitude + Math.PI
-        const offset = currAngle - lng
-        ref.rotationOffset = offset
-    }
-    return ref
-}
-
+// update lighting uniform on change
 const updateLighting = (gl, val, ref) => {
     if (ref) {
         Glu.switchShader(gl, ref.program)
@@ -89,6 +83,31 @@ const updateLighting = (gl, val, ref) => {
     }
 }
 
+// orient earth rotation relative to satellites
+const updateRotationOffset = (satrec, ref) => {
+    if (ref) {
+        const date = new Date(ref.offsetEpoch)
+
+        // get cartesian coords for reference satellite
+        const { position } = propagate(satrec, date)
+        const { x, y } = position
+
+        // find angle between cartesian pos and longitude 0 (+x axis)
+        let currAngle = Math.acos(x / Math.sqrt(x * x + y * y))
+        if (y < 0) { currAngle = 2 * Math.PI - currAngle }
+
+        // get earth centric coords for reference satellite
+        const { longitude } = eciToGeodetic(position, gstime(date))
+        const lng = longitude + Math.PI
+
+        // find angle between current earth longitude 0 and actual longitude 0
+        const offset = currAngle - lng
+        ref.rotationOffset = offset
+    }
+    return ref
+}
+
+// get earth rotation matrix at given epoch
 const getRotationMatrix = (epoch, ref) => {
     if (ref) {
         const dt = (epoch - ref.offsetEpoch) / 86400000
@@ -96,6 +115,7 @@ const getRotationMatrix = (epoch, ref) => {
     }
 }
 
+// update uniforms and draw
 const draw = (gl, viewMatrix, modelMatrix, earthRotation, ref) => {
     if (ref) {
         const { program, buffer, texture, locations, numVertex, epoch } = ref
