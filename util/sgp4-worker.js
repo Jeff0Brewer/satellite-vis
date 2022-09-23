@@ -25,5 +25,10 @@ const loopCalc = (data, memory, epoch) => {
 
 onmessage = e => {
     const { task } = e.data
-    if (task === 'start') { loopCalc(e.data.data, e.data.memory, e.data.epoch) } else if (intervalId) { clearInterval(intervalId) }
+    if (task === 'start') { 
+        loopCalc(e.data.data, e.data.memory, e.data.epoch) 
+    } 
+    else if (intervalId) { 
+        clearInterval(intervalId) 
+    }
 }
