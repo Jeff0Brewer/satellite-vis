@@ -212,7 +212,7 @@ const Visualization = props => {
     // setup event handlers for mouse click satellite selection
     useEffect(() => {
         const selectHandlers = {}
-        
+
         // store time of mousedown to prevent filtering on long drags
         let clickTime = 0
         selectHandlers.mousedown = () => {

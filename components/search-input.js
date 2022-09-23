@@ -8,8 +8,8 @@ const SearchInput = props => {
 
     // update input value on external state change
     useEffect(() => {
-        if (inputRef.current.value !== props.value) { 
-            inputRef.current.value = props.value 
+        if (inputRef.current.value !== props.value) {
+            inputRef.current.value = props.value
         }
     }, [props.value])
 
