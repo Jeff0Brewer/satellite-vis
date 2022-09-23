@@ -5,11 +5,13 @@ import Tle from '../../models/tleModel.js'
 import { getCatalogNumber } from '../../lib/tle.js'
 import { noradGroups, supplementalGroups } from '../../util/celes-groups.js'
 
+// convert groups to celestrak api urls
 const getNoradUrl = group =>
     `https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=TLE`
 const getSupplementalUrl = group =>
     `https://celestrak.org/NORAD/elements/supplemental/sup-gp.php?FILE=${group}&FORMAT=tle`
 
+// fetch group and add to db
 const addGroup = (category, url, seenIds) => {
     return fetch(url)
         .then(res => res.text())
@@ -21,6 +23,8 @@ const addGroup = (category, url, seenIds) => {
                 const line1 = data[i + 1]
                 const line2 = data[i + 2]
                 const id = getCatalogNumber(line1, line2)
+
+                // check if satellite name listed as debris
                 const checkedCategory = (name + '!').match(/ DEB(?:[ )!])?/) ? 'Debris' : category
                 if (!seenIds.has(id)) {
                     tles.push({
@@ -37,6 +41,7 @@ const addGroup = (category, url, seenIds) => {
         })
 }
 
+// add multiple groups to db
 const addGroups = (groups, groupToUrl, seenIds) => {
     const out = []
     for (const category in groups) {
@@ -47,6 +52,7 @@ const addGroups = (groups, groupToUrl, seenIds) => {
     return out
 }
 
+// endpoint to populate database with full celestrak catalog
 const populateTles = async (req, res) => {
     if (req.headers?.authorization !== process.env.POPULATE_KEY) {
         console.log('POPULATE AUTHENTICATION FAILED')
@@ -56,13 +62,18 @@ const populateTles = async (req, res) => {
         })
     }
     await connectMongo()
+
+    // drop current data before update
     const collections = await mongoose.connection.db.listCollections({ name: 'tles' }).toArray()
     if (collections.length) {
         await Tle.collection.drop()
         console.log('COLLECTION RESET')
     }
 
+    // set to prevent adding duplicate satellites
     const seenIds = new Set()
+
+    // add all groups
     const groups = [
         ...addGroups(supplementalGroups, getSupplementalUrl, seenIds),
         ...addGroups(noradGroups, getNoradUrl, seenIds)
@@ -72,7 +83,6 @@ const populateTles = async (req, res) => {
     let totalTles = 0
     data.forEach(group => { totalTles += group.length })
     console.log(`UPDATE COMPLETE - ${totalTles} total tles`)
-
     res.status(200).send({
         status: 'success',
         data: { 'num-tles': totalTles }

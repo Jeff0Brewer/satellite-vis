@@ -2,6 +2,7 @@ import { propagate } from 'satellite.js'
 
 let intervalId
 
+// loop to propagate position with sgp4 and buffer into shared memory
 const loopCalc = (data, memory, epoch, tickrate) => {
     const tick = () => {
         const date = new Date(epoch[0])

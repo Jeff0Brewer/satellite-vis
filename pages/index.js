@@ -22,6 +22,8 @@ const Home = () => {
 
     const [tickrate, setTickrate] = useState(1000 / 90)
     const [threadCount, setThreadCount] = useState(100)
+
+    // warning and fixes for safari performance
     useEffect(() => {
         if (getBrowserName(window) === 'Safari') {
             setTickrate(1000 / 30) // throttle to reduce cpu load

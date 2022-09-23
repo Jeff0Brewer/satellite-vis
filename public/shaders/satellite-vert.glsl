@@ -20,9 +20,12 @@ void main() {
     float depthScale = pow(gl_Position.w, 0.5);
     gl_PointSize = 10.0/depthScale;
 
+    // calculate dist from mouse to vertex
     vec4 mouseNear = uInvMatrix * vec4(uMousePos, 0.0, 1.0);
     vec4 mouseFar = uInvMatrix * vec4(uMousePos, 1.0, 1.0);
     float mouseDist = distLinePoint(mouseNear.xyz/mouseNear.w, mouseFar.xyz/mouseFar.w, aPosition.xyz);
+
+    // resize and highlight point on hover
     float mouseRange = 100.0*depthScale;
     if (mouseDist < mouseRange) {
         vColor = aSelectColor;
