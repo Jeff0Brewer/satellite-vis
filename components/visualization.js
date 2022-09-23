@@ -36,7 +36,7 @@ const Visualization = props => {
             100
         )
     }
-    const MAX_SGP4_THREAD = 20
+    const MAX_SGP4_THREAD = 10
     const MIN_PER_THREAD = 20
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
@@ -135,6 +135,7 @@ const Visualization = props => {
         }
 
         return () => {
+            sgp4WorkerRefs.current.forEach(worker => worker.terminate())
             sgp4WorkerRefs.current = []
 
             window.removeEventListener('resize', resizeHandler)
