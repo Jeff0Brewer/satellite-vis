@@ -1,6 +1,14 @@
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { mat4 } from 'gl-matrix'
 
+test('mouseRotate locks X rotation at bound parameter', () => {
+    const mat = mouseRotate(mat4.create(), 0, Math.PI, 1, Math.PI/2)
+    const comp = mat4.fromXRotation(mat4.create(), -Math.PI/2)
+    comp.forEach((n, i) => {
+        expect(mat[i]).toBeCloseTo(n)
+    })
+})
+
 test('mouseRotate returns same matrix on 360 rotation', () => {
     const startMatrix = mat4.create()
     const endMatrix = mouseRotate(startMatrix, Math.PI * 2, Math.PI * 2, 1)
