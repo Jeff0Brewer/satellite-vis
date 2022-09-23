@@ -2,6 +2,7 @@ import { mat4 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 import { byteToHex, hexToByte } from '../../lib/hex.js'
 
+// map satellite category to point color
 const categoryColors = {
     Resource: [1, 1, 0.6],
     Communications: [1, 0.8, 1],
@@ -10,6 +11,8 @@ const categoryColors = {
     Debris: [0.6, 0.6, 0.6],
     Misc: [1, 1, 1]
 }
+
+// list of unique colors for determining satellite id on click
 const selectColors = []
 for (let r = 0; r < 40; r++) {
     for (let g = 0; g < 40; g++) {
@@ -21,15 +24,19 @@ for (let r = 0; r < 40; r++) {
 }
 const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 
+// init required variables
 const setupGl = async (gl, numVertex) => {
+    // load program from shader files
     const vertPath = './shaders/satellite-vert.glsl'
     const fragPath = './shaders/satellite-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
     Glu.switchShader(gl, program)
 
+    // init empty position and color buffers
     const posBuffer = Glu.initBuffer(gl, new Float32Array(numVertex * 3), gl.DYNAMIC_DRAW)
     const colBuffer = Glu.initBuffer(gl, new Float32Array(numVertex * 3 * 2), gl.STATIC_DRAW)
 
+    // get shader locations
     const locations = {}
     locations.aPosition = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, FLOAT_SIZE)
     locations.aColor = Glu.initAttribute(gl, 'aColor', 3, 6, 0, false, FLOAT_SIZE)
@@ -39,6 +46,7 @@ const setupGl = async (gl, numVertex) => {
     locations.uInvMatrix = gl.getUniformLocation(gl.program, 'uInvMatrix')
     locations.uMousePos = gl.getUniformLocation(gl.program, 'uMousePos')
 
+    // return ref of all required variables
     return {
         program,
         posBuffer,
@@ -49,11 +57,14 @@ const setupGl = async (gl, numVertex) => {
     }
 }
 
+// update position buffer size and color buffer values on data change
 const updateBuffer = (gl, data, ref) => {
     if (ref) {
+        // resize position buffer to fit data
         gl.bindBuffer(gl.ARRAY_BUFFER, ref.posBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.length * 3), gl.DYNAMIC_DRAW)
 
+        // buffer new color values from data
         const colors = new Float32Array(data.length * 3 * 2)
         data.forEach((item, i) => {
             const categoryColor = categoryColors[item.category]
@@ -64,11 +75,13 @@ const updateBuffer = (gl, data, ref) => {
         gl.bindBuffer(gl.ARRAY_BUFFER, ref.colBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW)
 
+        // get reference to data length for draw
         ref.numVertex = data.length
     }
     return ref
 }
 
+// update projMatrix on change, store ref to projMatrix
 const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref) {
         Glu.switchShader(gl, ref.program)
@@ -78,6 +91,7 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     return ref
 }
 
+// get inverse mvp matrix for unprojecting mouse position
 const getInvMat = (projMatrix, viewMatrix, modelMatrix) => {
     const mvpMat = mat4.multiply(mat4.create(),
         mat4.multiply(mat4.create(),
@@ -89,6 +103,7 @@ const getInvMat = (projMatrix, viewMatrix, modelMatrix) => {
     return mat4.invert(mat4.create(), mvpMat)
 }
 
+// update uniforms and draw
 const draw = (gl, viewMatrix, modelMatrix, positions, mousePos, ref) => {
     if (ref) {
         const { program, posBuffer, colBuffer, locations, numVertex, projMatrix } = ref

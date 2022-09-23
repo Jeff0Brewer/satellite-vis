@@ -1,17 +1,21 @@
 import React, { useEffect, useRef } from 'react'
 import styles from '../styles/PowRange.module.css'
 
+// range input with exponential value response
 const PowRange = props => {
     const inputRef = useRef()
 
+    // convert html input value to exponential value
     const rawToVal = val => {
         return Math.sign(val) * Math.pow(Math.abs(val), props.pow)
     }
 
+    // convert exponential value to html input value
     const valToRaw = val => {
         return Math.sign(val) * Math.pow(Math.abs(val), 1 / props.pow)
     }
 
+    // on load attach event handlers and call callbacks with default value
     useEffect(() => {
         const eventHandlers = {}
         if (props?.onChange) {

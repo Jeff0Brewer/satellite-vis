@@ -7,12 +7,16 @@ import MultiSelect from './multi-select.js'
 import CatalogItem from './catalog-item.js'
 import styles from '../styles/Catalog.module.css'
 
+// component for catalog of visualized satellites, provides data to visualization
 const Catalog = props => {
+    // reference to full dataset
     const [dataset, setDataset] = useState([])
+
     const [currPage, setCurrPage] = useState(0)
     const [maxPage, setMaxPage] = useState(0)
     const ITEM_PER_PAGE = 20
 
+    // parameters for filtering dataset
     const [nameSearch, setNameSearch] = useState('')
     const [idSearch, setIdSearch] = useState('')
     const [selectedCategories, setSelectedCategories] = useState(new Set(satCategories))
@@ -23,6 +27,7 @@ const Catalog = props => {
         setCurrPage(0)
     }
 
+    // fetch data from endpoint on load, store reference and pass full dataset to visualization
     useEffect(() => {
         fetch('/api/get-tles')
             .then(res => res.json())
@@ -42,6 +47,7 @@ const Catalog = props => {
             .catch(err => console.log(err))
     }, [])
 
+    // filter dataset by parameter, pass to visualization
     useEffect(() => {
         setVisData(dataset.filter(item => {
             return selectedCategories.has(item.category) &&
@@ -50,6 +56,7 @@ const Catalog = props => {
         }))
     }, [nameSearch, idSearch, selectedCategories])
 
+    // filter to one satellite when clicked in visualization
     useEffect(() => {
         if (props.selectId) {
             setIdSearch(props.selectId)

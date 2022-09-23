@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { BiCheck } from 'react-icons/bi'
 import styles from '../styles/Catalog.module.css'
 
+// dropdown menu to select multiple values
 const MultiSelect = props => {
     const [listOpen, setListOpen] = useState(false)
 

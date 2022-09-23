@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from '../styles/CameraControl.module.css'
 
+// toggle input with labels
 const TextToggle = props => {
     return (
         <span className={props.styleName}>
