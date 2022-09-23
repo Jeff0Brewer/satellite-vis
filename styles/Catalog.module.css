@@ -70,6 +70,7 @@
 
 .filterInput::placeholder, .multiSelectPlaceholder {
     color: #777;
+    opacity: 1;
     text-transform: lowercase;
     font-size: var(--control-font-size);
 }
@@ -93,6 +94,7 @@
     flex-direction: column;
     background-color: var(--control-bg);
     padding: 0 5px;
+    -webkit-transform:translate3d(0,0,0);
 }
 
 .selectItem {

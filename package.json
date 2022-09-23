@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.9",
+    "bowser": "^2.11.0",
     "canvas": "^2.9.3",
     "dotenv": "^16.0.1",
     "gl-matrix": "^3.4.3",

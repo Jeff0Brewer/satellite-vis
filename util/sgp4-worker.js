@@ -1,9 +1,8 @@
 import { propagate } from 'satellite.js'
 
-const TICKRATE = 1000 / 90
 let intervalId
 
-const loopCalc = (data, memory, epoch) => {
+const loopCalc = (data, memory, epoch, tickrate) => {
     const tick = () => {
         const date = new Date(epoch[0])
         data.forEach((satrec, i) => {
@@ -20,15 +19,14 @@ const loopCalc = (data, memory, epoch) => {
         })
     }
     if (intervalId) { clearInterval(intervalId) }
-    intervalId = setInterval(tick, TICKRATE)
+    intervalId = setInterval(tick, tickrate)
 }
 
 onmessage = e => {
     const { task } = e.data
-    if (task === 'start') { 
-        loopCalc(e.data.data, e.data.memory, e.data.epoch) 
-    } 
-    else if (intervalId) { 
-        clearInterval(intervalId) 
+    if (task === 'start') {
+        loopCalc(e.data.data, e.data.memory, e.data.epoch, e.data.tickrate)
+    } else if (intervalId) {
+        clearInterval(intervalId)
     }
 }

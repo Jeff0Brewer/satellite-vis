@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap');
+@import 'normalize.css';
 
 :root {
     --control-bg: rgba(0, 0, 0, .85);
