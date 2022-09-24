@@ -7,6 +7,7 @@ uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
 uniform mat4 uInvMatrix;
 uniform vec2 uMousePos;
+uniform float uDPR;
 
 varying vec4 vColor;
 
@@ -18,7 +19,8 @@ void main() {
     vColor = aColor;
     gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
     float depthScale = pow(gl_Position.w, 0.5);
-    gl_PointSize = 10.0/depthScale;
+    float pointSize = 5.0*uDPR;
+    gl_PointSize = pointSize/depthScale;
 
     // calculate dist from mouse to vertex
     vec4 mouseNear = uInvMatrix * vec4(uMousePos, 0.0, 1.0);
@@ -29,6 +31,6 @@ void main() {
     float mouseRange = 100.0*depthScale;
     if (mouseDist < mouseRange) {
         vColor = aSelectColor;
-        gl_PointSize = gl_PointSize + 10.0*abs((mouseDist - mouseRange)/mouseRange);
+        gl_PointSize = gl_PointSize + pointSize*abs((mouseDist - mouseRange)/mouseRange);
     }
 }

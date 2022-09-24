@@ -46,6 +46,7 @@ const setupGl = async (gl, numVertex) => {
     locations.uInvMatrix = gl.getUniformLocation(gl.program, 'uInvMatrix')
     locations.uMousePos = gl.getUniformLocation(gl.program, 'uMousePos')
 
+
     // return ref of all required variables
     return {
         program,
@@ -81,10 +82,11 @@ const updateBuffer = (gl, data, ref) => {
     return ref
 }
 
-// update projMatrix on change, store ref to projMatrix
+// update viewport variables on change, store ref to projection matrix
 const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref) {
         Glu.switchShader(gl, ref.program)
+        gl.uniform1f(gl.getUniformLocation(gl.program, 'uDPR'), devicePixelRatio)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
         ref.projMatrix = projMatrix
     }
