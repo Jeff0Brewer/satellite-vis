@@ -10,4 +10,4 @@ jobs:
         run: |
           curl --request POST \
           --url 'https://www.sat-vis.app/api/populate' \
-          --header 'Authorization: Bearer ${{ secrets.POPULATE_KEY }}'
+          --header 'Authorization: ${{ secrets.POPULATE_KEY }}'
