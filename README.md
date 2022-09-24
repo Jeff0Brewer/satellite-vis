@@ -34,3 +34,10 @@ Visualization is done in WebGL, with Earth textures from [NASA blue marble](http
 
 ## Performance
 Smooth visualization of the entire NORAD GP catalog is the primary goal for this application, and the targeted 60fps can be achieved by modest hardware on most browsers. The application is compatible with all major browsers but, due to the large number of calculations being performed, mileage may vary based on the javascript engine. Firefox, Edge, Chrome, Opera and most browsers achieve high performance, but Safari may experience lower framerate and slow interactions. 
+
+---
+
+### To do: 
+Add mobile support
+- touch interactions
+- interface style
