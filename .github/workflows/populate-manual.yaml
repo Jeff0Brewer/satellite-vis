@@ -1,4 +1,4 @@
-name: daily-populate
+name: manual-populate
 on: [workflow_dispatch]
 jobs:
   cron:
