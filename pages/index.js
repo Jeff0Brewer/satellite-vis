@@ -27,7 +27,7 @@ const Home = () => {
     // warning and fixes for safari performance
     useEffect(() => {
         if (getBrowserName(window) === 'Safari') {
-            setTickrate(1000 / 30) // throttle to reduce cpu load
+            setTickrate(1000 / 60) // throttle to reduce cpu load
             setThreadCount(5) // minimize safari specific thrashing
             window.alert(
                 'Safari runs this application ~10x slower than other browsers. ' +
