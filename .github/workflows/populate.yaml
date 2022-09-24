@@ -1,0 +1,13 @@
+name: daily-populate
+on:
+  schedule:
+    - cron: '0 1 * * *'
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call populate api endpoint
+        run: |
+          curl --request POST \
+          --url 'https://www.sat-vis.app/api/populate' \
+          --header 'Authorization: Bearer ${{ secrets.POPULATE_KEY }}'
