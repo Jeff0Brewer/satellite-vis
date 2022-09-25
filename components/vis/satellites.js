@@ -46,7 +46,6 @@ const setupGl = async (gl, numVertex) => {
     locations.uInvMatrix = gl.getUniformLocation(gl.program, 'uInvMatrix')
     locations.uMousePos = gl.getUniformLocation(gl.program, 'uMousePos')
 
-
     // return ref of all required variables
     return {
         program,
