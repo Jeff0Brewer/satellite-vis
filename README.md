@@ -24,7 +24,7 @@ Adjust camera reference frame to view satellites from a distance or follow indiv
 ---
 
 ## Implementation
-Orbital elements for position calculation are obtained from TLE (Two-Line Element set) data, a standardized format containing values used in the SGP4 orbital model. TLEs provide the required information for orbital propagation, but propagating over large time scales accumulates error, so TLEs are updated daily from the [Celestrak](https://celestrak.org/) api. 
+Orbital elements for position calculation are obtained from TLE (Two-Line Element set) data, a standardized format containing values used in the SGP4 orbital model. TLEs provide the required information for orbital propagation, but propagating over large time scales accumulates error, so TLEs are updated daily from the [Celestrak](https://celestrak.org/) api.
 
 The orbital calculation is handled by [satellite.js](https://github.com/shashwatak/satellite-js), a javascript implementation of the SGP4 orbital model. Since the SGP4 model is quite complex and computationally expensive for large sets of satellites, propagation is done in web worker threads to utilize multi-core cpus.
 
@@ -33,11 +33,4 @@ Visualization is done in WebGL, with Earth textures from [NASA blue marble](http
 ---
 
 ## Performance
-Smooth visualization of the entire NORAD GP catalog is the primary goal for this application, and the targeted 60fps can be achieved by modest hardware on most browsers. The application is compatible with all major browsers but, due to the large number of calculations being performed, mileage may vary based on the javascript engine. Firefox, Edge, Chrome, Opera and most browsers achieve high performance, but Safari may experience lower framerate and slow interactions. 
-
----
-
-### To do: 
-Add mobile support
-- touch interactions
-- interface style
+Smooth visualization of the entire NORAD GP catalog is the primary goal for this application, and the targeted 60fps can be achieved by modest hardware on most browsers. The application is compatible with all major browsers but, due to the large number of calculations being performed, mileage may vary based on the javascript engine. Firefox, Edge, Chrome, Opera and most browsers achieve high performance, but Safari may experience lower framerate and slow interactions.
