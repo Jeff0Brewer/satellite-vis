@@ -39,6 +39,7 @@ const setupGl = async (gl, epoch, lighting) => {
     locations.uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
     locations.uViewMatrix = gl.getUniformLocation(gl.program, 'uViewMatrix')
     locations.uSunNormal = gl.getUniformLocation(gl.program, 'uSunNormal')
+    locations.uCameraDirection = gl.getUniformLocation(gl.program, 'uCameraDirection')
     locations.uLighting = gl.getUniformLocation(gl.program, 'uLighting')
     gl.uniform1i(locations.uLighting, lightingMap[lighting])
     gl.uniform1i(gl.getUniformLocation(gl.program, 'uEarthMap'), 0)
@@ -126,9 +127,22 @@ const draw = (gl, viewMatrix, modelMatrix, earthRotation, ref) => {
                 mat4.invert(mat4.create(), earthRotation)
             )
         )
+        const cameraDirection = vec3.normalize(vec3.create(),
+            vec3.transformMat4(vec3.create(),
+                [0, 0, 1],
+                mat4.invert(mat4.create(),
+                    mat4.multiply(mat4.create(),
+                        viewMatrix,
+                        earthModelMat
+                    )
+                )
+            )
+        )
 
         Glu.switchShader(gl, program)
         gl.uniform3fv(locations.uSunNormal, sunNormal)
+        gl.uniform3fv(locations.uCameraDirection, cameraDirection)
+
         gl.uniformMatrix4fv(locations.uModelMatrix, false, earthModelMat)
         gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
 
