@@ -6,8 +6,8 @@ import { byteToHex, hexToByte } from '../../lib/hex.js'
 const categoryColors = {
     Resource: [1, 1, 0.6],
     Communications: [1, 0.8, 1],
-    Navigation: [0.8, 0.8, 1],
-    Scientific: [0.8, 1, 0.8],
+    Navigation: [0.7, 0.7, 1],
+    Scientific: [0.7, 1, 0.7],
     Debris: [0.6, 0.6, 0.6],
     Misc: [1, 1, 1]
 }
