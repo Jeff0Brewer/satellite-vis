@@ -6,8 +6,8 @@ import { byteToHex, hexToByte } from '../../lib/hex.js'
 const categoryColors = {
     Resource: [1, 1, 0.6],
     Communications: [1, 0.8, 1],
-    Navigation: [0.8, 0.8, 1],
-    Scientific: [0.8, 1, 0.8],
+    Navigation: [0.7, 0.7, 1],
+    Scientific: [0.7, 1, 0.7],
     Debris: [0.6, 0.6, 0.6],
     Misc: [1, 1, 1]
 }
@@ -85,9 +85,10 @@ const updateBuffer = (gl, data, ref) => {
 const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref) {
         Glu.switchShader(gl, ref.program)
-        gl.uniform1f(gl.getUniformLocation(gl.program, 'uDPR'), devicePixelRatio)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
         ref.projMatrix = projMatrix
+        const pointSize = Math.max(0.005 * innerHeight, 3) * devicePixelRatio
+        gl.uniform1f(gl.getUniformLocation(gl.program, 'uPointSize'), pointSize)
     }
     return ref
 }
