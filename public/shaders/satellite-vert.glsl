@@ -18,7 +18,7 @@ float distLinePoint(vec3 line0, vec3 line1, vec3 point) {
 void main() {
     vColor = aColor;
     gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
-    float depthScale = pow(gl_Position.w, 0.5);
+    float depthScale = pow(gl_Position.w, 0.4);
     gl_PointSize = uPointSize/depthScale;
 
     // calculate dist from mouse to vertex

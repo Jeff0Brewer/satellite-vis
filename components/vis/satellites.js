@@ -87,7 +87,7 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
         ref.projMatrix = projMatrix
-        const pointSize = Math.max(0.005 * innerHeight, 3) * devicePixelRatio
+        const pointSize = Math.max(0.004 * innerHeight, 3) * devicePixelRatio
         gl.uniform1f(gl.getUniformLocation(gl.program, 'uPointSize'), pointSize)
     }
     return ref
