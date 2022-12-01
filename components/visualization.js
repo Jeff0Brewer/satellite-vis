@@ -5,6 +5,7 @@ import { byteToHex } from '../lib/hex.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
+import * as Glow from './vis/glow.js'
 import styles from '../styles/Visualization.module.css'
 
 // component handling sgp4 calculation threads and gl visualization
@@ -17,6 +18,7 @@ const Visualization = props => {
     const satelliteRef = useRef()
     const earthRef = useRef()
     const skyboxRef = useRef()
+    const glowRef = useRef()
 
     const VIS_SCALE = 0.0001
     const modelMatRef = useRef(
@@ -56,14 +58,16 @@ const Visualization = props => {
         gl.getExtension('OES_standard_derivatives')
 
         // initialize visualization elements, store references to required variables for each element
-        const [satelliteVars, earthVars, skyboxVars] = await Promise.all([
+        const [satelliteVars, earthVars, skyboxVars, glowVars] = await Promise.all([
             Satellites.setupGl(gl, props.data.length),
             Earth.setupGl(gl, props.epoch, props.lighting),
-            Skybox.setupGl(gl)
+            Skybox.setupGl(gl),
+            Glow.setupGl(gl)
         ])
         satelliteRef.current = satelliteVars
         earthRef.current = earthVars
         skyboxRef.current = skyboxVars
+        glowRef.current = glowVars
 
         setupViewport(gl)
     }
@@ -80,6 +84,7 @@ const Visualization = props => {
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
         satelliteRef.current = Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
+        Glow.updateProjMatrix(gl, projMatrix, glowRef.current)
     }
 
     // get functions to return matrices for each camera mode
@@ -286,6 +291,7 @@ const Visualization = props => {
             // draw all visualization elements
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
+            Glow.draw(gl, viewMatrix, modelMatrix, glowRef.current)
             Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, earthRef.current)
             Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, mousePosRef.current, satelliteRef.current)
 

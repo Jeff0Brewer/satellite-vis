@@ -94,9 +94,8 @@ const draw = (gl, viewMatrix, modelMatrix, ref) => {
         gl.vertexAttribPointer(locations.aPosition, 2, gl.FLOAT, false, 2 * FLOAT_SIZE, 0)
         gl.uniformMatrix4fv(locations.uViewProjInverse, false, getInvMatrix(viewMatrix, projMatrix, modelMatrix, angleOffset))
 
-        gl.disable(gl.DEPTH_TEST)
         gl.drawArrays(gl.TRIANGLES, 0, numVertex)
-        gl.enable(gl.DEPTH_TEST)
+        gl.clear(gl.DEPTH_BUFFER_BIT)
     }
 }
 
