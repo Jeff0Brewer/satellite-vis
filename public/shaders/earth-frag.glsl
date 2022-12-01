@@ -8,7 +8,7 @@ uniform samplerCube uEarthMap;
 varying vec3 vNormal;
 
 float getShade(vec3 vertexNormal, vec3 lightNormal) {
-    return .3 + 1.2*clamp(dot(vertexNormal, uSunNormal), .0, 1.0);
+    return .4 + pow(clamp(dot(vertexNormal, uSunNormal), .0, 1.0), 0.75);
 }
 
 vec3 getAtmosphere(vec3 vertexNormal, vec3 cameraDirection) {
