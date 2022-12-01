@@ -16,6 +16,7 @@ const setupGl = async (gl) => {
     locations.uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
     locations.uViewMatrix = gl.getUniformLocation(gl.program, 'uViewMatrix')
     locations.uProjMatrix = gl.getUniformLocation(gl.program, 'uProjMatrix')
+    locations.uScreenHeight = gl.getUniformLocation(gl.program, 'uScreenHeight')
 
     // return ref of all required variables
     return {
@@ -30,6 +31,7 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref) {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(ref.locations.uProjMatrix, false, projMatrix)
+        gl.uniform1f(ref.locations.uScreenHeight, innerHeight * devicePixelRatio)
     }
 }
 
