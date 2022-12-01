@@ -49,6 +49,12 @@ const Visualization = props => {
     const frameIdRef = useRef()
 
     const setupGl = async gl => {
+        gl.enable(gl.DEPTH_TEST)
+        gl.enable(gl.CULL_FACE)
+        gl.enable(gl.BLEND)
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+        gl.getExtension('OES_standard_derivatives')
+
         // initialize visualization elements, store references to required variables for each element
         const [satelliteVars, earthVars, skyboxVars] = await Promise.all([
             Satellites.setupGl(gl, props.data.length),
@@ -59,11 +65,7 @@ const Visualization = props => {
         earthRef.current = earthVars
         skyboxRef.current = skyboxVars
 
-        // initialize viewport
         setupViewport(gl)
-
-        gl.enable(gl.DEPTH_TEST)
-        gl.enable(gl.CULL_FACE)
     }
 
     // update viewport, projection matrix, and canvas size
