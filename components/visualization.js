@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { byteToHex } from '../lib/hex.js'
+import { isTouchDevice } from '../lib/touch.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
@@ -46,9 +47,9 @@ const Visualization = props => {
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
 
-    const mousePosRef = useRef({ x: 0, y: 0 })
-
     const frameIdRef = useRef()
+
+    const cursorPosRef = useRef({ x: 0, y: 0 })
 
     const setupGl = async gl => {
         gl.enable(gl.DEPTH_TEST)
@@ -74,8 +75,8 @@ const Visualization = props => {
 
     // update viewport, projection matrix, and canvas size
     const setupViewport = gl => {
-        const w = innerWidth * devicePixelRatio
-        const h = innerHeight * devicePixelRatio
+        const w = visualViewport.width * devicePixelRatio
+        const h = visualViewport.height * devicePixelRatio
         setWidth(w)
         setHeight(h)
         gl.viewport(0, 0, w, h)
@@ -126,6 +127,39 @@ const Visualization = props => {
         return { getViewMatrix, getModelMatrix }
     }
 
+    const getViewHandlersMouse = () => {
+        let dragging = false
+        const handlers = {}
+        handlers.mousedown = () => { dragging = true }
+        handlers.mouseup = () => { dragging = false }
+        handlers.mousemove = e => {
+            cursorPosRef.current.x = e.clientX
+            cursorPosRef.current.y = e.clientY
+            if (dragging) {
+                modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, 0.004, Math.PI / 2)
+            }
+        }
+        handlers.wheel = e => {
+            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.001, 0.8, 80)
+            e.preventDefault()
+        }
+        return handlers
+    }
+
+    const getViewHandlersTouch = () => {
+        let dragging = false
+        const handlers = {}
+        handlers.touchstart = () => { dragging = true }
+        handlers.touchend = () => { dragging = false }
+        handlers.touchmove = e => {
+            const dx = e.clientX - cursorPosRef.current.x
+            const dy = e.clientY - cursorPosRef.current.y
+            if (dragging) {
+                modelMatRef.current = mouseRotate(modelMatRef.current, dx, dy, 0.004, Math.PI / 2)
+            }
+        }
+    }
+
     // initialize gl and event handlers on component mount
     useEffect(() => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: true })
@@ -135,24 +169,10 @@ const Visualization = props => {
         const resizeHandler = () => setupViewport(glRef.current)
         window.addEventListener('resize', resizeHandler)
 
-        // add handlers for mouse rotation and zooming
-        const dragHandler = e => {
-            modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, 0.004, Math.PI / 2)
-        }
-        const canvHandlers = {}
-        canvHandlers.mousedown = () => canvRef.current.addEventListener('mousemove', dragHandler)
-        canvHandlers.mouseup = () => canvRef.current.removeEventListener('mousemove', dragHandler)
-        canvHandlers.wheel = e => {
-            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.001, 0.8, 80)
-            e.preventDefault()
-        }
-
-        // store reference to mouse position on move
-        canvHandlers.mousemove = e => {
-            mousePosRef.current.x = e.clientX
-            mousePosRef.current.y = e.clientY
-        }
-
+        // add handlers for rotation and zooming
+        const canvHandlers = isTouchDevice()
+            ? getViewHandlersTouch()
+            : getViewHandlersMouse()
         for (const [type, handler] of Object.entries(canvHandlers)) {
             canvRef.current.addEventListener(type, handler)
         }
@@ -160,7 +180,6 @@ const Visualization = props => {
         return () => {
             // remove event handlers on unmount
             window.removeEventListener('resize', resizeHandler)
-            canvRef.current.removeEventListener('mousemove', dragHandler)
             for (const [type, handler] of Object.entries(canvHandlers)) {
                 canvRef.current.removeEventListener(type, handler)
             }
@@ -233,7 +252,7 @@ const Visualization = props => {
 
             // get color of pixel under mouse
             const clickX = e.clientX * devicePixelRatio
-            const clickY = (innerHeight - e.clientY) * devicePixelRatio
+            const clickY = (visualViewport.height - e.clientY) * devicePixelRatio
             const clickColor = new Uint8Array(4)
             glRef.current.readPixels(clickX, clickY, 1, 1, glRef.current.RGBA, glRef.current.UNSIGNED_BYTE, clickColor)
 
@@ -295,7 +314,7 @@ const Visualization = props => {
             Glow.draw(gl, viewMatrix, modelMatrix, glowRef.current)
             gl.enable(gl.DEPTH_TEST)
             Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, earthRef.current)
-            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, mousePosRef.current, satelliteRef.current)
+            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, cursorPosRef.current, satelliteRef.current)
 
             frameIdRef.current = window.requestAnimationFrame(tick)
         }
