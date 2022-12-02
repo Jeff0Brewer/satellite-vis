@@ -8,7 +8,7 @@ const categoryColors = {
     Communications: [1, 0.8, 1],
     Navigation: [0.7, 0.7, 1],
     Scientific: [0.7, 1, 0.7],
-    Debris: [0.6, 0.6, 0.6],
+    Debris: [0.7, 0.7, 0.7],
     Misc: [1, 1, 1]
 }
 
