@@ -35,6 +35,7 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     }
 }
 
+// update uniforms and draw
 const draw = (gl, viewMatrix, modelMatrix, ref) => {
     if (ref) {
         const { program, buffer, locations } = ref
@@ -44,9 +45,7 @@ const draw = (gl, viewMatrix, modelMatrix, ref) => {
         gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
         gl.uniformMatrix4fv(locations.uModelMatrix, false, modelMatrix)
         gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
-
         gl.drawArrays(gl.POINTS, 0, 1)
-        gl.clear(gl.DEPTH_BUFFER_BIT)
     }
 }
 
