@@ -12,7 +12,7 @@ float getShade(vec3 vertexNormal, vec3 lightNormal) {
 }
 
 vec3 getAtmosphere(vec3 vertexNormal, vec3 cameraDirection) {
-    float intensity = 1.0 - dot(vertexNormal, cameraDirection);
+    float intensity = .95 - dot(vertexNormal, cameraDirection);
     return vec3(.3, .6, 1.0) * pow(intensity, 1.5);
 }
 
