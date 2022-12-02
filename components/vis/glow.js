@@ -16,6 +16,7 @@ const setupGl = async (gl) => {
     locations.uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
     locations.uViewMatrix = gl.getUniformLocation(gl.program, 'uViewMatrix')
     locations.uProjMatrix = gl.getUniformLocation(gl.program, 'uProjMatrix')
+    locations.uScreenHeight = gl.getUniformLocation(gl.program, 'uScreenHeight')
 
     // return ref of all required variables
     return {
@@ -30,9 +31,11 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref) {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(ref.locations.uProjMatrix, false, projMatrix)
+        gl.uniform1f(ref.locations.uScreenHeight, innerHeight * devicePixelRatio)
     }
 }
 
+// update uniforms and draw
 const draw = (gl, viewMatrix, modelMatrix, ref) => {
     if (ref) {
         const { program, buffer, locations } = ref
@@ -42,9 +45,7 @@ const draw = (gl, viewMatrix, modelMatrix, ref) => {
         gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
         gl.uniformMatrix4fv(locations.uModelMatrix, false, modelMatrix)
         gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
-
         gl.drawArrays(gl.POINTS, 0, 1)
-        gl.clear(gl.DEPTH_BUFFER_BIT)
     }
 }
 

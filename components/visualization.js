@@ -290,8 +290,10 @@ const Visualization = props => {
 
             // draw all visualization elements
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
+            gl.disable(gl.DEPTH_TEST)
             Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
             Glow.draw(gl, viewMatrix, modelMatrix, glowRef.current)
+            gl.enable(gl.DEPTH_TEST)
             Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, earthRef.current)
             Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, mousePosRef.current, satelliteRef.current)
 

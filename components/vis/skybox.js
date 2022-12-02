@@ -83,19 +83,16 @@ const getInvMatrix = (viewMatrix, projMatrix, modelMatrix, angleOffset) => {
     )
 }
 
-// update uniforms and draw
+// update uniforms and draw, disable depth buffer prior
 const draw = (gl, viewMatrix, modelMatrix, ref) => {
     if (ref) {
         const { program, buffer, texture, locations, numVertex, projMatrix, angleOffset } = ref
-
         Glu.switchShader(gl, program)
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
         gl.vertexAttribPointer(locations.aPosition, 2, gl.FLOAT, false, 2 * FLOAT_SIZE, 0)
         gl.uniformMatrix4fv(locations.uViewProjInverse, false, getInvMatrix(viewMatrix, projMatrix, modelMatrix, angleOffset))
-
         gl.drawArrays(gl.TRIANGLES, 0, numVertex)
-        gl.clear(gl.DEPTH_BUFFER_BIT)
     }
 }
 
