@@ -6,5 +6,5 @@ uniform float uScreenHeight;
 
 void main() {
     gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
-    gl_PointSize = 2.0 * uScreenHeight / gl_Position.w;
+    gl_PointSize = 1.75 * uScreenHeight / gl_Position.w;
 }
