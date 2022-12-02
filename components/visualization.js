@@ -46,9 +46,9 @@ const Visualization = props => {
     const sgp4WorkerRefs = useRef([])
     const sgp4MemoryRefs = useRef([])
 
-    const mousePosRef = useRef({ x: 0, y: 0 })
-
     const frameIdRef = useRef()
+
+    const mousePosRef = useRef({ x: 0, y: 0 })
 
     const setupGl = async gl => {
         gl.enable(gl.DEPTH_TEST)
@@ -126,6 +126,25 @@ const Visualization = props => {
         return { getViewMatrix, getModelMatrix }
     }
 
+    const getViewHandlersMouse = () => {
+        let dragging = false
+        const handlers = {}
+        handlers.mousedown = () => { dragging = true }
+        handlers.mouseup = () => { dragging = false }
+        handlers.mousemove = e => {
+            mousePosRef.current.x = e.clientX
+            mousePosRef.current.y = e.clientY
+            if (dragging) {
+                modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, 0.004, Math.PI / 2)
+            }
+        }
+        handlers.wheel = e => {
+            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.001, 0.8, 80)
+            e.preventDefault()
+        }
+        return handlers
+    }
+
     // initialize gl and event handlers on component mount
     useEffect(() => {
         glRef.current = canvRef.current.getContext('webgl', { preserveDrawingBuffer: true })
@@ -135,24 +154,8 @@ const Visualization = props => {
         const resizeHandler = () => setupViewport(glRef.current)
         window.addEventListener('resize', resizeHandler)
 
-        // add handlers for mouse rotation and zooming
-        const dragHandler = e => {
-            modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, 0.004, Math.PI / 2)
-        }
-        const canvHandlers = {}
-        canvHandlers.mousedown = () => canvRef.current.addEventListener('mousemove', dragHandler)
-        canvHandlers.mouseup = () => canvRef.current.removeEventListener('mousemove', dragHandler)
-        canvHandlers.wheel = e => {
-            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.001, 0.8, 80)
-            e.preventDefault()
-        }
-
-        // store reference to mouse position on move
-        canvHandlers.mousemove = e => {
-            mousePosRef.current.x = e.clientX
-            mousePosRef.current.y = e.clientY
-        }
-
+        // add handlers for rotation and zooming
+        const canvHandlers = getViewHandlersMouse()
         for (const [type, handler] of Object.entries(canvHandlers)) {
             canvRef.current.addEventListener(type, handler)
         }
@@ -160,7 +163,6 @@ const Visualization = props => {
         return () => {
             // remove event handlers on unmount
             window.removeEventListener('resize', resizeHandler)
-            canvRef.current.removeEventListener('mousemove', dragHandler)
             for (const [type, handler] of Object.entries(canvHandlers)) {
                 canvRef.current.removeEventListener(type, handler)
             }
