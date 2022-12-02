@@ -31,7 +31,7 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref) {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(ref.locations.uProjMatrix, false, projMatrix)
-        gl.uniform1f(ref.locations.uScreenHeight, innerHeight * devicePixelRatio)
+        gl.uniform1f(ref.locations.uScreenHeight, visualViewport.height * devicePixelRatio)
     }
 }
 

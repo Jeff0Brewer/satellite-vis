@@ -74,8 +74,8 @@ const Visualization = props => {
 
     // update viewport, projection matrix, and canvas size
     const setupViewport = gl => {
-        const w = innerWidth * devicePixelRatio
-        const h = innerHeight * devicePixelRatio
+        const w = visualViewport.width * devicePixelRatio
+        const h = visualViewport.height * devicePixelRatio
         setWidth(w)
         setHeight(h)
         gl.viewport(0, 0, w, h)
@@ -233,7 +233,7 @@ const Visualization = props => {
 
             // get color of pixel under mouse
             const clickX = e.clientX * devicePixelRatio
-            const clickY = (innerHeight - e.clientY) * devicePixelRatio
+            const clickY = (visualViewport.height - e.clientY) * devicePixelRatio
             const clickColor = new Uint8Array(4)
             glRef.current.readPixels(clickX, clickY, 1, 1, glRef.current.RGBA, glRef.current.UNSIGNED_BYTE, clickColor)
 
