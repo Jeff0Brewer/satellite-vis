@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { byteToHex } from '../lib/hex.js'
+import { isTouchDevice } from '../lib/touch.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
@@ -48,7 +49,7 @@ const Visualization = props => {
 
     const frameIdRef = useRef()
 
-    const mousePosRef = useRef({ x: 0, y: 0 })
+    const cursorPosRef = useRef({ x: 0, y: 0 })
 
     const setupGl = async gl => {
         gl.enable(gl.DEPTH_TEST)
@@ -132,8 +133,8 @@ const Visualization = props => {
         handlers.mousedown = () => { dragging = true }
         handlers.mouseup = () => { dragging = false }
         handlers.mousemove = e => {
-            mousePosRef.current.x = e.clientX
-            mousePosRef.current.y = e.clientY
+            cursorPosRef.current.x = e.clientX
+            cursorPosRef.current.y = e.clientY
             if (dragging) {
                 modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, 0.004, Math.PI / 2)
             }
@@ -143,6 +144,20 @@ const Visualization = props => {
             e.preventDefault()
         }
         return handlers
+    }
+
+    const getViewHandlersTouch = () => {
+        let dragging = false
+        const handlers = {}
+        handlers.touchstart = () => { dragging = true }
+        handlers.touchend = () => { dragging = false }
+        handlers.touchmove = e => {
+            const dx = e.clientX - cursorPosRef.current.x
+            const dy = e.clientY - cursorPosRef.current.y
+            if (dragging) {
+                modelMatRef.current = mouseRotate(modelMatRef.current, dx, dy, 0.004, Math.PI / 2)
+            }
+        }
     }
 
     // initialize gl and event handlers on component mount
@@ -155,7 +170,9 @@ const Visualization = props => {
         window.addEventListener('resize', resizeHandler)
 
         // add handlers for rotation and zooming
-        const canvHandlers = getViewHandlersMouse()
+        const canvHandlers = isTouchDevice()
+            ? getViewHandlersTouch()
+            : getViewHandlersMouse()
         for (const [type, handler] of Object.entries(canvHandlers)) {
             canvRef.current.addEventListener(type, handler)
         }
@@ -297,7 +314,7 @@ const Visualization = props => {
             Glow.draw(gl, viewMatrix, modelMatrix, glowRef.current)
             gl.enable(gl.DEPTH_TEST)
             Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, earthRef.current)
-            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, mousePosRef.current, satelliteRef.current)
+            Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, cursorPosRef.current, satelliteRef.current)
 
             frameIdRef.current = window.requestAnimationFrame(tick)
         }
