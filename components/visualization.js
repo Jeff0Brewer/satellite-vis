@@ -149,15 +149,25 @@ const Visualization = props => {
     const getViewHandlersTouch = () => {
         let dragging = false
         const handlers = {}
-        handlers.touchstart = () => { dragging = true }
+        handlers.touchstart = e => {
+            dragging = true
+            cursorPosRef.current.x = e.touches[0].clientX
+            cursorPosRef.current.y = e.touches[0].clientY
+        }
         handlers.touchend = () => { dragging = false }
         handlers.touchmove = e => {
-            const dx = e.clientX - cursorPosRef.current.x
-            const dy = e.clientY - cursorPosRef.current.y
+            e.preventDefault()
+            const x = e.touches[0].clientX
+            const y = e.touches[0].clientY
+            const dx = x - cursorPosRef.current.x
+            const dy = y - cursorPosRef.current.y
+            cursorPosRef.current.x = x
+            cursorPosRef.current.y = y
             if (dragging) {
                 modelMatRef.current = mouseRotate(modelMatRef.current, dx, dy, 0.004, Math.PI / 2)
             }
         }
+        return handlers
     }
 
     // initialize gl and event handlers on component mount
