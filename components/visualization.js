@@ -156,7 +156,6 @@ const Visualization = props => {
         }
         handlers.touchend = () => { dragging = false }
         handlers.touchmove = e => {
-            e.preventDefault()
             const x = e.touches[0].clientX
             const y = e.touches[0].clientY
             const dx = x - cursorPosRef.current.x
