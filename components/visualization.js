@@ -28,6 +28,8 @@ const Visualization = props => {
             [VIS_SCALE, VIS_SCALE, VIS_SCALE]
         )
     )
+    const minZoom = 0.8
+    const maxZoom = 80
     const viewMatRef = useRef(
         mat4.lookAt(mat4.create(),
             [0, 3, 0],
@@ -141,7 +143,7 @@ const Visualization = props => {
             }
         }
         handlers.wheel = e => {
-            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.001, 0.8, 80)
+            viewMatRef.current = scrollZoom(viewMatRef.current, e.deltaY, -0.001, minZoom, maxZoom)
             e.preventDefault()
         }
         return handlers
@@ -181,7 +183,7 @@ const Visualization = props => {
             const dist = Math.sqrt(dx * dx + dy * dy)
             const dd = dist - cursorPosRef.current.dist
             cursorPosRef.current.dist = dist
-            viewMatRef.current = scrollZoom(viewMatRef.current, dd, -0.001, 0.8, 80)
+            viewMatRef.current = scrollZoom(viewMatRef.current, dd, -0.003, minZoom, maxZoom)
         }
         handlers.touchmove = e => {
             if (e.touches.length === 1) {
