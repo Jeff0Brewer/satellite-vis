@@ -1,7 +1,6 @@
 import { mat4 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 import { byteToHex, hexToByte } from '../../lib/hex.js'
-import { getScreenDimensions } from '../../lib/dimensions.js'
 
 // map satellite category to point color
 const categoryColors = {
@@ -88,7 +87,7 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, 'uProjMatrix'), false, projMatrix)
         ref.projMatrix = projMatrix
-        const { height } = getScreenDimensions()
+        const height = window.innerHeight * window.devicePixelRatio
         const pointSize = Math.max(0.0045 * height, 3)
         gl.uniform1f(gl.getUniformLocation(gl.program, 'uPointSize'), pointSize)
     }
@@ -114,7 +113,8 @@ const draw = (gl, viewMatrix, modelMatrix, positions, mousePos, ref) => {
 
         Glu.switchShader(gl, program)
 
-        const { width, height } = getScreenDimensions()
+        const width = window.innerWidth * window.devicePixelRatio
+        const height = window.innerHeight * window.devicePixelRatio
         gl.uniform2f(locations.uMousePos, 2 * mousePos.x / width - 1, -(2 * mousePos.y / height - 1))
         gl.uniformMatrix4fv(locations.uInvMatrix, false, getInvMat(projMatrix, viewMatrix, modelMatrix))
 
