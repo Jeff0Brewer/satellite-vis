@@ -3,7 +3,6 @@ import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { byteToHex } from '../lib/hex.js'
 import { isTouchDevice } from '../lib/touch.js'
-import { getScreenDimensions } from '../lib/dimensions.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
@@ -77,13 +76,13 @@ const Visualization = props => {
 
     // update viewport, projection matrix, and canvas size
     const setupViewport = gl => {
-        const { width, height } = getScreenDimensions()
-        setWidth(width)
-        setHeight(height)
-        setDpr(window.devicePixelRatio)
-        gl.viewport(0, 0, width, height)
+        const { innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
+        setWidth(w)
+        setHeight(h)
+        setDpr(dpr)
+        gl.viewport(0, 0, w, h)
 
-        const projMatrix = getProjMat(width / height)
+        const projMatrix = getProjMat(w / h)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
         satelliteRef.current = Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
@@ -265,7 +264,7 @@ const Visualization = props => {
             if (currTime - clickTime > 300) { return }
 
             // get color of pixel under mouse
-            const { height } = getScreenDimensions()
+            const height = window.innerHeight * window.devicePixelRatio
             const clickY = (height - e.clientY)
             const clickX = e.clientX
             const clickColor = new Uint8Array(4)
