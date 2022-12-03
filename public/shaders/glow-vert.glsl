@@ -1,16 +1,18 @@
 attribute vec4 aPosition;
-uniform mat4 uModelMatrix;
+attribute vec2 aTexCoord;
 uniform mat4 uViewMatrix;
 uniform mat4 uProjMatrix;
-uniform float uScreenHeight;
+
+varying vec2 vTexCoord;
 
 void main() {
-    float pointSize = 1.48 * uScreenHeight;
-    float growDist = 2.6;
-    gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * aPosition;
+    vTexCoord = aTexCoord;
+    gl_Position = uProjMatrix * uViewMatrix * aPosition;
+
+    float growDist = 2.2;
     if (gl_Position.w < growDist) {
-        gl_PointSize = pointSize / (growDist + 1.13*(gl_Position.w - growDist));
-    } else {
-        gl_PointSize = pointSize / gl_Position.w;
+        float grow = pow(growDist / gl_Position.w, 3.0);
+        vec4 scaledPos = vec4(aPosition.xyz * (.97 + .03*grow), 1.0);
+        gl_Position = uProjMatrix * uViewMatrix * scaledPos;
     }
 }
