@@ -4,9 +4,7 @@
 
 .home {
     min-height: 100vh;
-    min-height: -moz-available;
-    min-height: -webkit-fill-available;
-    min-height: fill-available;
+    min-height: stretch;
     background-color: #111;
     display: flex;
     flex-direction: column;
