@@ -80,7 +80,7 @@ const Visualization = props => {
         setWidth(w)
         setHeight(h)
         setDpr(dpr)
-        gl.viewport(0, 0, w, h)
+        gl.viewport(0, 0, w * dpr, h * dpr)
 
         const projMatrix = getProjMat(w / h)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
