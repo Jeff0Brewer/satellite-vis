@@ -3,20 +3,29 @@ import * as Glu from '../../lib/gl-help.js'
 const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 
 // init required variables
-const setupGl = async (gl) => {
+const setupGl = async (gl, scale) => {
     // load program from shader files
     const vertPath = './shaders/glow-vert.glsl'
     const fragPath = './shaders/glow-frag.glsl'
     const program = await Glu.loadProgram(gl, vertPath, fragPath)
     Glu.switchShader(gl, program)
 
-    const buffer = Glu.initBuffer(gl, new Float32Array([0, 0, 0]), gl.STATIC_DRAW)
+    const sz = scale * 6371 * 1.08 // > earth radius
+    const quad = [
+        sz, 0, -sz, 1, -1,
+        -sz, 0, -sz, -1, -1,
+        sz, 0, sz, 1, 1,
+        -sz, 0, -sz, -1, -1,
+        -sz, 0, sz, 1, -1,
+        sz, 0, sz, 1, 1
+    ]
+
+    const buffer = Glu.initBuffer(gl, new Float32Array(quad), gl.STATIC_DRAW)
     const locations = {}
-    locations.aPosition = Glu.initAttribute(gl, 'aPosition', 3, 3, 0, false, FLOAT_SIZE)
-    locations.uModelMatrix = gl.getUniformLocation(gl.program, 'uModelMatrix')
+    locations.aPosition = Glu.initAttribute(gl, 'aPosition', 3, 5, 0, false, FLOAT_SIZE)
+    locations.aTexCoord = Glu.initAttribute(gl, 'aTexCoord', 2, 5, 3, false, FLOAT_SIZE)
     locations.uViewMatrix = gl.getUniformLocation(gl.program, 'uViewMatrix')
     locations.uProjMatrix = gl.getUniformLocation(gl.program, 'uProjMatrix')
-    locations.uScreenHeight = gl.getUniformLocation(gl.program, 'uScreenHeight')
 
     // return ref of all required variables
     return {
@@ -31,22 +40,20 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref) {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(ref.locations.uProjMatrix, false, projMatrix)
-        const height = window.innerHeight * window.devicePixelRatio
-        gl.uniform1f(ref.locations.uScreenHeight, height)
     }
 }
 
 // update uniforms and draw
-const draw = (gl, viewMatrix, modelMatrix, ref) => {
+const draw = (gl, viewMatrix, ref) => {
     if (ref) {
         const { program, buffer, locations } = ref
 
         Glu.switchShader(gl, program)
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-        gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 3 * FLOAT_SIZE, 0)
-        gl.uniformMatrix4fv(locations.uModelMatrix, false, modelMatrix)
+        gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 5 * FLOAT_SIZE, 0)
+        gl.vertexAttribPointer(locations.aTexCoord, 2, gl.FLOAT, false, 5 * FLOAT_SIZE, 3 * FLOAT_SIZE)
         gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
-        gl.drawArrays(gl.POINTS, 0, 1)
+        gl.drawArrays(gl.TRIANGLES, 0, 6)
     }
 }
 

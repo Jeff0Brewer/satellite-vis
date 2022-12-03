@@ -66,7 +66,7 @@ const Visualization = props => {
             Satellites.setupGl(gl, props.data.length),
             Earth.setupGl(gl, props.epoch, props.lighting),
             Skybox.setupGl(gl),
-            Glow.setupGl(gl)
+            Glow.setupGl(gl, VIS_SCALE)
         ])
         satelliteRef.current = satelliteVars
         earthRef.current = earthVars
@@ -350,7 +350,7 @@ const Visualization = props => {
             gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
             gl.disable(gl.DEPTH_TEST)
             Skybox.draw(gl, viewMatrix, modelMatrix, skyboxRef.current)
-            Glow.draw(gl, viewMatrix, modelMatrix, glowRef.current)
+            Glow.draw(gl, viewMatrix, glowRef.current)
             gl.enable(gl.DEPTH_TEST)
             Earth.draw(gl, viewMatrix, modelMatrix, earthRotation, earthRef.current)
             Satellites.draw(gl, viewMatrix, modelMatrix, posBuffer, cursorPosRef.current, satelliteRef.current)
