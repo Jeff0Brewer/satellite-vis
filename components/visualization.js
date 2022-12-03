@@ -82,6 +82,9 @@ const Visualization = props => {
         setHeight(h)
         setDpr(dpr)
         gl.viewport(0, 0, w * dpr, h * dpr)
+        if (!isTouchDevice()) {
+            dprScaleRef.current = 1 / dpr
+        }
 
         const projMatrix = getProjMat(w / h)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
@@ -181,6 +184,7 @@ const Visualization = props => {
         window.addEventListener('resize', resizeHandler)
         window.addEventListener('orientationchange', resizeHandler)
 
+        // get inverse default dpr for calculating zoom on mobile
         dprScaleRef.current = 1 / window.devicePixelRatio
 
         // add handlers for rotation and zooming
