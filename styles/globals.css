@@ -4,12 +4,11 @@
 :root {
     --control-bg: rgba(0, 0, 0, .85);
     --clock-width: 300px;
-    --catalog-width: 700px;
-    --default-width: 1000px;
-    --clock-height: 120px;
-    --catalog-height: 250px;
+    --catalog-width: 600px;
+    --clock-height: 110px;
+    --catalog-height: 220px;
     --border-style: solid #fff;
-    --control-font-size: 18px;
+    --font-size: 14px;
 }
 
 * {

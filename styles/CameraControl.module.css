@@ -5,6 +5,7 @@
 .camControl {
     position: relative;
     width: var(--clock-width);
+    max-width: 100vw;
     height: calc(var(--catalog-height) - var(--clock-height));
     background-color: var(--control-bg);
     border: var(--border-style);
@@ -16,7 +17,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: var(--control-font-size);
+    font-size: var(--font-size);
     height: 50%;
 }
 
@@ -36,6 +37,7 @@
     text-transform: lowercase;
     cursor: pointer;
     padding: 8px;
+    font-size: var(--font-size);
     min-width: 80px;
     text-align: center;
 }
@@ -45,7 +47,13 @@
     color: #000;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 900px) {
+    .camControl {
+        border-width: 0 0 0 1px;
+    }
+}
+
+@media (max-width: 600px) {
     .camControl {
         border-width: 1px 0;
     }

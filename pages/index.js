@@ -52,7 +52,7 @@ const Home = () => {
                             }
                         </button>
                     </div>
-                    <div>
+                    <div className={styles.leftInterface}>
                         <Clock
                             sharedEpoch={sharedEpochRef.current}
                             setSpeed={setClockSpeed}

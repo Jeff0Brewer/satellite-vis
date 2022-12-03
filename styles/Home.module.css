@@ -24,6 +24,11 @@
     width: fit-content;
 }
 
+.leftInterface {
+    display: flex;
+    flex-direction: column;
+}
+
 .collapseWrap {
     position: relative;
     width: 100%;
@@ -32,9 +37,9 @@
 .collapseButton {
     position: absolute;
     bottom: 0;
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
+    width: 35px;
+    height: 30px;
+    font-size: 15px;
     background-color: var(--control-bg);
     color: #fff;
     border: none;
@@ -62,5 +67,11 @@
     }
     to {
         transform: rotateY(360deg);
+    }
+}
+
+@media (max-width: 900px) and (min-width: 600px) {
+    .leftInterface {
+        flex-direction: row;
     }
 }
