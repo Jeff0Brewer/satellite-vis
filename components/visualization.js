@@ -343,7 +343,6 @@ const Visualization = props => {
             ref={canvRef}
             width={width * dpr}
             height={height * dpr}
-            style={{ width, height }}
         />
     )
 }

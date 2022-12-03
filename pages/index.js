@@ -45,10 +45,7 @@ const Home = () => {
                 <title>Satellite Visualization</title>
                 <link rel="icon" type="image/png" href="./favicon.png"/>
             </Head>
-            <main
-                className={loaded ? styles.home : styles.hidden}
-                style={{ height: `${height}px` }}
-            >
+            <main className={loaded ? styles.home : styles.hidden}>
                 <section className={styles.interface}>
                     <div className={styles.collapseWrap}>
                         <button
