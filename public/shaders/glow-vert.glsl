@@ -9,7 +9,7 @@ void main() {
     vTexCoord = aTexCoord;
     gl_Position = uProjMatrix * uViewMatrix * aPosition;
 
-    float growDist = 2.2;
+    float growDist = 2.3;
     if (gl_Position.w < growDist) {
         float grow = pow(growDist / gl_Position.w, 3.0);
         vec4 scaledPos = vec4(aPosition.xyz * (.97 + .03*grow), 1.0);
