@@ -5,7 +5,7 @@
     width: var(--clock-width);
     height: var(--clock-height);
     background-color: var(--control-bg);
-    padding: 15px;
+    padding: 10px;
 }
 
 .clockRow {
@@ -16,7 +16,7 @@
 }
 
 .epochText {
-    font-size: 22px;
+    font-size: 20px;
 }
 
 .resetEpoch {
@@ -32,10 +32,10 @@
 }
 
 .speedText {
-    width: 75px;
-    font-size: var(--control-font-size);
+    width: 55px;
+    font-size: var(--font-size);
 }
 
 .speedInput {
-    width: calc(100% - 80px);
+    width: calc(100% - 60px);
 }
