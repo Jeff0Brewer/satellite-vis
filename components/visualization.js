@@ -148,23 +148,38 @@ const Visualization = props => {
     }
 
     const getViewHandlersTouch = () => {
-        let dragging = false
         const handlers = {}
         handlers.touchstart = e => {
-            dragging = true
             cursorPosRef.current.x = e.touches[0].clientX
             cursorPosRef.current.y = e.touches[0].clientY
+            if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX
+                const dy = e.touches[0].clientY - e.touches[1].clientY
+                cursorPosRef.current.dist = Math.sqrt(dx * dx + dy * dy)
+            }
         }
-        handlers.touchend = () => { dragging = false }
-        handlers.touchmove = e => {
+        const handleDrag = e => {
             const x = e.touches[0].clientX
             const y = e.touches[0].clientY
             const dx = x - cursorPosRef.current.x
             const dy = y - cursorPosRef.current.y
             cursorPosRef.current.x = x
             cursorPosRef.current.y = y
-            if (dragging) {
-                modelMatRef.current = mouseRotate(modelMatRef.current, dx, dy, 0.004, Math.PI / 2)
+            modelMatRef.current = mouseRotate(modelMatRef.current, dx, dy, 0.004, Math.PI / 2)
+        }
+        const handlePinch = e => {
+            const dx = e.touches[0].clientX - e.touches[1].clientX
+            const dy = e.touches[0].clientY - e.touches[1].clientY
+            const dist = Math.sqrt(dx * dx + dy * dy)
+            const dd = dist - cursorPosRef.current.dist
+            cursorPosRef.current.dist = dist
+            viewMatRef.current = scrollZoom(viewMatRef.current, dd, -0.001, 0.8, 80)
+        }
+        handlers.touchmove = e => {
+            if (e.touches.length === 1) {
+                handleDrag(e)
+            } else if (e.touches.length === 2) {
+                handlePinch(e)
             }
         }
         return handlers
