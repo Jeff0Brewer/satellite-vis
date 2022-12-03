@@ -14,6 +14,7 @@ import styles from '../styles/Visualization.module.css'
 const Visualization = props => {
     const [width, setWidth] = useState(0)
     const [height, setHeight] = useState(0)
+    const [dpr, setDpr] = useState(0)
 
     const canvRef = useRef()
     const glRef = useRef()
@@ -79,6 +80,7 @@ const Visualization = props => {
         const { width, height } = getScreenDimensions()
         setWidth(width)
         setHeight(height)
+        setDpr(window.devicePixelRatio)
         gl.viewport(0, 0, width, height)
 
         const projMatrix = getProjMat(width / height)
@@ -177,6 +179,7 @@ const Visualization = props => {
         // setup viewport on page resize
         const resizeHandler = () => setupViewport(glRef.current)
         window.addEventListener('resize', resizeHandler)
+        window.addEventListener('orientationchange', resizeHandler)
 
         // add handlers for rotation and zooming
         const canvHandlers = isTouchDevice()
@@ -189,6 +192,7 @@ const Visualization = props => {
         return () => {
             // remove event handlers on unmount
             window.removeEventListener('resize', resizeHandler)
+            window.removeEventListener('orientationchange', resizeHandler)
             for (const [type, handler] of Object.entries(canvHandlers)) {
                 canvRef.current.removeEventListener(type, handler)
             }
@@ -335,7 +339,13 @@ const Visualization = props => {
     }, [props.clockSpeed, props.data, props.followId, props.cameraMode])
 
     return (
-        <canvas className={styles.vis} ref={canvRef} width={width} height={height}/>
+        <canvas
+            className={styles.vis}
+            ref={canvRef}
+            width={width}
+            height={height}
+            style={{ width: width / dpr, height: height / dpr }}
+        />
     )
 }
 
