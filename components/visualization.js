@@ -3,6 +3,7 @@ import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { byteToHex } from '../lib/hex.js'
 import { isTouchDevice } from '../lib/touch.js'
+import { getScreenDimensions } from '../lib/dimensions.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
@@ -75,13 +76,12 @@ const Visualization = props => {
 
     // update viewport, projection matrix, and canvas size
     const setupViewport = gl => {
-        const w = visualViewport.width * devicePixelRatio
-        const h = visualViewport.height * devicePixelRatio
-        setWidth(w)
-        setHeight(h)
-        gl.viewport(0, 0, w, h)
+        const { width, height } = getScreenDimensions()
+        setWidth(width)
+        setHeight(height)
+        gl.viewport(0, 0, width, height)
 
-        const projMatrix = getProjMat(w / h)
+        const projMatrix = getProjMat(width / height)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
         satelliteRef.current = Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
@@ -246,6 +246,7 @@ const Visualization = props => {
 
     // setup event handlers for mouse click satellite selection
     useEffect(() => {
+        if (isTouchDevice()) { return }
         const selectHandlers = {}
 
         // store time of mousedown to prevent filtering on long drags
@@ -257,11 +258,12 @@ const Visualization = props => {
         // find satellite id on click and set selected id for filtering
         selectHandlers.mouseup = e => {
             const currTime = Date.now()
-            if (currTime - clickTime > 300) return
+            if (currTime - clickTime > 300) { return }
 
             // get color of pixel under mouse
-            const clickX = e.clientX * devicePixelRatio
-            const clickY = (visualViewport.height - e.clientY) * devicePixelRatio
+            const { height } = getScreenDimensions()
+            const clickY = (height - e.clientY)
+            const clickX = e.clientX
             const clickColor = new Uint8Array(4)
             glRef.current.readPixels(clickX, clickY, 1, 1, glRef.current.RGBA, glRef.current.UNSIGNED_BYTE, clickColor)
 
