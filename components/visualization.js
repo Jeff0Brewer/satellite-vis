@@ -14,6 +14,7 @@ const Visualization = props => {
     const [width, setWidth] = useState(0)
     const [height, setHeight] = useState(0)
     const [dpr, setDpr] = useState(0)
+    const dprScaleRef = useRef(0)
 
     const canvRef = useRef()
     const glRef = useRef()
@@ -180,6 +181,8 @@ const Visualization = props => {
         window.addEventListener('resize', resizeHandler)
         window.addEventListener('orientationchange', resizeHandler)
 
+        dprScaleRef.current = 1 / window.devicePixelRatio
+
         // add handlers for rotation and zooming
         const canvHandlers = isTouchDevice()
             ? getViewHandlersTouch()
@@ -343,7 +346,10 @@ const Visualization = props => {
             ref={canvRef}
             width={width * dpr}
             height={height * dpr}
-            style={{ width, height }}
+            style={{
+                width: width * dpr * dprScaleRef.current,
+                height: height * dpr * dprScaleRef.current
+            }}
         />
     )
 }
