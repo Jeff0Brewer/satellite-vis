@@ -24,6 +24,11 @@
     width: fit-content;
 }
 
+.leftInterface {
+    display: flex;
+    flex-direction: column;
+}
+
 .collapseWrap {
     position: relative;
     width: 100%;
@@ -62,5 +67,11 @@
     }
     to {
         transform: rotateY(360deg);
+    }
+}
+
+@media (max-width: 900px) and (min-width: 600px) {
+    .leftInterface {
+        flex-direction: row;
     }
 }

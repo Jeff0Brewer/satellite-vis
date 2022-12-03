@@ -3,9 +3,9 @@
 
 :root {
     --control-bg: rgba(0, 0, 0, .85);
-    --clock-width: 275px;
+    --clock-width: 300px;
     --catalog-width: 600px;
-    --clock-height: 100px;
+    --clock-height: 110px;
     --catalog-height: 220px;
     --border-style: solid #fff;
     --font-size: 14px;
