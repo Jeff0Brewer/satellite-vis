@@ -3,6 +3,7 @@ import { mat4, vec3 } from 'gl-matrix'
 import { mouseRotate, scrollZoom } from '../lib/mouse-control.js'
 import { byteToHex } from '../lib/hex.js'
 import { isTouchDevice } from '../lib/touch.js'
+import { getScreenDimensions } from '../lib/dimensions.js'
 import * as Satellites from './vis/satellites.js'
 import * as Earth from './vis/earth.js'
 import * as Skybox from './vis/skybox.js'
@@ -76,13 +77,13 @@ const Visualization = props => {
 
     // update viewport, projection matrix, and canvas size
     const setupViewport = gl => {
-        const { innerWidth: w, innerHeight: h, devicePixelRatio: dpr } = window
-        setWidth(w)
-        setHeight(h)
-        setDpr(dpr)
-        gl.viewport(0, 0, w * dpr, h * dpr)
+        const { width, height } = getScreenDimensions()
+        setWidth(width)
+        setHeight(height)
+        setDpr(window.devicePixelRatio)
+        gl.viewport(0, 0, width, height)
 
-        const projMatrix = getProjMat(w / h)
+        const projMatrix = getProjMat(width / height)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
         satelliteRef.current = Satellites.updateProjMatrix(gl, projMatrix, satelliteRef.current)
         skyboxRef.current = Skybox.updateProjMatrix(projMatrix, skyboxRef.current)
@@ -178,6 +179,7 @@ const Visualization = props => {
         // setup viewport on page resize
         const resizeHandler = () => setupViewport(glRef.current)
         window.addEventListener('resize', resizeHandler)
+        window.addEventListener('orientationchange', resizeHandler)
 
         // add handlers for rotation and zooming
         const canvHandlers = isTouchDevice()
@@ -190,6 +192,7 @@ const Visualization = props => {
         return () => {
             // remove event handlers on unmount
             window.removeEventListener('resize', resizeHandler)
+            window.removeEventListener('orientationchange', resizeHandler)
             for (const [type, handler] of Object.entries(canvHandlers)) {
                 canvRef.current.removeEventListener(type, handler)
             }
@@ -262,7 +265,7 @@ const Visualization = props => {
             if (currTime - clickTime > 300) { return }
 
             // get color of pixel under mouse
-            const height = window.innerHeight * window.devicePixelRatio
+            const { height } = getScreenDimensions()
             const clickY = (height - e.clientY)
             const clickX = e.clientX
             const clickColor = new Uint8Array(4)
@@ -339,9 +342,9 @@ const Visualization = props => {
         <canvas
             className={styles.vis}
             ref={canvRef}
-            width={width * dpr}
-            height={height * dpr}
-            style={{ width, height }}
+            width={width}
+            height={height}
+            style={{ width: width / dpr, height: height / dpr }}
         />
     )
 }
