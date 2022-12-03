@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react'
-import Head from 'next/head'
 import { getBrowserName } from '../util/get-browser.js'
 import { newEpoch } from '../lib/shared-epoch.js'
 import { FaCaretUp, FaCaretDown } from 'react-icons/fa'
@@ -34,10 +33,6 @@ const Home = () => {
 
     return (
         <div>
-            <Head>
-                <title>Satellite Visualization</title>
-                <link rel="icon" type="image/png" href="./favicon.png"/>
-            </Head>
             <main className={loaded ? styles.home : styles.hidden}>
                 <section className={styles.interface}>
                     <div className={styles.collapseWrap}>
