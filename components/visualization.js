@@ -14,6 +14,7 @@ const Visualization = props => {
     const [width, setWidth] = useState(0)
     const [height, setHeight] = useState(0)
     const [dpr, setDpr] = useState(0)
+    const dprScaleRef = useRef(0)
 
     const canvRef = useRef()
     const glRef = useRef()
@@ -81,6 +82,9 @@ const Visualization = props => {
         setHeight(h)
         setDpr(dpr)
         gl.viewport(0, 0, w * dpr, h * dpr)
+        if (!isTouchDevice()) {
+            dprScaleRef.current = 1 / dpr
+        }
 
         const projMatrix = getProjMat(w / h)
         Earth.updateProjMatrix(gl, projMatrix, earthRef.current)
@@ -179,6 +183,9 @@ const Visualization = props => {
         const resizeHandler = () => setupViewport(glRef.current)
         window.addEventListener('resize', resizeHandler)
         window.addEventListener('orientationchange', resizeHandler)
+
+        // get inverse default dpr for calculating zoom on mobile
+        dprScaleRef.current = 1 / window.devicePixelRatio
 
         // add handlers for rotation and zooming
         const canvHandlers = isTouchDevice()
@@ -343,7 +350,10 @@ const Visualization = props => {
             ref={canvRef}
             width={width * dpr}
             height={height * dpr}
-            style={{ width, height }}
+            style={{
+                width: width * dpr * dprScaleRef.current,
+                height: height * dpr * dprScaleRef.current
+            }}
         />
     )
 }

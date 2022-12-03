@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import Head from 'next/head'
 import { getBrowserName } from '../util/get-browser.js'
 import { newEpoch } from '../lib/shared-epoch.js'
 import { FaCaretUp, FaCaretDown } from 'react-icons/fa'
@@ -23,17 +24,31 @@ const Home = () => {
     const [tickrate, setTickrate] = useState(1000 / 90)
     const [threadCount, setThreadCount] = useState(100)
 
+    const [height, setHeight] = useState(0)
+
     // fixes for safari performance
     useEffect(() => {
         if (getBrowserName(window) === 'Safari') {
             setTickrate(1000 / 60) // throttle to reduce cpu load
             setThreadCount(5) // minimize safari specific thrashing
         }
+        const heightHandler = () => setHeight(window.innerHeight)
+        window.addEventListener('resize', heightHandler)
+        return () => {
+            window.removeEventListener('resize', heightHandler)
+        }
     }, [])
 
     return (
         <div>
-            <main className={loaded ? styles.home : styles.hidden}>
+            <Head>
+                <title>Satellite Visualization</title>
+                <link rel="icon" type="image/png" href="./favicon.png"/>
+            </Head>
+            <main
+                className={loaded ? styles.home : styles.hidden}
+                style={{ height: `${height}px` }}
+            >
                 <section className={styles.interface}>
                     <div className={styles.collapseWrap}>
                         <button
