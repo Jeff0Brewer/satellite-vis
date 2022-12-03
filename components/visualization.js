@@ -341,9 +341,9 @@ const Visualization = props => {
         <canvas
             className={styles.vis}
             ref={canvRef}
-            width={width}
-            height={height}
-            style={{ width: width / dpr, height: height / dpr }}
+            width={width * dpr}
+            height={height * dpr}
+            style={{ width, height }}
         />
     )
 }
