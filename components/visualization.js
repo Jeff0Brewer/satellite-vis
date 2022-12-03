@@ -150,12 +150,20 @@ const Visualization = props => {
     const getViewHandlersTouch = () => {
         const handlers = {}
         handlers.touchstart = e => {
-            cursorPosRef.current.x = e.touches[0].clientX
-            cursorPosRef.current.y = e.touches[0].clientY
+            if (e.touches.length === 1) {
+                cursorPosRef.current.x = e.touches[0].clientX
+                cursorPosRef.current.y = e.touches[0].clientY
+            }
             if (e.touches.length === 2) {
                 const dx = e.touches[0].clientX - e.touches[1].clientX
                 const dy = e.touches[0].clientY - e.touches[1].clientY
                 cursorPosRef.current.dist = Math.sqrt(dx * dx + dy * dy)
+            }
+        }
+        handlers.touchend = e => {
+            if (e.touches.length === 1) {
+                cursorPosRef.current.x = e.touches[0].clientX
+                cursorPosRef.current.y = e.touches[0].clientY
             }
         }
         const handleDrag = e => {
