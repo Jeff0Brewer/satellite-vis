@@ -42,7 +42,7 @@ const Visualization = props => {
             50 * Math.PI / 180,
             aspect,
             0.1,
-            100
+            70
         )
     }
 
