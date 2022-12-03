@@ -166,7 +166,7 @@
     color: #444;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 900px) {
     .catalog {
         border: none;
     }

@@ -46,7 +46,7 @@
     color: #000;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 900px) {
     .camControl {
         border-width: 1px 0;
     }
