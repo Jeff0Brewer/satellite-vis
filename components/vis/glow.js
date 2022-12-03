@@ -1,4 +1,5 @@
 import * as Glu from '../../lib/gl-help.js'
+import { getScreenDimensions } from '../../lib/dimensions.js'
 
 const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 
@@ -31,7 +32,7 @@ const updateProjMatrix = (gl, projMatrix, ref) => {
     if (ref) {
         Glu.switchShader(gl, ref.program)
         gl.uniformMatrix4fv(ref.locations.uProjMatrix, false, projMatrix)
-        const height = window.innerHeight * window.devicePixelRatio
+        const { height } = getScreenDimensions()
         gl.uniform1f(ref.locations.uScreenHeight, height)
     }
 }
