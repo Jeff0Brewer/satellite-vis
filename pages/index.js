@@ -37,6 +37,7 @@ const Home = () => {
             <Head>
                 <title>Satellite Visualization</title>
                 <link rel="icon" type="image/png" href="./favicon.png"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             </Head>
             <main className={loaded ? styles.home : styles.hidden}>
                 <section className={styles.interface}>
