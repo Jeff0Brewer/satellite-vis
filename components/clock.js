@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { getEpochDisplay } from '../lib/shared-epoch.js'
-import { IoMdRefresh } from 'react-icons/io'
+import { MdRefresh } from 'react-icons/md'
 import PowRange from './pow-range.js'
 import styles from '../styles/Clock.module.css'
 
@@ -33,7 +33,7 @@ const Clock = props => {
                     {epochText}
                 </p>
                 <button className={styles.resetEpoch} onClick={resetEpoch}>
-                    <IoMdRefresh />
+                    <MdRefresh />
                 </button>
             </span>
             <span className={styles.clockRow}>

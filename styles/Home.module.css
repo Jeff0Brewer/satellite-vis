@@ -39,6 +39,8 @@
     bottom: 0;
     width: 35px;
     height: 30px;
+    display: grid;
+    place-items: center;
     font-size: 15px;
     background-color: var(--control-bg);
     color: #fff;
