@@ -1,4 +1,5 @@
 import * as Glu from '../../lib/gl-help.js'
+import { mat4, vec3 } from 'gl-matrix'
 
 const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT
 
@@ -48,11 +49,18 @@ const draw = (gl, viewMatrix, ref) => {
     if (ref) {
         const { program, buffer, locations } = ref
 
+        const viewDist = vec3.length(mat4.getTranslation(vec3.create(), viewMatrix))
+        const zoomMatrix = mat4.lookAt(mat4.create(),
+            [0, viewDist, 0],
+            [0, 0, 0],
+            [0, 0, 1]
+        )
+
         Glu.switchShader(gl, program)
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
         gl.vertexAttribPointer(locations.aPosition, 3, gl.FLOAT, false, 5 * FLOAT_SIZE, 0)
         gl.vertexAttribPointer(locations.aTexCoord, 2, gl.FLOAT, false, 5 * FLOAT_SIZE, 3 * FLOAT_SIZE)
-        gl.uniformMatrix4fv(locations.uViewMatrix, false, viewMatrix)
+        gl.uniformMatrix4fv(locations.uViewMatrix, false, zoomMatrix)
         gl.drawArrays(gl.TRIANGLES, 0, 6)
     }
 }
