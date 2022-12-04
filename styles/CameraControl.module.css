@@ -47,13 +47,13 @@
     color: #000;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 810px) {
     .camControl {
         border-width: 0 0 0 1px;
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 540px) {
     .camControl {
         border-width: 1px 0;
     }

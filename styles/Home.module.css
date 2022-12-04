@@ -70,7 +70,7 @@
     }
 }
 
-@media (max-width: 900px) and (min-width: 600px) {
+@media (max-width: 810px) and (min-width: 540px) {
     .leftInterface {
         flex-direction: row;
     }
