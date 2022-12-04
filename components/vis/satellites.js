@@ -1,6 +1,7 @@
 import { mat4 } from 'gl-matrix'
 import * as Glu from '../../lib/gl-help.js'
 import { byteToHex, hexToByte } from '../../lib/hex.js'
+import { isTouchDevice } from '../../lib/touch.js'
 
 // map satellite category to point color
 const categoryColors = {
@@ -115,7 +116,13 @@ const draw = (gl, viewMatrix, modelMatrix, positions, mousePos, ref) => {
 
         const width = window.innerWidth * window.devicePixelRatio
         const height = window.innerHeight * window.devicePixelRatio
-        gl.uniform2f(locations.uMousePos, 2 * mousePos.x / width - 1, -(2 * mousePos.y / height - 1))
+
+        // move mouse offscreen for touch devices
+        const mouseVec = isTouchDevice()
+            ? [-10, -10]
+            : [2 * mousePos.x / width - 1, -(2 * mousePos.y / height - 1)]
+
+        gl.uniform2fv(locations.uMousePos, mouseVec)
         gl.uniformMatrix4fv(locations.uInvMatrix, false, getInvMat(projMatrix, viewMatrix, modelMatrix))
 
         gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer)
