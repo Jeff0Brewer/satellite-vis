@@ -35,9 +35,11 @@
 }
 
 .collapseButton {
+    display: grid;
+    place-items: center;
     position: absolute;
     bottom: 0;
-    width: 35px;
+    width: 45px;
     height: 30px;
     font-size: 15px;
     background-color: var(--control-bg);
