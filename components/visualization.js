@@ -136,8 +136,8 @@ const Visualization = props => {
         handlers.mousedown = () => { dragging = true }
         handlers.mouseup = () => { dragging = false }
         handlers.mousemove = e => {
-            cursorPosRef.current.x = e.clientX
-            cursorPosRef.current.y = e.clientY
+            cursorPosRef.current.x = e.clientX * window.devicePixelRatio
+            cursorPosRef.current.y = e.clientY * window.devicePixelRatio
             if (dragging) {
                 modelMatRef.current = mouseRotate(modelMatRef.current, e.movementX, e.movementY, 0.004, Math.PI / 2)
             }
