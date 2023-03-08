@@ -289,9 +289,8 @@ const Visualization = props => {
             if (currTime - clickTime > 300) { return }
 
             // get color of pixel under mouse
-            const height = window.innerHeight * window.devicePixelRatio
-            const clickY = (height - e.clientY)
-            const clickX = e.clientX
+            const clickY = (window.innerHeight - e.clientY) * window.devicePixelRatio
+            const clickX = e.clientX * window.devicePixelRatio
             const clickColor = new Uint8Array(4)
             glRef.current.readPixels(clickX, clickY, 1, 1, glRef.current.RGBA, glRef.current.UNSIGNED_BYTE, clickColor)
 
